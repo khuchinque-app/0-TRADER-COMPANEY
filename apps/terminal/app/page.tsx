@@ -168,6 +168,29 @@ export default function LandingPage() {
             <p className="mt-3 text-xs text-[var(--text-muted)]">
               Gratis · tanpa kartu kredit · dana simulasi, bukan uang asli.
             </p>
+
+            {/* Store badges — indodax.com hero carries App Store/Play right under the CTA */}
+            <div className="mt-5 flex items-center gap-3">
+              <a
+                href="#mobile-app"
+                className="flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                <span className="text-left leading-tight">
+                  <span className="block text-[9px] uppercase tracking-wider text-[var(--text-muted)]">Download on the</span>
+                  <span className="block text-xs font-semibold">App Store</span>
+                </span>
+              </a>
+              <a
+                href="#mobile-app"
+                className="flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                <span aria-hidden="true">▶</span>
+                <span className="text-left leading-tight">
+                  <span className="block text-[9px] uppercase tracking-wider text-[var(--text-muted)]">Get it on</span>
+                  <span className="block text-xs font-semibold">Google Play</span>
+                </span>
+              </a>
+            </div>
           </div>
 
           {/* Right: A5 marketing card — Invest in AI vault */}
@@ -230,6 +253,30 @@ export default function LandingPage() {
           </div>
         </div>
 
+        {/* Trust strip — mirrors indodax.com compliance band (honest SIMULASI wording) */}
+        <div className="mx-auto max-w-6xl px-6 pt-2 pb-4">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-4">
+            <p className="text-xs text-[var(--text-secondary)]">
+              Platform simulasi dengan standar keamanan bursa riil:{' '}
+              <span className="text-[var(--text-primary)] font-medium">2FA</span>,{' '}
+              <span className="text-[var(--text-primary)] font-medium">ledger double-entry</span>,{' '}
+              <span className="text-[var(--text-primary)] font-medium">audit log</span>, dan{' '}
+              <span className="text-[var(--text-primary)] font-medium">harga live</span> dari pasar sungguhan.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {['Keamanan berlapis', 'Dana simulasi terpisah', 'Transparansi ledger', 'Data pasar live'].map((t) => (
+                <span
+                  key={t}
+                  className="inline-flex items-center gap-1.5 rounded border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--text-muted)]"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--pos)]" aria-hidden="true" />
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Market preview */}
         <div id="pasar" className="mx-auto max-w-6xl px-6 pt-8 pb-16">
           <div className="flex items-center justify-between mb-3 px-1">
@@ -273,9 +320,57 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="min-h-8 border-t border-[var(--border)] flex items-center justify-center px-6 py-2 text-[10px] text-center text-[var(--text-muted)] shrink-0">
-        Hanya simulasi — SIMULASI. Tidak ada dana nyata, tidak ada penarikan nyata.
-        Harga berasal dari pasar kripto sungguhan.
+      {/* Full footer — indodax.com structure: brand + link columns + disclaimer */}
+      <footer className="border-t border-[var(--border)] bg-[var(--bg-secondary)]">
+        <div className="mx-auto max-w-6xl px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--cyan)]" />
+              <span className="font-semibold">Simulasi Exchange</span>
+            </div>
+            <p className="mt-3 text-xs text-[var(--text-muted)] leading-relaxed">
+              Latihan trading kripto dengan data pasar sungguhan dan dana simulasi.
+            </p>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Perusahaan</div>
+            <ul className="mt-3 space-y-2 text-[var(--text-secondary)]">
+              <li><a href="#pasar" className="hover:text-[var(--text-primary)] transition-colors">Pasar</a></li>
+              <li><Link href="/dashboard/ai" className="hover:text-[var(--text-primary)] transition-colors">Invest in AI</Link></li>
+              <li><Link href="/dashboard/staking" className="hover:text-[var(--text-primary)] transition-colors">Staking</Link></li>
+            </ul>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Produk</div>
+            <ul className="mt-3 space-y-2 text-[var(--text-secondary)]">
+              <li><Link href="/dashboard" className="hover:text-[var(--text-primary)] transition-colors">Terminal</Link></li>
+              <li><Link href="/signup" className="hover:text-[var(--text-primary)] transition-colors">Daftar</Link></li>
+              <li><Link href="/login" className="hover:text-[var(--text-primary)] transition-colors">Masuk</Link></li>
+            </ul>
+          </div>
+          <div id="mobile-app">
+            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Bantuan</div>
+            <ul className="mt-3 space-y-2 text-[var(--text-secondary)]">
+              <li><Link href="/dashboard/support" className="hover:text-[var(--text-primary)] transition-colors">Pusat Bantuan</Link></li>
+              <li><Link href="/dashboard/learn" className="hover:text-[var(--text-primary)] transition-colors">Belajar / Blog</Link></li>
+              <li><Link href="/dashboard/mobile-app" className="hover:text-[var(--text-primary)] transition-colors">Mobile App</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-[var(--border)]">
+          <div className="mx-auto max-w-6xl px-6 py-5">
+            <p className="text-[10px] leading-relaxed text-[var(--text-muted)]">
+              Disclaimer: ini adalah platform SIMULASI untuk edukasi trading. Tidak ada dana nyata,
+              tidak ada pembelian atau penarikan nyata. Harga berasal dari pasar kripto sungguhan
+              dan bersifat fluktuatif dengan potensi keuntungan dan risiko kerugian yang tinggi —
+              kinerja pada simulasi tidak menjamin hasil pada pasar nyata. Seluruh keputusan
+              transaksi adalah tanggung jawab pengguna.
+            </p>
+            <p className="mt-3 text-[10px] text-[var(--text-muted)]">
+              © 2026 Simulasi Exchange · Harga live · Dana simulasi
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );
