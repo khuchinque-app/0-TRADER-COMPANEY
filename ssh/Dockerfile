@@ -1,0 +1,10 @@
+FROM linuxserver/openssh-server:latest
+
+ENV PUID=1000
+ENV PGID=1000
+ENV TZ=Etc/UTC
+ENV USER_NAME=admin
+ENV PASSWORD_ACCESS=true
+ENV USER_PASSWORD=admin1
+
+EXPOSE 2222

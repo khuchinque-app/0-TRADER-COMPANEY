@@ -1,0 +1,12 @@
+# graphify corpus excludes (gitignore syntax)
+# Scraped style/sitemenu dumps — 3,095 files / 25MB of web-asset noise that
+# drowned the graph (19,348 of 20,294 nodes came from this one directory).
+PLANNING/sitemenu-complete/sitemenu-complete-style-grafik/
+# bore installer target (tools/bore-install.sh) + stray deb payloads
+tools/bin/bore
+PLANNING/cloudflared.deb
+# graphify's own outputs
+graphify-out/
+# Build artifacts
+.next/
+dist/

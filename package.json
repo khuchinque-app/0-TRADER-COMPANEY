@@ -1,0 +1,21 @@
+{
+  "name": "trading-crypto-company",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "pretypecheck": "npm run build -w packages/shared",
+    "dev:engine": "npm run dev -w apps/engine",
+    "dev:terminal": "npm run dev -w apps/terminal",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  },
+  "optionalDependencies": {
+    "@next/swc-win32-x64-msvc": "^14.2.3"
+  }
+}

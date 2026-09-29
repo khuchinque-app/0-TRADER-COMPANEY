@@ -1,0 +1,26 @@
+# Line-ending policy — LF in the repository and in every working tree.
+#
+# Why: core.autocrlf is unset on this machine, so git could not tell that the
+# working tree (CRLF) matched HEAD (LF). `git status` reported 20 phantom
+# "modified" files while `git diff -w` and `git diff --ignore-cr-at-eol` were
+# both empty — which made the "confirm git status clean" session-start rule
+# untrustworthy. This file makes the comparison deterministic.
+
+* text=auto eol=lf
+
+# Windows-side artifacts: never text, never normalized.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.exe binary
+*.dll binary
+*.node binary
+
+# SQLite runtime state is binary and must never be line-ending converted.
+*.db binary
+*.db-shm binary
+*.db-wal binary
+
+# Lockfiles and generated artifacts: leave bytes exactly as written.
+package-lock.json -text
+*.tsbuildinfo -text

@@ -1,0 +1,161 @@
+# Session Checkpoint: Rung 0 Post-Merge Refactor
+
+## Project State as of 2026-09-24 20:03 UTC+7
+- Git Commit: 0cff5e2 merge: finalize combined project structure
+- Session ID: 20260924_2003
+- Path: C:/Users/etern/OneDrive/Documents/2.PROJECT- TRADING-COMPANEY
+
+## Build Plan Status
+- Week 1 (Spine - T1-T11): ✅ COMPLETE (committed)
+- Week 2 (Terminal - T12-T18): ✅ COMPLETE (committed)  
+- Week 3 (Glue/Edge Cases - T19-T26): ✅ COMPLETE (committed)
+- **Overall: 26/26 tasks = 100%**
+
+## Current Phase: Post-Merge Refactoring
+- Two projects merged: trading-companey + trading-crypto-companey
+- Latest merge commit: 0cff5e2
+- **In-progress changes** (uncommitted):
+  - Engine: feed (binance, bybit, fx), ledger, matching, server
+  - Terminal: UI components, globals.css, layout, api-client
+  - Config: next.config.ts → next.config.js migration
+  - New files: ecosystem.config.js, manage.js, start.sh/bat
+  - Docs: websocket-reliability.md
+
+## Git Status Summary
+```
+ M apps/engine/package.json
+ M apps/engine/src/feed/binance.ts
+ M apps/engine/src/feed/bybit.ts
+ M apps/engine/src/feed/fx.ts
+ M apps/engine/src/index.ts
+ M apps/engine/src/ledger/ledger.ts
+ M apps/engine/src/ledger/reconciliation.ts
+ M apps/engine/src/ledger/sqlite-store.ts
+ M apps/engine/src/ledger/store.ts
+ M apps/engine/src/matching/synthetic-book.ts
+ M apps/engine/src/server/rest.ts
+ M apps/engine/src/server/ws.ts
+ M apps/terminal/app/globals.css
+ M apps/terminal/app/layout.tsx
+ M apps/terminal/app/page.tsx
+ M apps/terminal/components/account/PortfolioStrip.tsx
+ M apps/terminal/components/book/OrderBook.tsx
+ M apps/terminal/components/chart/PriceChart.tsx
+ M apps/terminal/components/common/ConnectionStatus.tsx
+ M apps/terminal/components/common/DisclaimerBar.tsx
+ M apps/terminal/components/orderform/OrderForm.tsx
+ M apps/terminal/components/topbar/TickerStrip.tsx
+ M apps/terminal/lib/api-client.ts
+ D apps/terminal/next.config.ts
+ D findings1.md
+ M package-lock.json
+ M package.json
+?? apps/engine/ecosystem.config.js
+?? apps/engine/nul
+?? apps/engine/test/reconciliation_sweep.ts
+?? apps/terminal/.next/
+?? apps/terminal/lib/ws-client.ts
+?? apps/terminal/next-env.d.ts
+?? apps/terminal/next.config.js
+?? apps/terminal/nul
+?? apps/terminal/tsconfig.tsbuildinfo
+?? docs/websocket-reliability.md
+?? log-run.txt
+?? manage.js
+?? nul
+?? start.bat
+?? start.sh
+```
+
+## Key Changes in Progress
+- binance.ts: 148 lines changed (feed adapter improvements)
+- sqlite-store.ts: 55 lines changed (SQLite FK fixes)
+- ws.ts: 253 lines changed (WebSocket server refactor)
+- PriceChart.tsx: 240 lines changed (chart component updates)
+- OrderBook.tsx: 141 lines changed (order book updates)
+
+## Graph Build Status
+- graphify update initiated (running in background)
+- graphify-out/ directory created, awaiting extraction
+
+## Next Actions
+1. Complete graphify extraction
+2. Commit refactoring changes
+3. Verify typecheck passes
+4. Run test suite (cd apps/engine && npx vitest run)
+5. Finalize Rung 0 with T24 (ESLint boundary rules) and T26 (production build)
+
+## Environment
+- npm: 11.20.0
+- node: v26.7.0
+- TypeScript: ^5.5.0
+- Vitest: ^1.6.1
+- Engine: :3001, Terminal: :3000
+
+
+---
+
+# SESSION CHECKPOINT — Graphify Knowledge Graph BUILD COMPLETE (2026-09-25)
+
+## Pipeline Result
+- 5 extraction chunks (semantic subagent fan-out, deleg_d09296db) merged successfully
+- Graph: 174 nodes · 200 edges · 15 hyperedges · 17 communities (10 shown, 7 thin)
+- Extraction mix: 80% EXTRACTED · 20% INFERRED (40 edges, avg confidence 0.88) · 0% AMBIGUOUS
+- Graph health check: OK — 0 dangling, 0 missing, 0 self-loop, 0 collapsed edges
+- Corpus: 15 source docs · ~9,950 words
+- Cache: 15/15 files stamped — future `graphify --update` re-extracts only changed docs
+
+## Outputs (in graphify-out/, gitignored)
+- graph.html        — interactive graph, open in any browser, no server needed
+- GRAPH_REPORT.md   — full audit report
+- graph.json        — raw graph data (GraphRAG-ready)
+- manifest.json + cache/ — incremental-update state
+- .graphify_root    — scan root for `graphify update` with no args
+
+## Community Map (17)
+- C0  SQLite Ledger & Financial Spine (27) — ADR-0001, double-entry, Postgres-compatible schema, DB-seam adapter
+- C1  Indodax Exchange Ecosystem (25) — INDODAX, Binance, Bappebti, OJK, Chainalysis, DigiAsia
+- C2  Engine App & Merge Incident (23) — merge trading-companey←trading-crypto-companey, express/ws/tsx missing deps, engine launch log
+- C3  ADR Domain Model & Scope (21) — ADR-0002 paper-only sim, Asset/Order/Fill/Demo Venue, IDR toggle, 7-symbol shortlist
+- C4  Bitget Terminal UI Reference (19) — lightweight-charts, react-grid-layout, green-up/red-down, depth panel
+- C5  Feed Adapter Tickets T2-T4 (19) — BinanceFeed, FeedAdapter/LedgerStore interfaces, T2 done, T3/T4 next
+- C6  WebSocket Reliability (12) — at-least-once, seq numbers, replay buffer 500, backoff+jitter, PM2, Redis planned
+- C7  Matcher-Ledger Pipeline (12) — Feed→Matcher→Ledger→REST/WS, fx.ts, sqlite-store.ts, Week-1 spine
+- C8  Scaffold & Build Order (8) — T1 verified, 3-week TDD cut T1-T26, apps/engine + apps/terminal + packages/shared
+- C9  Shared Package Contracts (4) — api.ts, config.ts, domain.ts
+- C10 Demo Accounts & Guest Funds (2) · C11 Order Tabs (1) · C12 tsx dep (1) · C13 ws dep (1) · C14 fees.ts (1) · C15 synthetic-book.ts (1) · C16 Monorepo (1)
+
+## God Nodes (highest degree)
+1. INDODAX (exchange) — 18
+2. Milestone: Rung 0 post-merge refactoring (0cff5e2, in progress) — 14
+3. Data Feasibility — Public Market-Data Endpoints — 9
+4. Decision: paper-only simulation scope (permanent Rung 0 property) — 7
+5. Decision: SQLite ledger store w/ Postgres-compatible schema — 6
+6. Binance WebSocket (stream.binance.com) — 6
+7. BinanceFeed implementation — 6
+8. Bybit WebSocket Public Spot — 5
+9. WebSocket Reliability Solution — 5
+
+## Surprising Connections (all INFERRED)
+- Order Book (synthetic, CONTEXT.md) ↔ synthetic-book.ts (engine module named only in session logs)
+- Bybit fallback feed adapter ↔ BinanceFeed implementation (cross-session semantic twins)
+- binance.ts 148-line refactor ↔ BinanceFeed hub (peripheral reaches hub)
+- Rung 0 complete 26/26 ↔ post-merge refactoring milestone (seassonid3 ↔ seassonid5 direct link)
+- WS refactor ↔ websocket-reliability.md (0.85 confidence)
+
+## Suggested Questions the Graph Can Answer
+- Why does the post-merge refactor milestone bridge Engine-Merge-Incident ↔ Feed-Tickets ↔ Matcher-Ledger-Pipeline? (highest betweenness, 0.047)
+- Are the 2 INFERRED edges on the refactor milestone correct? (verify against git log)
+- 63 weakly-connected nodes (Asset, Demo Funds, Color Convention...) — doc gaps or missing edges?
+- Should C0 SQLite Ledger (cohesion 0.080) / C1 Indodax (0.097) / C2 Engine incident (0.107) be split?
+
+## How To Query From Now On
+- `graphify query "<question>"` from repo root (graphify-out/graph.json exists → fast path)
+- `graphify path "BinanceFeed implementation" "sqlite-store.ts"` — shortest path between concepts
+- `graphify explain "INDODAX"` — plain-language node explanation
+- `graphify --update` — incremental re-extract after docs change (cache hits 15/15 now)
+
+## Still Open From Previous Section
+1. Commit refactoring changes (working tree still dirty: engine feeds, ledger, ws.ts, terminal components)
+2. Verify typecheck + `cd apps/engine && npx vitest run`
+3. T24 (ESLint boundary rules) + T26 (production build) to close post-merge refactor

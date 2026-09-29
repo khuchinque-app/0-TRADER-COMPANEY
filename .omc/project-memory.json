@@ -1,0 +1,131 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1790700175896,
+  "projectRoot": "/home/khuchinque/0-project-TRADING-COMPANEY/TRADING-COMPANEY",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {
+      "build": "npm run build --workspaces",
+      "pretypecheck": "npm run build -w packages/shared",
+      "dev:engine": "npm run dev -w apps/engine",
+      "dev:terminal": "npm run dev -w apps/terminal",
+      "typecheck": "npm run typecheck --workspaces --if-present"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": true,
+    "workspaces": [
+      "packages/*",
+      "apps/*"
+    ],
+    "mainDirectories": [
+      "app",
+      "docs"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "PLANNING": {
+      "path": "PLANNING",
+      "purpose": null,
+      "fileCount": 13,
+      "lastAccessed": 1790700175856,
+      "keyFiles": [
+        "BUG-REPORT.md",
+        "DECISIONS-LOG.md",
+        "PLAN-TO-DO.md",
+        "README.md",
+        "RULE.md"
+      ]
+    },
+    "app": {
+      "path": "app",
+      "purpose": "Application code",
+      "fileCount": 1,
+      "lastAccessed": 1790700175857,
+      "keyFiles": [
+        "Dockerfile"
+      ]
+    },
+    "apps": {
+      "path": "apps",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1790700175875,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 2,
+      "lastAccessed": 1790700175877,
+      "keyFiles": [
+        "project-status.md",
+        "websocket-reliability.md"
+      ]
+    },
+    "logs": {
+      "path": "logs",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1790700175883,
+      "keyFiles": []
+    },
+    "packages": {
+      "path": "packages",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1790700175887,
+      "keyFiles": []
+    },
+    "ssh": {
+      "path": "ssh",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1790700175888,
+      "keyFiles": [
+        "Dockerfile"
+      ]
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1790700175888,
+      "keyFiles": [
+        "bore-install.sh",
+        "bore-tunnel.sh",
+        "cloudflared-tunnel.sh",
+        "fix-systemd.sh",
+        "verify-pipeline.sh"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

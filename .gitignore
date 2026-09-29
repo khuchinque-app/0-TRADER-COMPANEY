@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Planning
+.planning/
+.seassonid*.txt
+
+# graphify knowledge-graph build artifacts
+graphify-out/
+nul
+**/nul
+.next/
+tsconfig.tsbuildinfo
+log-run.txt
+
+# Session junk
+seassonid*.txt
+nul
+log-run.txt
+
+# Reference dumps & binaries — never commit (25MB+ scraped assets, installers)
+style-grafik.zip
+indodax-tokocrypto-info.zip
+PLANNING/cloudflared.deb
+PLANNING/sitemenu-complete/sitemenu-complete-style-grafik/
+.codegraph/
+codegraph.json
+
+# SQLite runtime database — engine state, not source. The engine recreates it
+# and auto-funds demo accounts on boot; committing it meant every engine run
+# dirtied the worktree and shipped one machine's balances to everyone else.
+*.db
+*.db-shm
+*.db-wal
+
+# session probe/extraction junk — never committed
+.tw-probe/
+.out-of-scope/
+tools/.cloudflared-extract/
+*.swp
+
+# runtime logs (may contain OTP/PII until ticket 04 fix)
+server.log
+terminal.log

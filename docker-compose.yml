@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  ssh:
+    build:
+      context: ./ssh
+      dockerfile: Dockerfile
+    image: trading-ssh
+    ports:
+      - "2222:2222"
+    volumes:
+      - /home/chinque/projects/TRADING-COMPANEY:/workspace
+    restart: unless-stopped
+    container_name: trading-ssh
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: trading-app
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - /home/chinque/projects/TRADING-COMPANEY:/workspace
+    restart: unless-stopped
+    container_name: trading-app
