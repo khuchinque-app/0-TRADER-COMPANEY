@@ -1,3 +1,9 @@
+# Struktur Project 0-TRADER-COMPANEY
+**Tanggal pembuatan**: 3 Oktober 2026
+**Tanggal update terakhir**: 3 Oktober 2026
+
+---
+
 # Project Structure — Paper-Trading Crypto Venue (Rung 0)
 
 Scope: an Indonesian-flavored **paper-trading** terminal (Bitget-shaped UI, simulation-only — see

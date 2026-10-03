@@ -1,0 +1,62 @@
+# WP0 Diagnostic Evidence — VPS Read-Only
+
+## System Info
+```
+Node.js: v22.23.2
+npm: 10.9.2
+Memory: 15992 MB total, 11573 MB available
+Swap: 8 GB file active (3.5 GB used)
+Disk: 193 GB total, 35 GB available (82% used)
+```
+
+## R1: ledger.db Lock
+```
+COMMAND  PID      USER   FD  TYPE DEVICE SIZE/OFF    NODE NAME
+node    2997251 khuchinque 22ur REG    8,1   434176 7134244 ledger.db
+```
+**Finding:** Backend PID 2997251 holds exclusive lock (FD 22ur = update read). No engine process.
+
+## R2: Terminal Build
+`.next/BUILD_ID` exists with content `C2XMZMzxr8_lYBdXJ_FSi`. PM2 reports build validation errors but service is online with 49 restarts.
+
+## R5: Git Remote
+```
+$ git ls-remote origin HEAD
+fff52fd1de377bae321be9ff326c6034170c6f51	HEAD
+```
+**Finding:** Remote accessible, latest commit fff52fd.
+
+## R6: Database Tracking
+```
+$ git ls-files | grep -E '\.db$'
+(no output)
+```
+**Finding:** No .db files tracked by git. Safe to pull.
+
+## .gitignore Check
+```
+dist/
+.env
+.env.local
+.env.*.local
+.next/
+*.db
+*.db-shm
+*.db-wal
+```
+**Finding:** All required patterns present.
+
+## PM2 Status
+```
+backend    PID 2997251  ↺44  status:online  port 11110
+terminal   PID 2972311  ↺49  status:online  port 22220
+```
+No other projects in PM2 for this user.
+
+## Health Check
+```
+$ curl -s http://localhost:11110/health
+{"status":"ok","service":"trading-backend","port":"11110","timestamp":"..."}
+```
+
+[DONE VPS WP0]

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1790700175896,
-  "projectRoot": "/home/khuchinque/0-project-TRADING-COMPANEY/TRADING-COMPANEY",
+  "lastScanned": 1791031962785,
+  "projectRoot": "/home/khuchinque/0-TRADER-COMPANEY",
   "techStack": {
     "languages": [
       {
@@ -53,21 +53,21 @@
     "PLANNING": {
       "path": "PLANNING",
       "purpose": null,
-      "fileCount": 13,
-      "lastAccessed": 1790700175856,
+      "fileCount": 16,
+      "lastAccessed": 1791031962749,
       "keyFiles": [
         "BUG-REPORT.md",
         "DECISIONS-LOG.md",
-        "PLAN-TO-DO.md",
-        "README.md",
-        "RULE.md"
+        "ENTERPRISE-UPGRADE.md",
+        "PAYMENT-INTEGRATION.md",
+        "PLAN-TO-DO.md"
       ]
     },
     "app": {
       "path": "app",
       "purpose": "Application code",
       "fileCount": 1,
-      "lastAccessed": 1790700175857,
+      "lastAccessed": 1791031962750,
       "keyFiles": [
         "Dockerfile"
       ]
@@ -76,38 +76,52 @@
       "path": "apps",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1790700175875,
+      "lastAccessed": 1791031962764,
       "keyFiles": []
     },
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 2,
-      "lastAccessed": 1790700175877,
+      "lastAccessed": 1791031962768,
       "keyFiles": [
         "project-status.md",
         "websocket-reliability.md"
       ]
     },
+    "graphify-out": {
+      "path": "graphify-out",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1791031962771,
+      "keyFiles": [
+        "graph.json",
+        "manifest.json"
+      ]
+    },
     "logs": {
       "path": "logs",
       "purpose": null,
-      "fileCount": 0,
-      "lastAccessed": 1790700175883,
-      "keyFiles": []
+      "fileCount": 3,
+      "lastAccessed": 1791031962772,
+      "keyFiles": [
+        "engine-22220.log",
+        "engine-dev.log",
+        "terminal-dev.log"
+      ]
     },
     "packages": {
       "path": "packages",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1790700175887,
+      "lastAccessed": 1791031962772,
       "keyFiles": []
     },
     "ssh": {
       "path": "ssh",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1790700175888,
+      "lastAccessed": 1791031962772,
       "keyFiles": [
         "Dockerfile"
       ]
@@ -116,7 +130,7 @@
       "path": "tools",
       "purpose": null,
       "fileCount": 5,
-      "lastAccessed": 1790700175888,
+      "lastAccessed": 1791031962773,
       "keyFiles": [
         "bore-install.sh",
         "bore-tunnel.sh",

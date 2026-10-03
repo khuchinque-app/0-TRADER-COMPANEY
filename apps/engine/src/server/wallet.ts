@@ -104,14 +104,14 @@ export function createWalletRouter(deps: WalletDeps): Router {
     }
   });
 
-  // POST /api/wallet/:userId/deposit { asset, amount }
+  // POST /api/wallet/:userId/deposit { asset, amount, paymentMethod? }
   router.post('/api/wallet/:userId/deposit', mockAuth, async (req, res) => {
     const key = idemKey(req, res);
     if (!key) return;
     try {
       const uid = identity(req, res);
       if (!uid) return;
-      const { asset, amount } = req.body ?? {};
+      const { asset, amount, paymentMethod } = req.body ?? {};
       if (typeof asset !== 'string' || !ASSETS.has(asset)) {
         res.status(400).json({ error: `Unknown asset: ${asset}`, simulasi: true }); return;
       }
@@ -121,8 +121,9 @@ export function createWalletRouter(deps: WalletDeps): Router {
       await ensureAccount(ledger, uid);
       const entryId = externalEntryId('wdp', uid, key);
       const posted = await ledger.postExternal(entryId, uid, asset as Asset, n, 'deposit');
-      if (posted) deps.audit(uid, 'wallet_deposit', `${n} ${asset} entry=${entryId}`);
-      res.status(201).json({ ok: true, entryId, replayed: !posted, simulasi: true });
+      const methodStr = typeof paymentMethod === 'string' ? paymentMethod : 'manual';
+      if (posted) deps.audit(uid, 'wallet_deposit', `${n} ${asset} via ${methodStr} entry=${entryId}`);
+      res.status(201).json({ ok: true, entryId, replayed: !posted, simulasi: true, paymentMethod: methodStr });
     } catch (e) {
       console.error('[WALLET] deposit error:', e);
       res.status(500).json({ error: 'Internal error', simulasi: true });

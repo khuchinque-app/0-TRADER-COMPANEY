@@ -1,0 +1,13 @@
+{
+  "apps": [{
+    "name": "terminal",
+    "cwd": "/home/khuchinque/0-TRADER-COMPANEY/apps/terminal",
+    "script": "npm",
+    "args": "start",
+    "env": {
+      "PORT": "22220",
+      "NODE_ENV": "production",
+      "NEXT_PUBLIC_ENGINE_URL": "http://localhost:11110"
+    }
+  }]
+}

@@ -2,6 +2,16 @@
 
 /* Trading Terminal — market-monitor style (sitemenu-complete-style-grafik) */
 
+/* STX Theme from chinque-cripto (port 2217) */
+:root {
+  --stx-bg: #090909;
+  --stx-sidebar: #0b0b0c;
+  --stx-surface: #101113;
+  --stx-surface-2: #141518;
+  --stx-profit: #22c55e;
+  --stx-loss: #ef4444;
+}
+
 :root {
   /* market-monitor dark tokens (adopted from sitemenu-complete-style-grafik/market-monitor.css) */
   --bg-primary: #000000;

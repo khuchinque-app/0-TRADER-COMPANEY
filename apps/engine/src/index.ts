@@ -18,6 +18,18 @@ import { createAiRouter } from './server/ai';
 import { createOrderEntryRouter } from './server/orders';
 import { createWalletRouter } from './server/wallet';
 import { createQuickRouter } from './server/quick';
+import { createRecurringRouter } from './server/recurring';
+import { createAddressRouter } from './server/addresses';
+import { createHistoryRouter } from './server/history';
+import { createReferralRouter } from './server/referral';
+import { createSecurityRouter } from './server/security';
+import { createTwoFaRouter } from './server/two-fa';
+import { createApiKeyRouter } from './server/api-keys';
+import { createEducationRouter } from './server/education';
+import { createSupportRouter } from './server/support';
+import { createMobileAppRouter } from './server/mobile-app';
+import { createPaymentRouter } from './server/payment';
+import { createLoginPage } from './server/login-page';
 import { registerAuthService } from './server/auth';
 import { ENGINE_PORT, type TickEvent } from '@trading/shared';
 import * as fs from 'fs';
@@ -143,6 +155,31 @@ async function main() {
     db: store.dbHandle,
     audit: (userId, event, detail) => authService.audit(null, userId, event, detail),
   }));
+  // Recurring invest (spec C: Recurring → /api/recurring/*)
+  app.use(createRecurringRouter({ db: store.dbHandle, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+  // Address management (spec C: Addresses → /api/addresses/*)
+  app.use(createAddressRouter({ db: store.dbHandle, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+  // History/fills (spec C: History → /api/history/*)
+  app.use(createHistoryRouter({ db: store.dbHandle }));
+  // Referral (spec C: Referral → /api/referral/*)
+  app.use(createReferralRouter({ db: store.dbHandle, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+  // Security (spec C: Security → /api/security/*)
+  app.use(createSecurityRouter({ db: store.dbHandle, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+  // 2FA (spec C: Authenticator → /api/2fa/*)
+  app.use(createTwoFaRouter({ db: store.dbHandle, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+  // API Keys (spec C: Trade API → /api/api-keys/*)
+  app.use(createApiKeyRouter({ db: store.dbHandle, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+  // Education (spec C: Education → /api/education/*)
+  app.use(createEducationRouter());
+  // Support (spec C: Support → /api/support/*)
+  app.use(createSupportRouter({ db: store.dbHandle, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+  // Mobile app info
+  app.use(createMobileAppRouter());
+  // Payment gateway (Duitku integration)
+  app.use(createPaymentRouter({ db: store.dbHandle, ledger: store, audit: (uid, ev, det) => authService.audit(null, uid, ev as any, det) }));
+
+  // Login page (served at GET /)
+  app.use(createLoginPage());
 
   // Bind host: default stays loopback (local dev safety); deploys that must be
   // reachable online set ENGINE_HOST=0.0.0.0 (e.g. VPS demo on :22220).

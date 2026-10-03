@@ -1,0 +1,331 @@
+{
+  "version": 1,
+  "jobId": "e4bc5e02-6a04-42f7-99fe-799fbe26c210",
+  "sessionId": "1444a383-ed13-43cd-a9e2-064d10240061",
+  "scopeKey": "e9e2413af0b9c4c9de5134ffa01ebee947acbbfd666b0bea03db6dbe3bbf96b3",
+  "revision": 56,
+  "createdAt": "2026-10-03T12:53:36.449Z",
+  "updatedAt": "2026-10-03T12:54:07.938Z",
+  "producerGraceExpiresAt": "2026-10-03T12:54:06.450Z",
+  "bestEffortDeadlineAt": "2026-10-03T12:54:57.450Z",
+  "producers": {
+    "core": {
+      "state": "sealed",
+      "intentKey": "a7e3765d5be963aa7f2ed8402e05d1766ea4a0a427681e79fd22d34cdf08222b",
+      "payloadDigest": "a7e3765d5be963aa7f2ed8402e05d1766ea4a0a427681e79fd22d34cdf08222b",
+      "sealedAt": "2026-10-03T12:54:06.788Z",
+      "sealedBy": "recovery"
+    },
+    "wiki": {
+      "state": "no-op",
+      "sealedAt": "2026-10-03T12:53:36.449Z",
+      "sealedBy": "wiki-producer"
+    }
+  },
+  "actions": {
+    "foreground-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "completed",
+      "attempts": 1,
+      "idempotencyKey": "febf6dba2f2536433960a07f7cedce72e946b43ced0896570df80f017b8914d2",
+      "payload": {
+        "transcriptPath": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+        "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+        "reason": "other",
+        "input": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "transcript_path": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+          "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+          "prompt_id": "4aa194fe-9f77-4e05-a1ba-bed1d6c00f09",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "ended_at": "2026-10-03T12:53:36.446Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 9000,
+      "claimedAt": "2026-10-03T12:54:06.512Z",
+      "runner": {
+        "attempt": 1,
+        "runnerNonce": "37fe4c6e-5fa0-47ec-87ca-89a4242161cc",
+        "phase": "terminal",
+        "deadlineAt": "2026-10-03T12:54:16.461Z"
+      },
+      "lastOutcomeCode": "completed",
+      "completedAt": "2026-10-03T12:54:06.778Z"
+    },
+    "wiki-capture": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "completed",
+      "attempts": 0,
+      "idempotencyKey": "1719cd1ef5b51e0269b78c4cb8c9308c9c1f7b82fd1c067fc034c060f23863f5",
+      "payload": {},
+      "budgetMs": 9000,
+      "completedAt": "2026-10-03T12:53:36.449Z"
+    },
+    "team-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "completed",
+      "attempts": 1,
+      "idempotencyKey": "cee6ac31df545408e1e822247ac249b3f8182a98a5fe8e448ae3b251e55bdee1",
+      "payload": {
+        "transcriptPath": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+        "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+        "reason": "other",
+        "input": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "transcript_path": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+          "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+          "prompt_id": "4aa194fe-9f77-4e05-a1ba-bed1d6c00f09",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "ended_at": "2026-10-03T12:53:36.446Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 9000,
+      "claimedAt": "2026-10-03T12:54:06.810Z",
+      "runner": {
+        "attempt": 1,
+        "runnerNonce": "9193bbb8-e8da-43fb-b4a3-60c74b769878",
+        "phase": "terminal",
+        "deadlineAt": "2026-10-03T12:54:16.461Z"
+      },
+      "lastOutcomeCode": "completed",
+      "completedAt": "2026-10-03T12:54:06.996Z"
+    },
+    "python-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "completed",
+      "attempts": 1,
+      "idempotencyKey": "1f1370c4ac056606059d517e2f106b602d8cbcb04587b3fcc5f3b9f89e649cd0",
+      "payload": {
+        "transcriptPath": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+        "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+        "reason": "other",
+        "input": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "transcript_path": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+          "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+          "prompt_id": "4aa194fe-9f77-4e05-a1ba-bed1d6c00f09",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "ended_at": "2026-10-03T12:53:36.446Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 9000,
+      "claimedAt": "2026-10-03T12:54:07.011Z",
+      "runner": {
+        "attempt": 1,
+        "runnerNonce": "294234b8-3d01-4aca-b854-fcde320e8b2e",
+        "phase": "terminal",
+        "deadlineAt": "2026-10-03T12:54:16.461Z"
+      },
+      "lastOutcomeCode": "completed",
+      "completedAt": "2026-10-03T12:54:07.192Z"
+    },
+    "reply-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "completed",
+      "attempts": 1,
+      "idempotencyKey": "0b3a8b47c28b26d56aca004d4f572b96c118f16819c0d35162418816f9a5420a",
+      "payload": {
+        "transcriptPath": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+        "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+        "reason": "other",
+        "input": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "transcript_path": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+          "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+          "prompt_id": "4aa194fe-9f77-4e05-a1ba-bed1d6c00f09",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "ended_at": "2026-10-03T12:53:36.446Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 9000,
+      "claimedAt": "2026-10-03T12:54:07.206Z",
+      "runner": {
+        "attempt": 1,
+        "runnerNonce": "b801f180-be35-4b54-812b-267616493f5f",
+        "phase": "terminal",
+        "deadlineAt": "2026-10-03T12:54:16.461Z"
+      },
+      "lastOutcomeCode": "completed",
+      "completedAt": "2026-10-03T12:54:07.416Z"
+    },
+    "callback": {
+      "class": "best-effort",
+      "phase": "deferred-best-effort",
+      "status": "completed",
+      "attempts": 1,
+      "idempotencyKey": "d068ede2655bf89e0c0950e087d0603d7dcf45538e94f20a654d08c6f4841895",
+      "payload": {
+        "transcriptPath": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+        "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+        "reason": "other",
+        "input": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "transcript_path": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+          "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+          "prompt_id": "4aa194fe-9f77-4e05-a1ba-bed1d6c00f09",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "ended_at": "2026-10-03T12:53:36.446Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 2000,
+      "claimedAt": "2026-10-03T12:54:07.432Z",
+      "runner": {
+        "attempt": 1,
+        "runnerNonce": "65e164dc-d28e-4816-a1fe-2734ac3e4b0d",
+        "phase": "terminal",
+        "deadlineAt": "2026-10-03T12:54:16.461Z"
+      },
+      "lastOutcomeCode": "completed",
+      "completedAt": "2026-10-03T12:54:07.593Z"
+    },
+    "notification": {
+      "class": "best-effort",
+      "phase": "deferred-best-effort",
+      "status": "completed",
+      "attempts": 1,
+      "idempotencyKey": "89c0438ff63097ce04beb60efb87292ff68a7af350a0ee331f3de9dbf42d62fc",
+      "payload": {
+        "transcriptPath": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+        "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+        "reason": "other",
+        "input": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "transcript_path": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+          "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+          "prompt_id": "4aa194fe-9f77-4e05-a1ba-bed1d6c00f09",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "ended_at": "2026-10-03T12:53:36.446Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 2000,
+      "claimedAt": "2026-10-03T12:54:07.606Z",
+      "runner": {
+        "attempt": 1,
+        "runnerNonce": "03247a8c-caeb-498c-a753-58d49a57d5c4",
+        "phase": "terminal",
+        "deadlineAt": "2026-10-03T12:54:16.461Z"
+      },
+      "lastOutcomeCode": "completed",
+      "completedAt": "2026-10-03T12:54:07.753Z"
+    },
+    "openclaw": {
+      "class": "best-effort",
+      "phase": "deferred-best-effort",
+      "status": "completed",
+      "attempts": 1,
+      "idempotencyKey": "31fe8f6e1cf204e27006de511df257326fdd98655122ca437013e8779ffc735b",
+      "payload": {
+        "transcriptPath": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+        "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+        "reason": "other",
+        "input": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "transcript_path": "/home/khuchinque/.claude/projects/-home-khuchinque-0-0-project-TRADING-COMPANEY-0-project-TRADING-COMPANEY-0-TRADER-COMPANEY/1444a383-ed13-43cd-a9e2-064d10240061.jsonl",
+          "cwd": "/home/khuchinque/0-0.project-TRADING-COMPANEY/0-project-TRADING-COMPANEY/0-TRADER-COMPANEY",
+          "prompt_id": "4aa194fe-9f77-4e05-a1ba-bed1d6c00f09",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "1444a383-ed13-43cd-a9e2-064d10240061",
+          "ended_at": "2026-10-03T12:53:36.446Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 2000,
+      "claimedAt": "2026-10-03T12:54:07.764Z",
+      "runner": {
+        "attempt": 1,
+        "runnerNonce": "2a0a27a1-7415-4387-ac86-37bf697caf55",
+        "phase": "terminal",
+        "deadlineAt": "2026-10-03T12:54:16.461Z"
+      },
+      "lastOutcomeCode": "completed",
+      "completedAt": "2026-10-03T12:54:07.916Z"
+    }
+  },
+  "owner": null,
+  "phase": "complete",
+  "completion": {
+    "completedAt": "2026-10-03T12:54:07.929Z",
+    "terminalDigest": "2b023e50f173046d5b2a7ae6d570ec2e6e9f95c365b20b68f863b63d3caa2929",
+    "terminalRevision": 55
+  }
+}
