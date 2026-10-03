@@ -1,13 +1,15 @@
 # Design System Reference — Port 2217 (chinque-cripto)
 
-Extracted: 2026-10-04
-Source: http://localhost:2217/
+**Extracted:** 2026-10-04
+**Source:** http://localhost:2217/
+
+---
 
 ## Color Tokens
 
 Backgrounds:
   --stx-bg: #090909           Main page background
-  --stx-sidebar: #0B0B0C      Sidebar background  
+  --stx-sidebar: #0B0B0C      Sidebar background
   --stx-surface: #101113      Card surface
   --stx-surface-2: #141518    Secondary surface
 
@@ -48,8 +50,8 @@ Topbar:
 Sidebar:
   - Width: 248px
   - Background: --stx-sidebar
-  - Nav item: h-9, rounded-lg
-  - Active: bg-brand-border-subtle with border
+  - Item padding: py-2.5 px-4
+  - Active state: bg-brand-border-subtle with border
   - Hover: bg-brand-surface-hover
 
 Input:
@@ -58,6 +60,31 @@ Input:
   - Border: border-brand-border-subtle
   - Focus: focus:border-brand-border
   - Radius: rounded-md or rounded-xl
+
+Button:
+  - Padding: px-4 py-2
+  - Border: border-brand-border
+  - Radius: rounded-lg or rounded-xl
+  - Hover: bg-brand-surface-hover
+  - Active: active:scale-[0.95]
+
+Table:
+  - Header: uppercase, tracking-wider, text-xs
+  - Row hover: bg-brand-surface-hover
+  - Border: border-brand-border-subtle
+
+Modal:
+  - Background: --stx-surface
+  - Border: 1px solid rgba(255,255,255,0.05)
+  - Radius: 20px
+  - Shadow: 0 24px 48px rgba(0,0,0,0.6)
+  - Overlay: backdrop-blur
+
+Nav item:
+  - Height: h-9
+  - Radius: rounded-lg
+  - Active: bg-brand-border-subtle with border-l
+  - Hover: bg-brand-surface-hover
 
 ## Layout
 - Sidebar: 248px left, hidden < lg breakpoint
@@ -68,3 +95,11 @@ Input:
 - Scrollbar: 6px width, rgba(255,255,255,0.1) thumb
 - Transitions: duration-200 ease-out
 - Active: active:scale-[0.95]
+
+## File Structure
+Source: chinque-cripto/src/components/
+  - layout/AppLayout.tsx
+  - layout/Topbar.tsx
+  - layout/Sidebar.tsx
+  - ui/Card.tsx
+  - ui/Button.tsx
