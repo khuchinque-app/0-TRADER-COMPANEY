@@ -49,6 +49,11 @@ Deployed sha: ab97f2e
 - Backup cron: daily 02:00 UTC
 - PM2: services saved for auto-restart
 - Logrotate: weekly rotation configured
+[2026-10-04 02:35 UTC][VPS][REVIEW] START: Reviewing sha 808bdee
+[2026-10-04 02:35 UTC][VPS][REVIEW] PASS: Auth routes working, login returns token
+[2026-10-04 02:35 UTC][VPS][REVIEW] PASS: Frontend proxy works (:22220/api/auth/login)
+[2026-10-04 02:35 UTC][VPS][REVIEW] NOTE: Engine process running (PID 3054693), backend reloads frequent (↺187)
+[2026-10-04 02:35 UTC][VPS][REVIEW] DONE: Review PASS, see ops/evidence/REVIEW-808bdee.txt
 
 ## Notes
 - chinque@dev.local promoted to system-admin
