@@ -145,3 +145,12 @@ Deployed sha: 756066b
 SHA: 2880c31
 [VPS][BEAT] checking design port 2217 (not built) + verifying services
 [2026-10-04 03:40 UTC][VPS][BEAT] Project state checked - M5 in progress, design system applied
+
+## 2026-10-04 01:45 UTC — WP6: Design System Token Update
+
+- Applied port 2217 design tokens to login, signup pages and globals.css
+- Replaced var(--cyan) → #F59E0B, var(--bg-primary) → #090909, var(--text-muted) → rgba(255,255,255,0.38)
+- Fixed page.tsx modification conflict (git checkout reverted)
+- Rebuilt terminal, pm2 restart successful
+- All smoke tests PASS (5/5)
+- SHA: 34f6948
