@@ -1,79 +1,74 @@
-# Runbook
+# 0-TRADER-COMPANEY Runbook
 
-## Services
-
-| Service | Port | PM2 Name | Status |
-|---------|------|----------|--------|
-| Backend | 11110 | backend | online |
-| Terminal | 22220 | terminal | online |
-
-## Common Commands
-
-### Check Status
+## Quick Start
 ```bash
-pm2 status
+cd /home/khuchinque/0-TRADER-COMPANEY
+pm2 start backend terminal engine
 ```
 
-### Restart Backend
+## Stop Services
 ```bash
+pm2 stop backend terminal engine
+```
+
+## Restart After Code Changes
+```bash
+git pull
+pm2 reload backend terminal
+```
+
+## Change Port
+Edit `.env` and restart:
+```bash
+PORT=11110  # backend
+TERMINAL_PORT=22220  # frontend
+pm2 restart backend terminal
+```
+
+## Change Password
+Edit `.env`:
+```bash
+SEED_PASSWORD=NewPassword123!
+```
+Then re-seed:
+```bash
+cd apps/backend && npm run seed
+```
+
+## Database Backup
+```bash
+cp apps/engine/data/ledger.db apps/engine/data/ledger.db.backup.$(date +%Y%m%d_%H%M%S)
+```
+
+## Restore Backup
+```bash
+cp apps/engine/data/ledger.db.backup.XXXXXX apps/engine/data/ledger.db
 pm2 restart backend
 ```
 
-### View Logs
+## Smoke Test
+```bash
+bash scripts/smoke.sh
+# or
+python3 scripts/smoke-test.py
+```
+
+## SQL Diagnostics
+```bash
+python3 fix_sql.py
+```
+
+## Admin Credentials
+- Email: chinque@dev.local
+- Password: TestTrader2026! (change in .env)
+
+## URLs
+- Backend API: http://187.127.178.20:11110
+- Terminal UI: http://187.127.178.20:22220
+- Health: http://localhost:11110/health
+
+## Logs
 ```bash
 pm2 logs backend --lines 50
 pm2 logs terminal --lines 50
 ```
-
-### Save Configuration
-```bash
-pm2 save
-```
-
-### Start on Boot
-```bash
-pm2 startup
-pm2 save
-```
-
-## Deploy
-
-### From Source
-```bash
-cd ~/0-TRADER-COMPANEY
-git pull
-cd apps/backend && npm run build && cd ../..
-pm2 restart backend
-pm2 save
-```
-
-### Smoke Test
-```bash
-bash scripts/smoke.sh
-```
-
-## Environment
-
-All configuration is in `.env` at the project root:
-- `PORT_BACKEND=11110`
-- `DB_PATH=/home/khuchinque/0-TRADER-COMPANEY/apps/engine/data/ledger.db`
-- `JWT_SECRET=dev-jwt-secret-change-in-production`
-- `MARKETS=BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT`
-
-## Database
-
-SQLite database at `apps/engine/data/ledger.db`
-
-### Backup
-```bash
-sqlite3 apps/engine/data/ledger.db ".backup /tmp/ledger.db.backup"
-```
-
-### Restore
-```bash
-cp /tmp/ledger.db.backup apps/engine/data/ledger.db
-```
-
-## Troubleshooting
-
-### Backend wont start
