@@ -1,13 +1,25 @@
 ## STATUS
 Milestone: **M5 COMPLETE — PROJECT READY TO USE**
-Deployed sha: cd71adb
-Last smoke: 5/5 PASS (2026-10-04 02:45 UTC)
-Database integrity: ✅ OK (FK violations fixed)
+Deployed sha: aa5aabc
+Last smoke: 5/5 PASS (2026-10-04 03:45 UTC)
+Database integrity: ✅ OK (all FK constraints satisfied)
 
 ## Services
 - backend: port 11110, online
 - terminal: port 22220, online  
 - engine: running, holding ledger.db lock
+
+## Pages Working
+- /login: 200 ✅
+- /admin: 200 ✅
+- /dashboard: 307 redirect ✅
+- API endpoints: all responding
+
+## Documentation
+- docs/RUNBOOK.md ✅
+- docs/HARDENING-TODO.md ✅
+- docs/FINAL-REPORT.md ✅
+- docs/DESIGN-SYSTEM-2217.md ✅
 
 ## Endpoints Working
 ### Auth (M1)
