@@ -178,7 +178,7 @@ app.get("/api/admin/integrity", (req, res) => {
     }
     
     // Check required tables exist
-    const tables = ["users", "orders", "wallets", "assets"];
+    const tables = ["users", "orders", "accounts", "balances"];
     const missing = tables.filter(t => {
       try {
         db.prepare(`SELECT 1 FROM ${t} LIMIT 0`).get();
