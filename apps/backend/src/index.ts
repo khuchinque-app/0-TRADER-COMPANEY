@@ -406,6 +406,142 @@ app.get("/api/portfolio", (req, res) => {
 });
 
 // HEALTH
+
+// ========== ADMIN ROUTES EXTENDED ==========
+
+// GET /api/admin/users - list all users
+app.get("/api/admin/users", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role: string } | undefined;
+  if (!user || user.role !== "system-admin") {
+    return res.status(403).json({ error: "forbidden", message: "Admin access required" });
+  }
+  try {
+    const users = db.prepare("SELECT id, email, phone, phone_verified, status, role, ray_id, created_at, updated_at FROM users ORDER BY created_at DESC LIMIT 100").all();
+    res.json({ users, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
+// GET /api/admin/users/:id - user detail
+app.get("/api/admin/users/:id", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role: string } | undefined;
+  if (!user || user.role !== "system-admin") {
+    return res.status(403).json({ error: "forbidden", message: "Admin access required" });
+  }
+  try {
+    const userData = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
+    if (!userData) return res.status(404).json({ error: "not_found" });
+    res.json({ user: userData, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
+// PUT /api/admin/users/:id/status - update user status
+app.put("/api/admin/users/:id/status", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role: string } | undefined;
+  if (!user || user.role !== "system-admin") {
+    return res.status(403).json({ error: "forbidden", message: "Admin access required" });
+  }
+  try {
+    const { status } = req.body ?? {};
+    if (!status || !["active", "pending", "suspended"].includes(status)) {
+      return res.status(400).json({ error: "invalid_params", message: "status must be active, pending, or suspended" });
+    }
+    const now = Math.floor(Date.now() / 1000);
+    db.prepare("UPDATE users SET status = ?, updated_at = ? WHERE id = ?").run(status, now, req.params.id);
+    db.prepare("INSERT INTO audit_log (ray_id, user_id, event, detail, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      userId, req.params.id, "user_status_updated", "Status changed to " + status, now
+    );
+    res.json({ ok: true, userId: req.params.id, status, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
+// PUT /api/admin/users/:id/role - update user role
+app.put("/api/admin/users/:id/role", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role: string } | undefined;
+  if (!user || user.role !== "system-admin") {
+    return res.status(403).json({ error: "forbidden", message: "Admin access required" });
+  }
+  try {
+    const { role } = req.body ?? {};
+    if (!role || !["customer", "system-admin"].includes(role)) {
+      return res.status(400).json({ error: "invalid_params", message: "role must be customer or system-admin" });
+    }
+    const now = Math.floor(Date.now() / 1000);
+    db.prepare("UPDATE users SET role = ?, updated_at = ? WHERE id = ?").run(role, now, req.params.id);
+    db.prepare("INSERT INTO audit_log (ray_id, user_id, event, detail, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      userId, req.params.id, "user_role_updated", "Role changed to " + role, now
+    );
+    res.json({ ok: true, userId: req.params.id, role, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
+// POST /api/admin/users/:id/adjust - adjust wallet balance
+app.post("/api/admin/users/:id/adjust", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role: string } | undefined;
+  if (!user || user.role !== "system-admin") {
+    return res.status(403).json({ error: "forbidden", message: "Admin access required" });
+  }
+  try {
+    const { asset, amount, reason } = req.body ?? {};
+    if (!asset || !amount || !reason) {
+      return res.status(400).json({ error: "invalid_params", message: "asset, amount, and reason required" });
+    }
+    const now = Math.floor(Date.now() / 1000);
+    const account = db.prepare("SELECT id FROM accounts WHERE user_id = ?").get(req.params.id) as { id: string } | undefined;
+    if (!account) return res.status(404).json({ error: "account_not_found" });
+    const accountId = account.id;
+    const existing = db.prepare("SELECT id, available FROM balances WHERE account_id = ? AND asset = ?").get(accountId, asset) as { id: number; available: number } | undefined;
+    if (existing) {
+      db.prepare("UPDATE balances SET available = available + ? WHERE id = ?").run(amount, existing.id);
+    } else {
+      db.prepare("INSERT INTO balances (account_id, asset, available, locked) VALUES (?, ?, ?, ?)").run(accountId, asset, amount, 0);
+    }
+    const journalId = "adj_" + accountId + "_" + asset;
+    db.prepare("INSERT INTO journal (id, timestamp, description, created_at) VALUES (?, ?, ?, ?)").run(journalId, now, "Admin adjustment: " + reason, now);
+    const entryType = amount >= 0 ? "debit" : "credit";
+    db.prepare("INSERT INTO journal_lines (journal_id, account_id, asset, amount, entry_type) VALUES (?, ?, ?, ?, ?)").run(journalId, accountId, asset, Math.abs(amount), entryType);
+    db.prepare("INSERT INTO audit_log (ray_id, user_id, event, detail, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      userId, req.params.id, "wallet_adjusted", reason, now
+    );
+    res.json({ ok: true, accountId, asset, amount, reason, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
+// GET /api/admin/audit - get audit log
+app.get("/api/admin/audit", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role: string } | undefined;
+  if (!user || user.role !== "system-admin") {
+    return res.status(403).json({ error: "forbidden", message: "Admin access required" });
+  }
+  try {
+    const logs = db.prepare("SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 100").all();
+    res.json({ audit: logs, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "trading-backend", port: PORT, timestamp: new Date().toISOString() });
 });
