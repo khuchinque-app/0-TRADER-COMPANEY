@@ -108,3 +108,26 @@ No action required.
 ---
 Working on: M5 (apply design system from port 2217 to terminal pages)
 Deployed sha: 756066b
+
+## 2026-10-04 Design System Application (VPS Review)
+
+### Review sha 2880c31 (LOCAL commit 1cf1329)
+- Changed files: apps/terminal/app/globals.css, docs/DESIGN-SYSTEM-2217.md
+- Design tokens from port 2217 applied to all terminal pages
+- No security issues detected
+- All services healthy after deploy
+
+### Design Tokens Applied:
+- Backgrounds: #090909, #0d0d0d, #101113 (3-tier surface)
+- Border: rgba(255,255,255,0.05)
+- Text: #F4F4F5 (primary), rgba(255,255,255,0.62) (secondary)
+- Profit: #22C55E, Loss: #EF4444, Gold: #F59E0B
+- Font: Inter (400/500/600)
+- Components: Card (radius-16px), Input (h-40px, rounded-xl), Button (rounded-lg)
+
+### Services:
+- Backend: PID 3166979, uptime 102m, online
+- Terminal: PID 3253926, online
+- Engine: PID 3054693, standby
+
+SHA: 2880c31
