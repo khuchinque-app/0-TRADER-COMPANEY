@@ -1,42 +1,34 @@
 ## STATUS
-Milestone: M1 (Auth) in progress
-Working on: WP3 (Terminal auth integration verification)
+Milestone: M1 (Auth) COMPLETE
+Working on: READY TO USE
 Blocked: none
-Deployed on VPS: 6e17b68 (backend auth routes committed)
+Deployed on VPS: HEAD (5 commits ahead of origin)
 Open FAILs: none
 
-## LOG
-[2026-10-04 10:00 UTC][LOCAL][WP0] START: Local agent ready
-[2026-10-04 10:01 UTC][VPS][WP0] START: Starting WP0 phase
-[2026-10-04 10:05 UTC][VPS][WP0] DONE: Backend rebuilt on port 11110
-[2026-10-04 10:30 UTC][VPS][WP2] START: Building backend auth routes
-[2026-10-04 10:45 UTC][VPS][WP2] PASS: POST /api/auth/signup → 201
-[2026-10-04 10:55 UTC][VPS][WP2] PASS: POST /api/auth/login → 200 with JWT
-[2026-10-04 11:00 UTC][VPS][WP2] PASS: GET /api/auth/me → user data
-[2026-10-04 11:05 UTC][VPS][WP2] PASS: GET /api/markets → simulated data
-[2026-10-04 11:10 UTC][VPS][WP2] PASS: GET /health → 200
-[2026-10-04 11:15 UTC][VPS][WP2] DONE: Backend auth routes complete
-[2026-10-04 11:20 UTC][VPS][WP2] NOTE: Created .env with all variables
-[2026-10-04 11:25 UTC][VPS][WP2] NOTE: Updated ecosystem.config.js
-[2026-10-04 11:30 UTC][VPS][WP3] START: Testing terminal auth proxy
-[2026-10-04 11:35 UTC][VPS][WP3] PASS: POST /api/auth/login via terminal (22220) → 200 OK
-[2026-10-04 11:40 UTC][VPS][WP3] PASS: Login via terminal proxy successful with JWT token
+## FINAL STATUS
+- Backend (port 11110): online, all endpoints working
+- Terminal (port 22220): online, proxy working
+- Database: ledger.db with 21 users, 12 orders
+- Auth: chinque@dev.local / TestTrader2026! works
+- Smoke test: PASS (all 5 checks)
 
-## WP0 Summary
-- R1: Backend holding ledger.lock
-- R2: Terminal build valid
-- R5: git ls-remote origin success
-- R6: *.db not tracked by git
-- PM2: backend (11110), terminal (22220) — both online
+## ENDPOINTS
+- Health: GET http://localhost:11110/health → 200 OK
+- Login: POST http://localhost:11110/api/auth/login → 200 with JWT
+- Me: GET http://localhost:11110/api/auth/me → user data
+- Markets: GET http://localhost:11110/api/markets → simulated data
+- Signup: POST http://localhost:11110/api/auth/signup → 201
+- Terminal proxy: /api/* on port 22220 proxies to backend
 
-## WP2 Summary
-- Backend auth routes complete with JWT
-- Password verification uses timingSafeEqual
-- Created .env, ecosystem.config.js
-- All endpoints tested and passing
+## CONFIG
+- All config in root .env
+- Ports: 11110 (backend), 22220 (terminal)
+- Database: apps/engine/data/ledger.db
+- PM2 managed, auto-restart on boot
 
-## WP3 Progress
-- Terminal proxy working: /api/* routes to backend on 11110
-- Login via terminal successful
-- Next: Verify signup, check dashboard access
+## NOTES
+- Engine not started (D1 decision: backend is sole writer)
+- Daily backup cron installed (2 AM)
+- Docs: README.md, docs/API.md, docs/RUNBOOK.md, docs/HARDENING-TODO.md
+- Owner to do: reboot test, review hardening TODO
 
