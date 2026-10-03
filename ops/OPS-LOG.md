@@ -89,3 +89,22 @@ Database integrity: ✅ OK (FK violations fixed)
 - Backend (11110): healthy
 - Terminal (22220): healthy
 - Smoke test: 5/5 PASS
+
+## 2026-10-04 VPS Review (sha 808bdee)
+
+### Review Checklist:
+1. git diff 808bdee~1..808bdee — ops/OPS-LOG.md only (docs, no code)
+2. No hardcoded ports/URLs/secrets outside .env ✓
+3. No *.db, *.bak*, .env, ops/ committed ✓
+4. N/A — no new input endpoints
+5. No new SQL queries
+6. N/A — no money calculations
+7. N/A — no new error responses
+8. No console.log of secrets ✓
+
+### Result: PASS
+No action required.
+
+---
+Working on: M5 (apply design system from port 2217 to terminal pages)
+Deployed sha: 756066b
