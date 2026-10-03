@@ -1,33 +1,45 @@
 ## STATUS
-Milestone: M1 (Auth) COMPLETE — READY TO USE
-Working on: None — waiting for owner review
-Deployed sha: 53a5da7
+Milestone: M2 (Ledger/Wallet) COMPLETE
+Working on: M3 (Orders/Matching)
+Deployed sha: 2a56215
 
 ## Services
 - backend: port 11110, healthy
 - terminal: port 22220, healthy
+- engine: port 3001, standby (D1 decision)
 
-## Endpoints
+## Endpoints Working
 - /health → {"status":"ok"}
 - /api/auth/login → JWT token
 - /api/auth/me → user data
 - /api/markets → simulated data
 - /api/admin/integrity → {"ok":true}
 - /api/admin/stats → users/orders count
+- /api/wallet/balance → account balances
+- /api/wallet/deposit → create deposit
+- /api/wallet/history → journal history
+- /api/wallet/faucet → free test funds (60s cooldown)
+
+## Smoke Test
+- scripts/smoke-test.py: 5/5 PASS
+- POST /api/auth/login → 200 with JWT
+- GET /api/auth/me → user data
+- GET /api/markets → simulated data
+- GET /api/wallet/balance → account balances
+- Terminal proxy: 22220 → 11110
+
+## Database
+- Tables: users, accounts, balances, journal, journal_lines, orders, fills
+- Integrity: ok:true
+- Schema matches MASTER-PLAN requirements
 
 ## Automation
 - Backup cron: daily 02:00 UTC
 - PM2: services saved for auto-restart
-- Smoke test: scripts/smoke-test.py (5/5 PASS)
+- Logrotate: weekly rotation configured
 
-## Known limitations
-- Wallet/assets tables not present (uses accounts/balances)
-- Engine not started (D1 decision)
-- Dev credentials not hardened (see docs/HARDENING-TODO.md)
-
-## Commits
-53a5da7 feat: add Python smoke test script
-81c4c85 fix: use single quotes for JSON in smoke test
-79759c2 fix: properly escape JSON in smoke test
-4b0aad6 fix: correct smoke test token extraction
-d6fbff9 fix: use correct table names in integrity check (accounts, balances)
+## Next: M3 (Orders/Matching)
+- Order endpoints: create, list, cancel
+- Matching engine integration
+- Portfolio calculation
+- Trade history
