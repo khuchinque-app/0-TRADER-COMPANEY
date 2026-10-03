@@ -296,7 +296,7 @@ app.get("/api/wallet/faucet", (req, res) => {
     const recentDeposits = db.prepare(`
       SELECT jl.asset FROM journal j 
       JOIN journal_lines jl ON j.id = jl.journal_id 
-      WHERE jl.account_id = ? AND j.timestamp > ? AND j.description LIKE "Deposit %"
+      WHERE jl.account_id = ? AND j.timestamp > ? AND j.description LIKE 'Deposit %'
     `).all(accountId, now - 60);
     
     const cooldownedAssets = recentDeposits.map((d: any) => d.asset);
