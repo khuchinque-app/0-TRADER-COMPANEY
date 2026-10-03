@@ -167,3 +167,33 @@ app.get("/health", (_req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
 });
+
+// Integrity check endpoint
+app.get("/api/admin/integrity", (req, res) => {
+  try {
+    // Check database connectivity
+    const dbCheck = db.prepare("SELECT COUNT(*) as count FROM users").get();
+    if ((dbCheck as any).count < 0) {
+      return res.status(500).json({ ok: false, message: "Database check failed" });
+    }
+    
+    // Check required tables exist
+    const tables = ["users", "orders", "wallets", "assets"];
+    const missing = tables.filter(t => {
+      try {
+        db.prepare(`SELECT 1 FROM ${t} LIMIT 0`).get();
+        return false;
+      } catch {
+        return true;
+      }
+    });
+    
+    if (missing.length > 0) {
+      return res.status(500).json({ ok: false, message: `Missing tables: ${missing.join(", ")}` });
+    }
+    
+    res.json({ ok: true, tables: tables.length - missing.length, database: "ok" });
+  } catch (e: any) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
