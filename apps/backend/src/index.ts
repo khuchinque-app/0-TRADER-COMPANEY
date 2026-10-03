@@ -380,7 +380,7 @@ app.get("/api/portfolio", (req, res) => {
     const filledOrders = db.prepare(`
       SELECT o.pair, o.side, o.quantity, o.price, f.quantity as fill_qty, f.price as fill_price
       FROM orders o JOIN fills f ON o.id = f.order_id
-      WHERE o.user_id = ? AND o.status = filled
+      WHERE o.user_id = ? AND o.status = 'filled'
     `).all(userId) as any[];
     let realizedPnl = 0;
     const positionMap = new Map();
