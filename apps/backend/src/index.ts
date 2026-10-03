@@ -342,7 +342,7 @@ app.get("/api/orders", (req, res) => {
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: "unauthenticated" });
   try {
-    const orders = db.prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 50").all(userId);
+    const orders = db.prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 50").all(userId) as any[];
     res.json({ orders, simulasi: true });
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message });
@@ -381,7 +381,7 @@ app.get("/api/portfolio", (req, res) => {
       SELECT o.pair, o.side, o.quantity, o.price, f.quantity as fill_qty, f.price as fill_price
       FROM orders o JOIN fills f ON o.id = f.order_id
       WHERE o.user_id = ? AND o.status = filled
-    `).all(userId);
+    `).all(userId) as any[];
     let realizedPnl = 0;
     const positionMap = new Map();
     for (const order of filledOrders) {
