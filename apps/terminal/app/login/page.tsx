@@ -41,38 +41,49 @@ export default function LoginPage() {
     setBusy(false);
   };
 
-  const input = 'w-full rounded-md border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5 text-sm outline-none focus:border-[var(--cyan)]';
-
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <header className="flex items-center justify-between px-6 h-16 border-b border-[var(--border)]">
+    <div className="min-h-screen flex flex-col bg-[#090909] text-[#F4F4F5] font-inter">
+      <header className="flex items-center justify-between px-6 h-[56px] border-b border-[rgba(255,255,255,0.05)]">
         <Link href="/" className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--cyan)]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
           <span className="font-semibold">Simulasi Exchange</span>
         </Link>
-        <span className="text-[10px] px-1.5 py-0.5 rounded border border-[var(--border)] text-[var(--text-muted)] uppercase tracking-wider">SIMULASI</span>
+        <span className="text-[10px] px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.05)] text-[rgba(255,255,255,0.38)] uppercase tracking-wider">SIMULASI</span>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
           <h1 className="text-xl font-semibold mb-1">Welcome back</h1>
-          <p className="text-xs text-[var(--text-muted)] mb-6">Log in to your paper-trading account.</p>
+          <p className="text-xs text-[rgba(255,255,255,0.62)] mb-6">Log in to your paper-trading account.</p>
           <div className="space-y-3">
-            <input className={input} type="email" placeholder="Email"
-              value={email} onChange={e => setEmail(e.target.value)} autoFocus />
-            <input className={input} type="password" placeholder="Password"
-              value={password} onChange={e => setPassword(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && doLogin()} />
+            <input
+              className="w-full rounded-xl bg-[#121316] border border-[rgba(255,255,255,0.03)] px-3 py-2.5 text-sm outline-none focus:border-[rgba(255,255,255,0.05)] text-[#F4F4F5]"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoFocus
+            />
+            <input
+              className="w-full rounded-xl bg-[#121316] border border-[rgba(255,255,255,0.03)] px-3 py-2.5 text-sm outline-none focus:border-[rgba(255,255,255,0.05)] text-[#F4F4F5]"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && doLogin()}
+            />
             <button
-              className="w-full rounded-md bg-[var(--cyan)] text-black font-semibold py-2.5 text-sm hover:opacity-90 disabled:opacity-40 transition-opacity"
-              onClick={doLogin} disabled={busy}>
+              className="w-full rounded-lg bg-[#F59E0B] text-black font-semibold py-2.5 text-sm hover:bg-[#d97706] disabled:opacity-40 transition-colors duration-200"
+              onClick={doLogin}
+              disabled={busy}
+            >
               {busy ? 'Logging in…' : 'Log In'}
             </button>
           </div>
-          {err && <p className="mt-3 text-[11px] text-[var(--neg)]">{err}</p>}
-          <p className="mt-6 text-center text-xs text-[var(--text-muted)]">
+          {err && <p className="mt-3 text-[11px] text-[#EF4444]">{err}</p>}
+          <p className="mt-6 text-center text-xs text-[rgba(255,255,255,0.38)]">
             New here?{' '}
-            <Link className="text-[var(--cyan)] hover:underline" href="/signup">Create an account</Link>
+            <Link className="text-[#F59E0B] hover:underline" href="/signup">Create an account</Link>
           </p>
         </div>
       </main>

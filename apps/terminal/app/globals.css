@@ -162,9 +162,9 @@ body {
   content: '';
   width: 6px;
   height: 6px;
-  background: var(--cyan);
+  background: #F59E0B;
   border-radius: 50%;
-  box-shadow: 0 0 6px var(--cyan);
+  box-shadow: 0 0 6px #F59E0B;
 }
 
 .panel-content {
@@ -198,8 +198,8 @@ body {
 .logo-dot {
   width: 8px;
   height: 8px;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan);
+  background: #F59E0B;
+  box-shadow: 0 0 8px #F59E0B;
 }
 
 /* Ticker Strip */
@@ -228,7 +228,7 @@ body {
 .ticker-item:hover { background: var(--stx-surface-2); }
 .ticker-item.active {
   background: var(--stx-surface);
-  border-bottom-color: var(--cyan);
+  border-bottom-color: #F59E0B;
 }
 
 .ticker-symbol {
@@ -337,7 +337,7 @@ body {
 .timeframe-btn:hover { color: var(--text-primary-unified); }
 
 .timeframe-btn.active {
-  background: var(--cyan);
+  background: #F59E0B;
   color: #000;
   box-shadow: 0 0 8px rgba(50, 197, 233, 0.4);
 }
@@ -538,7 +538,7 @@ body {
   transition: border-color 0.15s;
 }
 
-.order-input:focus-within { border-color: var(--cyan); }
+.order-input:focus-within { border-color: #F59E0B; }
 
 .order-input input {
   flex: 1;
@@ -617,8 +617,8 @@ body {
 }
 
 .position-sizer button.active {
-  color: var(--cyan);
-  border-color: var(--cyan);
+  color: #F59E0B;
+  border-color: #F59E0B;
   background: var(--cyan-dim);
 }
 
@@ -725,8 +725,8 @@ body {
 
 /* Animations */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 4px var(--cyan); }
-  50% { box-shadow: 0 0 12px var(--cyan); }
+  0%, 100% { box-shadow: 0 0 4px #F59E0B; }
+  50% { box-shadow: 0 0 12px #F59E0B; }
 }
 
 .pulse-glow {
@@ -736,7 +736,7 @@ body {
 /* Utility */
 .text-gain { color: var(--stx-profit); }
 .text-loss { color: var(--stx-loss); }
-.text-cyan { color: var(--cyan); }
+.text-cyan { color: #F59E0B; }
 .text-purple { color: var(--purple); }
 .text-muted { color: var(--text-muted-unified); }
 .text-primary { color: var(--text-primary-unified); }
@@ -855,7 +855,7 @@ body {
 
 .nav-item-2217.active {
   background: rgba(255,255,255,0.05);
-  border-left: 2px solid var(--cyan);
+  border-left: 2px solid #F59E0B;
   color: var(--text-primary-unified);
 }
 
