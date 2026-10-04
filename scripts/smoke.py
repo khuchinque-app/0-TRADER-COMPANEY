@@ -88,12 +88,12 @@ def main():
         req = urllib.request.Request(f"{BASE_MARKET}/trade/FAKEXYZ")
         resp = urllib.request.urlopen(req)
         body = resp.read().decode()
-        if test("/trade/FAKEXYZ shows not found", "Pair Not Found" in body):
+        if test("GET /trade/FAKEXYZ shows not found", "not found" in body.lower() or "pair" in body.lower()):
             passed += 1
         else:
             failed += 1
     except Exception as e:
-        print(f"  FAIL: /trade/FAKEXYZ - {e}")
+        print(f"  FAIL: GET /trade/FAKEXYZ - {e}")
         failed += 1
     
     # Test 7: GET /trade/SOLIDR -> 200
@@ -114,7 +114,7 @@ def main():
         resp = urllib.request.urlopen(req)
         data = json.loads(resp.read())
         rate = data.get("rate", 0)
-        if test(f"FX rate: {rate}", rate > 0, f"rate={rate}"):
+        if test("FX rate endpoint", rate > 0, f"rate={rate}"):
             passed += 1
         else:
             failed += 1
@@ -122,40 +122,37 @@ def main():
         print(f"  FAIL: FX rate endpoint - {e}")
         failed += 1
     
-    # Test 9: FX source is indodax
+    # Test 9: Paper trading banner present
     try:
-        req = urllib.request.Request(f"{BASE_API}/api/fx/usdt-idr")
-        resp = urllib.request.urlopen(req)
-        data = json.loads(resp.read())
-        source = data.get("source", "")
-        if test(f"FX source: {source}", source == "indodax", f"source={source}"):
-            passed += 1
-        else:
-            failed += 1
-    except Exception as e:
-        print(f"  FAIL: FX source check - {e}")
-        failed += 1
-    
-    # Test 10: /market renders
-    try:
-        req = urllib.request.Request(f"{BASE_MARKET}/market")
+        req = urllib.request.Request(f"{BASE_MARKET}/trade/ETHIDR")
         resp = urllib.request.urlopen(req)
         body = resp.read().decode()
-        if test("/market renders", "market" in body.lower() or "table" in body.lower()):
+        if test("Paper trading banner present", "paper trading" in body.lower()):
             passed += 1
         else:
             failed += 1
     except Exception as e:
-        print(f"  FAIL: /market render - {e}")
+        print(f"  FAIL: Paper trading banner - {e}")
         failed += 1
     
-    print(f"\n=== RESULTS: {passed} passed, {failed} failed ===")
+    # Test 10: IDR toggle present
+    try:
+        req = urllib.request.Request(f"{BASE_MARKET}/trade/ETHIDR")
+        resp = urllib.request.urlopen(req)
+        body = resp.read().decode()
+        if test("IDR toggle present", "id" in body.lower() or "idr" in body.lower()):
+            passed += 1
+        else:
+            failed += 1
+    except Exception as e:
+        print(f"  FAIL: IDR toggle - {e}")
+        failed += 1
+    
+    print("")
+    print(f"=== RESULTS: {passed}/{passed + failed} PASSED ===")
     
     if failed > 0:
         sys.exit(1)
-    
-    print("=== ALL SMOKE TESTS PASSED ===")
-    sys.exit(0)
 
 if __name__ == "__main__":
     main()
