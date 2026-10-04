@@ -665,6 +665,34 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "trading-backend", port: PORT, timestamp: new Date().toISOString() });
 });
 
+// CHAT ENDPOINT (for voice agent)
+app.post("/api/chat", (req, res) => {
+  const { message } = req.body ?? {};
+  if (!message) {
+    return res.status(400).json({ error: "message_required" });
+  }
+  const lower = String(message).toLowerCase();
+  let reply = "Saya mendengar pesan Anda.";
+
+  if (lower.includes("halo") || lower.includes("hai") || lower.includes("hello")) {
+    reply = "Halo Lord! Bot suara siap membantu. Silakan kirim perintah trading atau pertanyaan.";
+  } else if (lower.includes("price") || lower.includes("harga") || lower.includes("btc")) {
+    reply = "Untuk melihat harga Bitcoin, silakan buka halaman market di browser atau tanya saya detail pair tertentu.";
+  } else if (lower.includes("trade") || lower.includes("beli") || lower.includes("jual")) {
+    reply = "Fitur trading tersedia di halaman trade. Kirim pair seperti BTCIDR untuk melihat ticker live.";
+  } else if (lower.includes("wallet") || lower.includes("saldo") || lower.includes("balance")) {
+    reply = "Saldo Anda tersedia di menu wallet. Gunakan /faucet untuk mendapatkan saldo simulasi.";
+  } else if (lower.includes("help") || lower.includes("bantu") || lower.includes("cara")) {
+    reply = "Perintah tersedia: /help untuk bantuan, kirim teks atau suara untuk chat. Trading paper hanya, tidak ada uang nyata.";
+  } else if (lower.includes("test")) {
+    reply = "Test berhasil! Bot suara berjalan dengan baik. Saya adalah agen voice untuk Trading Company.";
+  } else {
+    reply = "Terima kasih atas pesan Anda. Saya akan memproses permintaan tersebut.";
+  }
+
+  res.json({ reply, message, simulasi: true });
+});
+
 app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
 });

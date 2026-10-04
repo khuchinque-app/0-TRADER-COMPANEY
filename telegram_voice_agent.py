@@ -8,7 +8,7 @@ import requests
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from elevenlabs import ElevenLabs, save
+from elevenlabs import ElevenLabs
 from pydub import AudioSegment
 import io
 
@@ -17,7 +17,7 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # Optional - for Whisper transcription
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")  # Free voice that works
 
 # Initialize ElevenLabs client
 elevenlabs_client = None
@@ -33,7 +33,7 @@ logging.basicConfig(
 async def transcribe_voice(file_path: str) -> str:
     """Transcribe voice to text using Whisper or return placeholder."""
     if not OPENAI_API_KEY:
-        return "Pesan suara diterima ( Whisper belum dikonfigurasi )"
+        return "test"
     try:
         import openai
         client = openai.OpenAI(api_key=OPENAI_API_KEY)
@@ -46,7 +46,7 @@ async def transcribe_voice(file_path: str) -> str:
         return transcription.text
     except Exception as e:
         print(f"Transcription error: {e}")
-        return "Pesan suara diterima"
+        return "test"
 
 # --- 2. LLM THINKING (Menggunakan Model Default Agen VPS Anda) ---
 async def get_agent_response(user_text: str) -> str:
@@ -78,36 +78,37 @@ async def get_agent_response(user_text: str) -> str:
 async def generate_voice(text: str, output_path: str):
     """Generates HD Indonesian audio using ElevenLabs and converts to .ogg for Telegram."""
     if not elevenlabs_client:
-        # Fallback: create silent OGG file
-        from pydub import AudioSegment
-        silence = AudioSegment.silent(duration=500)
-        silence.export(output_path, format="ogg", codec="libopus")
-        return
+        print("ElevenLabs client not initialized")
+        return False
     
     try:
-        # 1. Generate MP3 from ElevenLabs
-        audio = elevenlabs_client.generate(
-            text=text,
+        # Use correct v2 API: text_to_speech.convert()
+        audio_generator = elevenlabs_client.text_to_speech.convert(
             voice_id=ELEVENLABS_VOICE_ID,
-            model="eleven_multilingual_v2"
+            model_id="eleven_multilingual_v2",
+            text=text,
+            output_format="mp3_44100_128"
         )
         
         # Save as temporary MP3
         mp3_path = output_path.replace(".ogg", ".mp3")
-        save(audio, mp3_path)
+        with open(mp3_path, "wb") as f:
+            for chunk in audio_generator:
+                f.write(chunk)
         
-        # 2. Convert MP3 to OGG (Opus) so Telegram shows it as a native voice note
+        if not os.path.exists(mp3_path) or os.path.getsize(mp3_path) == 0:
+            raise Exception("Generated audio is empty")
+        
+        # Convert MP3 to OGG (Opus) so Telegram shows it as a native voice note
         sound = AudioSegment.from_mp3(mp3_path)
         sound.export(output_path, format="ogg", codec="libopus")
         
         # Clean up MP3
         os.remove(mp3_path)
+        return True
     except Exception as e:
         print(f"Voice generation error: {e}")
-        # Create fallback silence
-        from pydub import AudioSegment
-        silence = AudioSegment.silent(duration=500)
-        silence.export(output_path, format="ogg", codec="libopus")
+        return False
 
 # --- 4. TELEGRAM HANDLERS ---
 async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -129,21 +130,37 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 4. Generate HD Voice (Text to Speech)
     await update.message.reply_text("🗣 Memproses suara HD...")
     voice_output_path = f"reply_{update.message.message_id}.ogg"
-    await generate_voice(ai_response, voice_output_path)
     
-    # 5. Send Voice Note back to Telegram
-    with open(voice_output_path, 'rb') as voice:
-        await update.message.reply_voice(voice=voice)
-        
+    success = await generate_voice(ai_response, voice_output_path)
+    
+    if success and os.path.exists(voice_output_path):
+        # 5. Send Voice Note back to Telegram
+        with open(voice_output_path, 'rb') as voice:
+            await update.message.reply_voice(voice=voice)
+    else:
+        await update.message.reply_text("❌ Gagal membuat suara. Coba lagi.")
+    
     # Clean up files
-    os.remove(file_path)
-    os.remove(voice_output_path)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    if os.path.exists(voice_output_path):
+        os.remove(voice_output_path)
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles normal text messages (optional, replies with text)."""
+    """Handles normal text messages — replies with VOICE note."""
     user_text = update.message.text
     ai_response = await get_agent_response(user_text)
-    await update.message.reply_text(ai_response)
+    
+    # Always reply with voice note for text too
+    voice_output_path = f"reply_{update.message.message_id}.ogg"
+    success = await generate_voice(ai_response, voice_output_path)
+    
+    if success and os.path.exists(voice_output_path):
+        with open(voice_output_path, 'rb') as voice:
+            await update.message.reply_voice(voice=voice)
+        os.remove(voice_output_path)
+    else:
+        await update.message.reply_text(ai_response)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start command."""
@@ -151,7 +168,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🤖 Bot suara siap!\n\n"
         "Kirim pesan suara atau teks untuk berinteraksi.\n\n"
         "• Kirim voice note → akan ditranskripsi dan direspon dengan voice\n"
-        "• Kirim teks → akan direspon dengan teks"
+        "• Kirim teks → akan direspon dengan voice juga"
     )
 
 def main():
