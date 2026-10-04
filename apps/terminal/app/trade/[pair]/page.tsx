@@ -23,6 +23,10 @@ interface Ticker {
 
 let orderIdCounter = 0;
 
+// Force dynamic rendering to avoid prerendering "Pair Not Found"
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function TradePage() {
   const params = useParams();
   const pair = String(params.pair).toUpperCase();
