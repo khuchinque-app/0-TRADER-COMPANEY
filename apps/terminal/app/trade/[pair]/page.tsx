@@ -30,7 +30,7 @@ export default function TradePage() {
   const [ticker, setTicker] = useState<Ticker | null>(null);
   const [loading, setLoading] = useState(true);
   const [showIDR, setShowIDR] = useState(false);
-  const [fxRate, setFxRate] = useState<number>(0);
+  const [fxRate, setFxRate] = useState<number>(15000);
   const [error, setError] = useState<string>("");
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [orderType, setOrderType] = useState<"limit" | "market">("limit");
@@ -56,8 +56,8 @@ export default function TradePage() {
         setLoading(false);
       });
 
-    // Fetch FX rate for IDR toggle
-    fetch("http://localhost:11110/api/fx/usdt-idr")
+    // Fetch FX rate for IDR toggle (use relative path to avoid localhost issue)
+    fetch("/api/fx/usdt-idr")
       .then((r) => r.json())
       .then((data: any) => {
         setFxRate(data.rate || 15000);
@@ -104,7 +104,6 @@ export default function TradePage() {
   }
 
   const handleOrderSubmit = () => {
-    // Validate inputs
     if (!price && orderType === "limit") {
       setError("Please enter a price");
       return;
@@ -118,28 +117,18 @@ export default function TradePage() {
       return;
     }
 
-    const total = parseFloat(price || "0") * parseFloat(amount);
+    const total = (parseFloat(price || "0") * parseFloat(amount)).toFixed(2);
     const newOrderId = ++orderIdCounter;
     
-    const order = {
-      id: newOrderId,
-      pair,
-      side,
-      type: orderType,
-      price: parseFloat(price || "0"),
-      amount: parseFloat(amount),
-      total,
-      status: orderType === "market" ? "filled" : "open",
-      timestamp: new Date().toISOString(),
-    };
+    const order = {\n      id: newOrderId,\n      pair,\n      side,\n      type: orderType,\n      price: parseFloat(price || "0"),\n      amount: parseFloat(amount),\n      total: parseFloat(total),\n      status: orderType === "market" ? "filled" : "open",\n      timestamp: new Date().toISOString(),\n    };
 
     if (order.status === "filled") {
       setOrderHistory([order, ...orderHistory]);
       setFills([order, ...fills]);
       if (side === "buy") {
-        setBalance(balance - total);
+        setBalance(balance - order.total);
       } else {
-        setBalance(balance + total);
+        setBalance(balance + order.total);
       }
     } else {
       setOrders([order, ...orders]);
