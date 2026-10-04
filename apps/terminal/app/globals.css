@@ -929,3 +929,269 @@ body {
   background: var(--color-gold);
   box-shadow: 0 0 6px var(--color-gold);
 }
+
+/* ===== Strata Design System Tokens ===== */
+/* Adapted from Strata UI Theme (Avalonia) by adirh3 — MIT License */
+/* https://github.com/adirh3/Strata */
+
+:root {
+  /* Surface */
+  --strata-bg: #0d1117;
+  --strata-surface0: #12171f;
+  --strata-surface1: #171d27;
+  --strata-surface2: #1c232f;
+  --strata-overlay: #212937;
+
+  /* Text */
+  --strata-text-primary: #eaeDef;
+  --strata-text-secondary: #afb5bf;
+  --strata-text-tertiary: #78828c;
+  --strata-text-disabled: #505a64;
+  --strata-text-on-accent: #ffffff;
+
+  /* Accent */
+  --strata-accent-default: #3b82f6;
+  --strata-accent-hover: #60a5fa;
+  --strata-accent-pressed: #2563eb;
+  --strata-accent-subtle: #1e3a8a;
+  --strata-accent-subtle-hover: #254aa0;
+
+  /* Status */
+  --strata-success: #22c55e;
+  --strata-danger: #ef4444;
+  --strata-warning: #eab308;
+
+  /* Control */
+  --strata-control-default: #283241;
+  --strata-control-hover: #323e50;
+  --strata-control-disabled: #1e2632;
+
+  /* Border */
+  --strata-border-default: #2d3746;
+  --strata-border-subtle: #232d3a;
+  --strata-border-strong: #3c4b5f;
+  --strata-border-focus: #3b82f6;
+  --strata-border-error: #ef4444;
+
+  /* Typography */
+  --strata-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --strata-font-mono: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+
+  /* Spacing */
+  --strata-space-s: 8px;
+  --strata-space-m: 12px;
+  --strata-space-l: 16px;
+  --strata-space-xl: 24px;
+
+  /* Heights */
+  --strata-height-s: 28px;
+  --strata-height-m: 36px;
+  --strata-height-l: 44px;
+
+  /* Radius */
+  --strata-radius-sm: 6px;
+  --strata-radius-md: 10px;
+  --strata-radius-lg: 14px;
+  --strata-radius-pill: 9999px;
+}
+
+/* ===== Strata Component Classes ===== */
+
+/* Surfaces */
+.strata-bg { background: var(--strata-bg); }
+.strata-surface0 { background: var(--strata-surface0); }
+.strata-surface1 { background: var(--strata-surface1); }
+.strata-surface2 { background: var(--strata-surface2); }
+.strata-overlay { background: var(--strata-overlay); }
+
+/* Text */
+.strata-text-primary { color: var(--strata-text-primary); }
+.strata-text-secondary { color: var(--strata-text-secondary); }
+.strata-text-tertiary { color: var(--strata-text-tertiary); }
+.strata-text-muted { color: var(--strata-text-disabled); }
+
+/* Accent */
+.strata-accent { color: var(--strata-accent-default); }
+.strata-accent-hover:hover { color: var(--strata-accent-hover); }
+.strata-bg-accent { background: var(--strata-accent-default); }
+.strata-bg-accent-subtle { background: var(--strata-accent-subtle); }
+
+/* Status */
+.strata-success { color: var(--strata-success); }
+.strata-danger { color: var(--strata-danger); }
+.strata-warning { color: var(--strata-warning); }
+.strata-bg-success { background: var(--strata-success); }
+.strata-bg-danger { background: var(--strata-danger); }
+.strata-bg-warning { background: var(--strata-warning); }
+
+/* Control */
+.strata-control { background: var(--strata-control-default); }
+.strata-control-hover:hover { background: var(--strata-control-hover); }
+
+/* Border */
+.strata-border { border: 1px solid var(--strata-border-default); }
+.strata-border-subtle { border: 1px solid var(--strata-border-subtle); }
+.strata-border-focus { border-color: var(--strata-border-focus); }
+
+/* Typography */
+.strata-font { font-family: var(--strata-font-sans); }
+.strata-mono { font-family: var(--strata-font-mono); }
+
+/* Spacing */
+.strata-p-s { padding: var(--strata-space-s); }
+.strata-p-m { padding: var(--strata-space-m); }
+.strata-p-l { padding: var(--strata-space-l); }
+.strata-p-xl { padding: var(--strata-space-xl); }
+.strata-g-s { gap: var(--strata-space-s); }
+.strata-g-m { gap: var(--strata-space-m); }
+.strata-g-l { gap: var(--strata-space-l); }
+
+/* Heights */
+.strata-h-s { height: var(--strata-height-s); }
+.strata-h-m { height: var(--strata-height-m); }
+.strata-h-l { height: var(--strata-height-l); }
+
+/* Radius */
+.strata-radius-sm { border-radius: var(--strata-radius-sm); }
+.strata-radius-md { border-radius: var(--strata-radius-md); }
+.strata-radius-lg { border-radius: var(--strata-radius-lg); }
+.strata-radius-pill { border-radius: var(--strata-radius-pill); }
+
+/* Strata Button */
+.strata-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--strata-font-sans);
+  border: 1px solid var(--strata-border-default);
+  border-radius: var(--strata-radius-md);
+  background: var(--strata-control-default);
+  color: var(--strata-text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.strata-btn:hover {
+  background: var(--strata-control-hover);
+  border-color: var(--strata-border-strong);
+}
+.strata-btn:active { transform: scale(0.97); }
+.strata-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.strata-btn-primary {
+  background: var(--strata-accent-default);
+  border-color: var(--strata-accent-default);
+  color: #ffffff;
+}
+.strata-btn-primary:hover {
+  background: var(--strata-accent-hover);
+  border-color: var(--strata-accent-hover);
+}
+
+.strata-btn-success {
+  background: var(--strata-success);
+  border-color: var(--strata-success);
+  color: #ffffff;
+}
+.strata-btn-danger {
+  background: var(--strata-danger);
+  border-color: var(--strata-danger);
+  color: #ffffff;
+}
+
+.strata-btn-sm { padding: 6px 12px; font-size: 12px; }
+.strata-btn-lg { padding: 12px 24px; font-size: 14px; }
+
+/* Strata Input */
+.strata-input {
+  height: var(--strata-height-m);
+  padding: 0 12px;
+  background: var(--strata-surface2);
+  border: 1px solid var(--strata-border-subtle);
+  border-radius: var(--strata-radius-md);
+  color: var(--strata-text-primary);
+  font-size: 13px;
+  font-family: var(--strata-font-sans);
+  transition: border-color 0.15s;
+}
+.strata-input:focus {
+  outline: none;
+  border-color: var(--strata-border-focus);
+  box-shadow: 0 0 0 3px var(--strata-accent-subtle);
+}
+.strata-input::placeholder { color: var(--strata-text-tertiary); }
+.strata-input-error { border-color: var(--strata-border-error); }
+
+/* Strata Badge */
+.strata-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--strata-radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--strata-font-mono);
+  background: var(--strata-surface2);
+  color: var(--strata-text-secondary);
+}
+.strata-badge-default { background: var(--strata-surface2); color: var(--strata-text-secondary); }
+.strata-badge-accent { background: var(--strata-accent-subtle); color: var(--strata-accent-hover); }
+.strata-badge-success { background: rgba(34, 197, 94, 0.15); color: var(--strata-success); }
+.strata-badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--strata-danger); }
+.strata-badge-warning { background: rgba(234, 179, 8, 0.15); color: var(--strata-warning); }
+
+/* Strata Panel */
+.strata-panel {
+  background: var(--strata-surface1);
+  border: 1px solid var(--strata-border-default);
+  border-radius: var(--strata-radius-lg);
+  overflow: hidden;
+}
+.strata-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--strata-surface2);
+  border-bottom: 1px solid var(--strata-border-default);
+  min-height: 40px;
+}
+.strata-panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--strata-text-tertiary);
+}
+.strata-panel-content { padding: 12px; }
+
+/* Strata Card */
+.strata-card {
+  background: var(--strata-surface1);
+  border: 1px solid var(--strata-border-default);
+  border-radius: var(--strata-radius-md);
+  padding: 16px;
+}
+
+/* Strata Divider */
+.strata-divider {
+  height: 1px;
+  background: var(--strata-border-default);
+  margin: 8px 0;
+}
+
+/* Strata Stack */
+.strata-stack { display: flex; flex-direction: column; }
+.strata-row { display: flex; align-items: center; }
+.strata-gap-s { gap: var(--strata-space-s); }
+.strata-gap-m { gap: var(--strata-space-m); }
+.strata-gap-l { gap: var(--strata-space-l); }
+
+/* Strata Grid */
+.strata-grid { display: grid; gap: 16px; }
+.strata-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.strata-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.strata-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
