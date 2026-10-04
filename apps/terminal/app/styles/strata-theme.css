@@ -1,0 +1,197 @@
+/* ============================================================
+   STRATA UI — CSS ADAPTATION FOR TRADING COMPANY
+   Converted from Avalonia UI theme to Tailwind v4 compatible CSS
+   ============================================================ */
+
+/* ── STRATA DARK THEME TOKENS ── */
+:root {
+  /* Neutral Palette */
+  --strata-neutral-0: #FFFFFF;
+  --strata-neutral-50: #F7F8FA;
+  --strata-neutral-100: #D8DCE4;
+  --strata-neutral-200: #B8BFC9;
+  --strata-neutral-300: #929BAA;
+  --strata-neutral-400: #6B7585;
+  --strata-neutral-500: #4A5364;
+  --strata-neutral-600: #333B49;
+  --strata-neutral-700: #272D38;
+  --strata-neutral-800: #1C2129;
+  --strata-neutral-900: #13161C;
+
+  /* Surface Colors */
+  --strata-bg: #161616;
+  --strata-surface-0: #1E1E1E;
+  --strata-surface-1: #252525;
+  --strata-surface-2: #2D2D2D;
+  --strata-surface-overlay: #2A2A2A;
+
+  /* Text Colors */
+  --strata-text-primary: #E4E4E4;
+  --strata-text-secondary: #B0B0B0;
+  --strata-text-tertiary: #8A8A8A;
+  --strata-text-disabled: #595959;
+  --strata-text-link: #A5B4FC;
+
+  /* Border Colors */
+  --strata-border-default: #3A3A3A;
+  --strata-border-subtle: #2D2D2D;
+  --strata-border-strong: #505050;
+
+  /* Accent - Indigo/Violet Gradient System */
+  --strata-accent-default: #818CF8;
+  --strata-accent-hover: #A5B4FC;
+  --strata-accent-pressed: #6366F1;
+  --strata-accent-subtle: #1E1B4B;
+  --strata-accent-violet: #A78BFA;
+  --strata-accent-rose: #F472B6;
+
+  /* Status Colors */
+  --strata-danger-default: #F06060;
+  --strata-danger-hover: #FF7878;
+  --strata-success-default: #10B981;
+  --strata-warning-default: #F59E0B;
+
+  /* Chart Palette */
+  --strata-chart-1: #818CF8; /* Indigo */
+  --strata-chart-2: #A78BFA; /* Violet */
+  --strata-chart-3: #C084FC; /* Purple */
+  --strata-chart-4: #F472B6; /* Rose */
+  --strata-chart-5: #38BDF8; /* Sky */
+  --strata-chart-6: #34D399; /* Emerald */
+
+  /* Gradients */
+  --strata-accent-gradient: linear-gradient(135deg, #818CF8 0%, #A78BFA 100%);
+  --strata-accent-gradient-hover: linear-gradient(135deg, #A5B4FC 0%, #C4B5FD 100%);
+  --strata-stratum-line: linear-gradient(90deg, #818CF8 0%, #A78BFA 50%, #F472B6 100%);
+  --strata-surface-card: linear-gradient(180deg, #24242A 0%, #1F1F24 100%);
+
+  /* Typography */
+  --strata-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --strata-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --strata-radius-sm: 4px;
+  --strata-radius-md: 8px;
+  --strata-radius-lg: 12px;
+  --strata-radius-xl: 16px;
+
+  /* Shadows */
+  --strata-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --strata-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --strata-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+  --strata-glow-accent: 0 0 20px rgba(129, 140, 248, 0.3);
+}
+
+/* ── STRATA LIGHT THEME TOKENS ── */
+[data-theme='light'] {
+  --strata-bg: #F5F5F5;
+  --strata-surface-0: #FFFFFF;
+  --strata-surface-1: #FAFAFA;
+  --strata-surface-2: #F0F0F0;
+  --strata-surface-overlay: #FFFFFF;
+
+  --strata-text-primary: #1B1B1F;
+  --strata-text-secondary: #49454F;
+  --strata-text-tertiary: #79747E;
+  --strata-text-disabled: #AEAAAE;
+  --strata-text-link: #4F46E5;
+
+  --strata-border-default: #E0E0E0;
+  --strata-border-subtle: #EBEBEB;
+  --strata-border-strong: #C4C4C4;
+
+  --strata-accent-default: #4F46E5;
+  --strata-accent-hover: #6366F1;
+  --strata-accent-pressed: #4338CA;
+  --strata-accent-subtle: #EEF2FF;
+  --strata-accent-violet: #7C3AED;
+  --strata-accent-rose: #EC4899;
+
+  --strata-danger-default: #BA1A1A;
+  --strata-danger-hover: #D93030;
+  --strata-success-default: #059669;
+  --strata-warning-default: #D97706;
+
+  --strata-chart-1: #4F46E5;
+  --strata-chart-2: #7C3AED;
+  --strata-chart-3: #9333EA;
+  --strata-chart-4: #EC4899;
+  --strata-chart-5: #0284C7;
+  --strata-chart-6: #059669;
+
+  --strata-accent-gradient: linear-gradient(135deg, #4338CA 0%, #6D28D9 100%);
+  --strata-accent-gradient-hover: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  --strata-stratum-line: linear-gradient(90deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%);
+  --strata-surface-card: linear-gradient(180deg, #FFFFFF 0%, #FBFBFD 100%);
+}
+
+/* ── STRATA UTILITY CLASSES ── */
+
+/* Surfaces */
+.strata-bg { background-color: var(--strata-bg); }
+.strata-surface { background-color: var(--strata-surface-0); }
+.strata-surface-1 { background-color: var(--strata-surface-1); }
+.strata-surface-2 { background-color: var(--strata-surface-2); }
+.strata-surface-card {
+  background: var(--strata-surface-card);
+  border: 1px solid var(--strata-border-subtle);
+  border-radius: var(--strata-radius-lg);
+}
+
+/* Text */
+.strata-text-primary { color: var(--strata-text-primary); }
+.strata-text-secondary { color: var(--strata-text-secondary); }
+.strata-text-tertiary { color: var(--strata-text-tertiary); }
+.strata-text-link { color: var(--strata-text-link); }
+
+/* Borders */
+.strata-border { border-color: var(--strata-border-default); }
+.strata-border-subtle { border-color: var(--strata-border-subtle); }
+.strata-border-strong { border-color: var(--strata-border-strong); }
+
+/* Accent Buttons */
+.strata-btn-accent {
+  background: var(--strata-accent-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--strata-radius-md);
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.strata-btn-accent:hover {
+  background: var(--strata-accent-gradient-hover);
+  box-shadow: var(--strata-glow-accent);
+}
+
+/* Stratum Line (signature gradient divider) */
+.strata-stratum-line {
+  height: 2px;
+  background: var(--strata-stratum-line);
+  border-radius: 1px;
+}
+
+/* Chart Colors */
+.strata-chart-1 { color: var(--strata-chart-1); }
+.strata-chart-2 { color: var(--strata-chart-2); }
+.strata-chart-3 { color: var(--strata-chart-3); }
+.strata-chart-4 { color: var(--strata-chart-4); }
+.strata-chart-5 { color: var(--strata-chart-5); }
+.strata-chart-6 { color: var(--strata-chart-6); }
+
+/* Status Colors */
+.strata-status-success { color: var(--strata-success-default); }
+.strata-status-warning { color: var(--strata-warning-default); }
+.strata-status-danger { color: var(--strata-danger-default); }
+.strata-status-danger-bg { background-color: var(--strata-danger-default); }
+
+/* Focus Ring */
+.strata-focus:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--strata-accent-default);
+}
+
+/* ============================================================
+   END OF STRATA CSS ADAPTATION
+   ============================================================ */
