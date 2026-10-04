@@ -1,0 +1,19 @@
+# Indodax Sitemap Counts
+
+## URL Counts per File
+- homepage.xml: 7 URLs
+- market.xml: 477 URLs
+- depth_chart.xml: 477 URLs
+- chart.xml: 477 URLs
+- **Total URLs**: 1,438
+
+## Unique Trading Pairs
+- Total unique pairs: 477
+- IDR pairs: 465
+- USDT pairs: 12
+- Other: 0
+
+## CORRECTION
+Previous report stated "~955 unique pages" but calculation should be:
+7 (homepage) + 477 (market) = 484 unique pages
+Depth chart and chart are mirrors of market, not additional unique pages.

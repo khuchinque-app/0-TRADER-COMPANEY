@@ -7,6 +7,27 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 **Visual reference:** Bitget's spot-trading terminal (cues, not a pixel-clone / not their brand).
 **Data:** reference prices from public Binance/Bybit feeds, clearly labeled.
 
+**Last updated:** 4 Oktober 2026
+
+---
+
+## Project Status (4 Oktober 2026)
+
+| Component | Status | Port | Notes |
+|-----------|--------|------|-------|
+| Backend API | ✅ Running | 11110 | Express + auth + admin |
+| Terminal Frontend | ✅ Running | 22220 | Next.js dashboard |
+| Trading Engine | ✅ Running | 3001 | WebSocket + matching |
+| Static Files | ✅ Running | 2217 | Design system |
+| Database | ✅ Active | - | SQLite ledger.db |
+| Smoke Tests | ✅ 5/5 PASS | - | All endpoints verified |
+
+**VPS:** 187.127.178.20  
+**Admin Login:** chinque / admin1  
+**Hermes Town:** Port 24187 (localhost) + 24188 (nginx proxy)
+
+---
+
 ## Glossary (domain terms only — no implementation detail)
 
 - **Demo venue** — our product. A simulation of a crypto exchange: users place *simulated*
@@ -19,7 +40,10 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 - **Rung 0 / Rung 3** — options ladder from `.planning/findings.md`. Rung 0 = shippable product layer now;
   Rung 3 = owning a licensed PAKD (deferred endgame).
 
+---
+
 ## Locked facts & decisions (grill round 1, 2026-09-23)
+
 - Scope = paper-trading venue now; licensed PAKD (Rung 3) is the deferred endgame.
 - Simulation-only hard line: no real money, custody, or execution (ADR 0002).
 - Team = 2 dev-capable humans: founder + co-developer (boss is also a dev).
@@ -35,7 +59,10 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 - Asset shortlist: BTC, ETH, SOL, BNB, XRP, LINK (AAVE fallback).
 - Chart lib = `lightweight-charts`; depth bars = our own CSS.
 
+---
+
 ## Resolved domain terms (settled in rounds 1–2, 2026-09-23)
+
 - **Order** — a simulated buy/sell instruction placed by a demo account. MVP types: *market*
   and *limit* only.
 - **Fill** — the execution of an order against the synthetic book; emits a ledger posting.
@@ -46,6 +73,13 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 - **Demo account** — the guest, funded-by-fiction identity a browser carries (stable user id).
 - **Market trades / tape** — the recent-fill scroll below the book (simulated maker fills).
 
+---
+
 ## Still open
+
 - **Color convention**: green-up (Western, recommended) vs. Indonesian red-up. Kept as a
   config flag `COLOR_CONVENTION`; not yet decided.
+
+---
+
+*Context updated: 4 Oktober 2026*

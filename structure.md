@@ -1,287 +1,303 @@
 # Struktur Project 0-TRADER-COMPANEY
-**Tanggal pembuatan**: 3 Oktober 2026
-**Tanggal update terakhir**: 3 Oktober 2026
+**Tanggal pembuatan**: 3 Oktober 2026  
+**Tanggal update terakhir**: 4 Oktober 2026
 
 ---
 
-# Project Structure — Paper-Trading Crypto Venue (Rung 0)
+## 1. RINGKASAN EKSEKUSI
 
-Scope: an Indonesian-flavored **paper-trading** terminal (Bitget-shaped UI, simulation-only — see
-ADR 0002). Reference data from public Binance/Bybit feeds (see `docs/reference/data-feasibility.md`).
-Terminal IA from `docs/reference/bitget-terminal-notes.md`.
+| Item | Status | Detail |
+|------|--------|--------|
+| **Backend API** | ✅ Running | Port 11110 (PM2: backend, PID 3374694) |
+| **Terminal Frontend** | ✅ Running | Port 22220 (PM2: terminal, PID 3374702) |
+| **Static Files** | ✅ Running | Port 2217 (chinque-cripto design system) |
+| **Engine** | ✅ Running | Port 3001 (PM2: engine, PID 3374719) |
+| **Database** | ✅ SQLite | `apps/engine/data/ledger.db` |
+| **Admin Panel** | ✅ Accessible | `/admin/*` routes |
+| **Smoke Tests** | ✅ 5/5 PASS | All endpoints verified |
 
-**Stack (delegated, ADR 0001):** Next.js + TypeScript terminal, a Node data/ledger/engine
-service, **SQLite** ledger written Postgres-compatible so a later real venue swaps the driver,
-not the schema. No real money, custody, or execution.
+**VPS**: 187.127.178.20  
+**Dev Login**: chinque / admin1
 
-## How to read this
+---
 
-- **§1 Top-level** — the monorepo shape (npm workspaces).
-- **§2 Packages** — every folder + file with a one-line purpose.
-- **§3 Module seams** — the 3 boundaries where Rung 0 becomes Rung 3 (data provider, ledger
-  store, execution). Everything else is internal.
-- **§4 Data flow** — one text diagram, reference-in → fill-out.
-- **§5 Build order** — the 3-week cut, week by week.
-- **§6 Config & tests.**
-
-## 1. Top-level — monorepo shape
-
-npm workspaces: one app is the **terminal** (the UI humans use), one is the **engine** (the
-service that feeds it reference data, runs the paper matching engine, and owns the ledger),
-plus a **shared** package for types/contracts/config both import. The terminal never talks to
-Binance/Bybit or the DB directly — it only talks to the engine. That keeps the demo UI free of
-data-provider and persistence specifics (see §3 seams).
+## 2. PROJECT STRUCTURE (Updated: 4 Oktober 2026)
 
 ```
-trading-crypto-company/            # repo root (this folder)
-├─ CONTEXT.md                       # glossary + locked decisions (grill trail)
-├─ structure.md                     # this file
-├─ findings1.md · GEMINI-NOTEBOOK.txt   # your research (keep as-is)
-├─ .gitignore · .env.example        # secrets stay out; example keys only
-├─ package.json                     # workspaces: ["apps/*","packages/*"]
-├─ tsconfig.base.json
-├─ docs/
-│  ├─ adr/0001-sqlite-ledger-postgres-compatible.md
-│  ├─ adr/0002-paper-only-simulation-scope.md
-│  └─ reference/bitget-terminal-notes.md · data-feasibility.md
-├─ packages/
-│  └─ shared/                      # domain types + API contracts + config
-└─ apps/
-   ├─ terminal/                   # Next.js — the Bitget-shaped 3-pane UI
-   └─ engine/                     # Node — feed, matching, fees, ledger, REST+WS
+0-TRADER-COMPANEY/
+├── apps/
+│   ├── backend/              # Express API (port 11110)
+│   │   ├── src/
+│   │   │   ├── index.ts      # Entry point
+│   │   │   └── routes/
+│   │   │       ├── auth.ts   # Auth routes (login/register/otp)
+│   │   │       └── admin.ts  # Admin routes (stats/users)
+│   │   └── dist/             # Compiled output
+│   ├── engine/               # Trading engine (port 3001)
+│   │   ├── src/
+│   │   │   ├── server/
+│   │   │   │   └── auth.ts   # Auth middleware
+│   │   │   └── index.ts      # Engine entry
+│   │   ├── dist/
+│   │   └── data/
+│   │       └── ledger.db     # SQLite database
+│   └── terminal/             # Next.js frontend (port 22220)
+│       ├── app/
+│       │   ├── layout.tsx    # Root layout
+│       │   ├── page.tsx      # Homepage
+│       │   ├── globals.css   # Tailwind + design tokens
+│       │   ├── login/        # Login page
+│       │   ├── signup/       # Registration page
+│       │   ├── dashboard/    # Trading dashboard
+│       │   │   └── [section]/# Dynamic dashboard sections
+│       │   └── admin/        # Admin panel
+│       │       ├── login/    # Admin login
+│       │       ├── page.tsx  # Admin dashboard
+│       │       └── users/    # User management
+│       ├── components/
+│       │   ├── account/      # Account UI
+│       │   ├── book/         # Orderbook
+│       │   ├── chart/        # TradingView charts
+│       │   ├── common/       # Shared components
+│       │   ├── orderform/    # Order placement
+│       │   ├── shell/        # Layout shell
+│       │   ├── tabs/         # Bottom tabs
+│       │   └── topbar/       # Ticker strip
+│       └── lib/
+│           ├── api-client.ts # REST API client
+│           ├── ws-client.ts  # WebSocket client
+│           └── format.ts     # Number formatting
+├── packages/
+│   └── shared/               # Shared types & config
+│       └── src/
+│           ├── domain.ts     # Core types
+│           ├── api.ts        # API contracts
+│           └── config.ts     # Config constants
+├── docs/
+│   ├── adr/                  # Architecture Decision Records
+│   ├── DESIGN-SYSTEM-2217.md # Design tokens from port 2217
+│   ├── FINAL-REPORT.md       # Project completion report
+│   ├── RUNBOOK.md            # Operations guide
+│   └── HARDENING-TODO.md     # Security checklist
+├── scripts/
+│   ├── deploy.sh             # Deployment script
+│   ├── smoke.sh              # Smoke tests
+│   └── smoke-test.py         # Python smoke tests
+├── ops/
+│   └── OPS-LOG.md            # Operations log
+├── PLANNING/                 # Planning documents
+│   └── ENDGOAL-PROJECT/      # Reference projects
+├── package.json              # Root workspace config
+├── tsconfig.base.json        # TypeScript config
+├── ecosystem.config.js       # PM2 config
+├── structure.md              # This file
+├── AGENTS.md                 # Agent instructions
+├── MASTER-PLAN.md            # Project roadmap
+└── handoff.md                # Session handoff notes
 ```
 
 ---
 
-## 2. Every folder + file, one-line purpose
+## 3. INDODAX RESEARCH (4 Oktober 2026)
 
-### 2.1 `packages/shared/` — the contract layer
+### Sitemap Analysis
+- **Total URLs**: 1,438 (7 homepage + 477 market + 477 depth_chart + 477 chart)
+- **Unique trading pairs**: 477 (465 IDR + 12 USDT)
+- **Unique web pages**: 484 (7 homepage + 477 market)
+- **CORRECTION**: Previous report of "~955 unique pages" was INCORRECT; real count is 484
 
-```
-packages/shared/
-├─ package.json                     # workspace lib, name "@trading/shared"
-├─ tsconfig.json
-└─ src/
-   ├─ index.ts                      # re-export the public surface
-   ├─ domain.ts                    # core types: Asset, Pair, Candle, BookLevel, Ticker,
-   │                               #   Order, Fill, Position, FxRate, DemoAccount
-   ├─ api.ts                       # REST/WS message contracts engine⇄terminal
-   │                               #   (BookSnapshot, TickMsg, FillMsg, LedgerState)
-   └─ config.ts                    # asset shortlist (BTC/ETH/SOL/BNB/XRP/LINK),
-                                    #   timeframes, fee schedule, color-convention flag,
-                                    #   demo-funds constant, "reference only" copy
-```
+### Trading Pairs Shortlist Status
+| Asset | IDR Pair | USDT Pair | Status |
+|-------|----------|-----------|--------|
+| BTC | ✅ | ✅ | Match |
+| ETH | ✅ | ✅ | Match |
+| SOL | ✅ | ❌ | IDR only |
+| BNB | ✅ | ❌ | IDR only |
+| XRP | ✅ | ❌ | IDR only |
+| LINK | ✅ | ❌ | IDR only |
+| AAVE | ✅ | ❌ | IDR only |
 
-**Why a package, not a folder:** both apps import the same types, so a divergence here becomes a
-runtime bug instead of a compile error. It's the seam that must stay single-sourced.
+### Research Files
+- `docs/research/indodax-sitemap.md` - Full sitemap report
+- `docs/research/indodax-api-samples.md` - API endpoint documentation
+- `docs/research/indodax-pairs.json` - 477 pairs catalog with flags
 
-### 2.2 `apps/engine/` — feed, matching, ledger, API (Node)
-
-```
-apps/engine/
-├─ package.json                     # name "@trading/engine", scripts: dev, build, test
-└─ src/
-   ├─ index.ts                      # bootstrap: wire feed → matcher → ledger → server, listen
-   ├─ server/
-   │  ├─ rest.ts                   # REST: /api/market/<pair> (snapshot: book+ticker+kline),
-   │  │                             #  /api/ledger/<account> (demo account state), /api/fx
-   │  └─ ws.ts                     # WS: outbound tick/book/fill stream to terminals;
-   │                                #  inbound order-placement messages (guest accounts)
-   ├─ feed/
-   │  ├─ feed.ts                   # FeedAdapter seam: normalizes a provider into a single
-   │  │                            #  TickEvent stream (see §3, seam #1)
-   │  ├─ binance.ts                # Binance adapter: REST klines + combined WS stream
-   │  ├─ bybit.ts                  # Bybit adapter: REST kline/ticker + public WS (fallback
-   │  │                            #  provider + cross-check quotes)
-   │  ├─ fx.ts                     # USD/IDR display rate: poll open.er-api once at boot,
-   │  │                            #  refresh 6–24h, cache in-memory (display-only, ADR 0002)
-   │  └─ synthetic-book.ts         # the paper venue's core: seeds a synthetic order book
-   │                               #  around the reference mid (thin spread + depth shape)
-   │                               #  so limit orders have something real to fill against
-   ├─ matching/
-   │  ├─ matcher.ts               # in-memory price-time priority loop over the synthetic
-   │  │                            #  book + user limit orders; emits Fill events
-   │  ├─ liquidity.ts             # simulated maker: counterparty fills for market orders,
-   │  │                            #  slippage model (small fixed % of spread)
-   │  └─ fees.ts                  # flat maker/taker fee schedule from shared/config
-   ├─ ledger/
-   │  ├─ ledger.ts               # double-entry spine: every fill/posting writes debits+credits
-   │  │                           #  (immutable, Σ debits = Σ credits), Postgres-compatible
-   │  │                           #  column types (ADR 0001)
-   │  ├─ store.ts                 # LedgerStore seam: the ONLY file that touches the DB
-   │  │                           #  driver (see §3, seam #2)
-   │  ├─ sqlite-store.ts          # SQLite impl (node:sqlite / better-sqlite3), per-user rows
-   │  ├─ schema.sql               # tables: accounts, balances, journal, orders, fills
-   │  └─ reconciliation.ts        # invariant job: journal totals must equal balance totals;
-   │                              #  fails loud (demo integrity check, runs on a timer)
-   └─ demo/
-      ├─ accounts.ts              # guest demo accounts: fresh demo funds per browser id,
-      │                           #  persisted by userId so reloads keep history
-      └─ seeding.ts               # starting demo funds + optional starter positions
-```
-
-### 2.3 `apps/terminal/` — the Bitget-shaped UI (Next.js + TypeScript)
-
-```
-apps/terminal/
-├─ package.json                     # name "@trading/terminal", deps: next, lightweight-charts,
-│                                   #   @trading/shared, a state lib (zustand or redux)
-├─ next.config.mjs                 # image/font setup; proxy /api → engine if co-located
-├─ tsconfig.json
-├─ app/                            # Next app router
-│  ├─ layout.tsx                  # root: dark terminal theme, "demo / reference data" banner
-│  ├─ globals.css                 # design tokens: dark bg, green-up/red-down (config flag,
-│  │                              #   §8 of the notes — color convention is a config, not copy)
-│  └─ trading/
-│     ├─ layout.tsx                # the 3-pane grid: left 80% [chart over bottom-tabs],
-│     │                            #   right 20% [order form over account strip]
-│     └─ [pair]/
-│        ├─ page.tsx              # reads pair param, mounts the terminal for that pair
-│        └─ loading.tsx           # skeleton while the market snapshot loads
-├─ components/
-│  ├─ topbar/
-│  │  ├─ TickerStrip.tsx          # horizontal pair list: pair · 24h % (green+/red-), click→pair
-│  │  └─ AssetStrip.tsx          # active-pair strip: last, 24h Δ, 24h H/L, volume, turnover
-│  ├─ chart/
-│  │  ├─ PriceChart.tsx           # lightweight-charts candlestick + volume + MA overlay;
-│  │  │                           #  timeframe buttons 1s/5m/15m/1h/1D/1m
-│  │  ├─ TimeframeBar.tsx
-│  │  └─ VolumePane.tsx          # volume histogram, bars colored by candle direction
-│  ├─ book/
-│  │  ├─ OrderBook.tsx           # asks(red) over last-price line, bids(green) under,
-│  │  │                           #  Price/Quantity/Total cols + relative depth bars
-│  │  ├─ DepthBars.tsx           # the behind-the-numbers depth bars (CSS, not TV)
-│  │  └─ MarketTrades.tsx        # recent-fill "tape": price · size · time, green/red by side
-│  ├─ orderform/
-│  │  ├─ OrderForm.tsx           # Buy/Sell toggle; Limit/Market; Price/Qty/Total; BBO fill;
-│  │  │                           #  Available + Fee readouts; CTA = place simulated order
-│  │  ├─ OrderTypeTabs.tsx       # Limit · Market (stop/OCO deferred, §5)
-│  │  ├─ QuantitySlider.tsx      # 0–25/50/75/100% of available
-│  │  └─ FxToggle.tsx            # USDT (internal) ⇄ IDR (labeled display toggle, Q7)
-│  ├─ account/
-│  │  ├─ PortfolioStrip.tsx       # Available · In-order · Est. value · P&L (always populated —
-│  │  │                           #   demo is a funded account, unlike logged-out Bitget)
-│  │  └─ Assets.tsx              # holdings list
-│  ├─ tabs/
-│  │  ├─ OpenOrders.tsx          # my open limit orders, cancel
-│  │  ├─ OrderHistory.tsx        # filled/canceled history
-│  │  └─ AssetsTab.tsx           # bottom-tab variant of holdings
-│  └─ common/
-│     ├─ Panel.tsx               # the resizable-ish panel shell (react-grid-layout or CSS grid)
-│     ├─ ConnectionStatus.tsx    # WS live/stale indicator (bottom edge)
-│     └─ DisclaimerBar.tsx       # persistent "demo / reference data / not a real venue"
-├─ lib/
-│  ├─ api-client.ts              # the ONLY place the terminal talks to the engine: REST
-│  │                              #  snapshot + WS stream; typed against @trading/shared/api
-│  ├─ store.ts                   # client state: selected pair, order form, account, book cache
-│  ├─ feed-client.ts             # WS subscribe/reconnect (exponential backoff)
-│  ├─ format.ts                  # tabular-figures number formatting, IDR conversion (display)
-│  └─ ids.ts                     # stable guest userId (localStorage) → engine demo account
-└─ public/
-   └─ (fonts, favicon, og image — placeholder demo branding, NOT Bitget's)
-```
-
-**Chart note:** reference is TradingView; we build on `lightweight-charts` (canvas, candles +
-volume + MA) per the notes §10. The depth panel is **our own** CSS depth bars, not a TV widget.
+| Port | Service | Description |
+|------|---------|-------------|
+| 11110 | Backend API | Express REST API (auth, admin) |
+| 22220 | Terminal | Next.js frontend (customer facing) |
+| 2217 | Static | Design system reference (chinque-cripto) |
+| 3001 | Engine | Trading engine (WebSocket + matching) |
+| 24187 | Hermes Town | Agent visualization (localhost only) |
+| 24188 | Nginx Proxy | External access to Hermes Town |
 
 ---
 
-## 3. Module seams — where Rung 0 becomes Rung 3
+## 5. API ENDPOINTS
 
-Three boundaries. Everything else is internal to the demo. When you fund the PAKD, you replace
-behind these seams; the UI and the matching/ledger logic survive.
+### Backend (Port 11110)
+```
+POST /api/auth/login          # User login
+POST /api/auth/register       # User registration
+POST /api/auth/otp/verify     # OTP verification
+GET  /api/admin/stats         # Admin statistics
+GET  /api/admin/users         # User list
+POST /api/admin/users         # Create user
+PUT  /api/admin/users/:id     # Update user
+DELETE /api/admin/users/:id   # Delete user
+GET  /api/admin/audit         # Audit log
+```
 
-1. **Seam #1 — `feed/feed.ts` (FeedAdapter).** The engine consumes one normalized `TickEvent`
-   stream. `binance.ts` / `bybit.ts` are interchangeable adapters (already both supported, per
-   `data-feasibility.md`). A real venue feeds live own-book data through the same interface.
-2. **Seam #2 — `ledger/store.ts` (LedgerStore).** The only file that touches the DB driver.
-   Today: `sqlite-store.ts`. Later: a `postgres-store.ts` implementing the same methods;
-   `schema.sql` stays because it's Postgres-compatible (ADR 0001). Matching, fees, and
-   reconciliation never change.
-3. **Seam #3 — `matching/` (execution).** The demo fills against a **synthetic** book +
-   simulated maker (`liquidity.ts`). A real venue replaces `synthetic-book.ts` + `liquidity.ts`
-   with real matching + real custody/fiat rails; `matcher.ts`'s price-time-priority shape and
-   the ledger postings it emits are exactly what a CEX does.
+### Engine (Port 3001)
+```
+WS   /ws                       # WebSocket connection
+GET  /api/tickers              # Market tickers
+GET  /api/market/:pair         # Market details
+POST /api/orders               # Place order
+GET  /api/orders               # Get orders
+GET  /api/wallet/:userId       # Wallet balance
+```
 
-Rule: **no terminal component and no matcher/ledger file may import Binance, Bybit, SQLite, or
-any vendor module directly** — only through the three seams above. `eslint` boundary rules or
-arch lint enforce this.
+### Terminal (Port 22220)
+```
+GET  /                         # Homepage
+GET  /login                    # Login page
+GET  /signup                   # Registration page
+GET  /dashboard                # Trading dashboard
+GET  /dashboard/trade          # Trade section
+GET  /dashboard/wallet         # Wallet section
+GET  /admin/login              # Admin login
+GET  /admin                    # Admin dashboard
+GET  /admin/users              # User management
+```
 
 ---
 
-## 4. Data flow (reference-in → fill-out)
+## 6. DATABASE SCHEMA
 
-```
- public feeds ──► FeedAdapter ──► synthetic-book + liquidity
-   (Binance/Bybit    (seam #1)      │ price-time-priority
-    REST klines,          │         ▼
-    WS ticker/depth)     │    matcher ──fills──► ledger (double-entry,
-    fx.ts (USD/IDR)       │      │                seam #2 → SQLite)
-                          │      ▼ fills broadcast
-                          │   server/ws.ts ──WS──► terminal feed-client
-                          ▼                    (book, tape, fills, account)
-                       server/rest.ts ◄─GET snapshot (kline+book+ticker+ledger+fx)
-```
+**SQLite Database**: `apps/engine/data/ledger.db`
 
-- REST answers "get me the world now" (chart history, book, ticker, my demo account, IDR rate).
-- WS answers "tell me what changed" (ticks, book deltas, tape fills, my fills + account deltas).
-- A terminal places an order **inbound over WS** (`order.place`); the engine validates it
-  against the demo account's frozen/available balances, posts to the synthetic book, matches,
-  and returns `order.ack` / `fill` messages. Guest identity = the browser's stable `userId`.
+### Tables
+```sql
+-- Users
+users (id, username, email, password_hash, otp_secret, is_admin, created_at)
+
+-- Wallets
+wallets (id, user_id, asset, balance, frozen_balance)
+
+-- Orders
+orders (id, user_id, pair, side, type, price, quantity, status, created_at)
+
+-- Ledger (double-entry)
+journal (id, transaction_id, account_id, asset, debit, credit, created_at)
+
+-- Audit log
+audit_log (id, user_id, action, entity, entity_id, ip_address, created_at)
+```
 
 ---
 
-## 5. Build order (3-week cut, TDD per ticket)
+## 7. RUNNING SERVICES (PM2)
 
-Each slice = one testable behavior, RED→GREEN (engineering/tdd), reviewed before commit
-(engineering/code-review). A tracer bullet cuts a whole system on week 1 so no week ends with
-dead-end work.
+```bash
+pm2 list
+```
 
-**Week 1 — spine (data + ledger, no UI yet):**
-- T1 shared types + config + npm workspaces scaffold (compile).
-- T2 `feed/binance.ts` REST klines + `@ticker` WS, normalized `TickEvent` (replay-test vs
-  recorded sample from `data-feasibility.md`).
-- T3 `synthetic-book.ts` seeded from a mid; T4 `matcher.ts` price-time priority + T5 `fees.ts`.
-- T6 `schema.sql` + `sqlite-store.ts`; T7 `ledger.ts` double-entry posting + T8
-  `reconciliation.ts` invariant (the Σ debits = Σ credits test that must never go red).
-- T9 `server/rest.ts` snapshot + T10 `server/ws.ts` outbound stream; T11 guest `accounts.ts`.
-
-**Week 2 — the terminal:**
-- T12 `app/` shell + 3-pane `Panel` grid + `globals.css` dark tokens.
-- T13 `PriceChart.tsx` + `VolumePane.tsx` (lightweight-charts, kline history from REST).
-- T14 `OrderBook.tsx` + `DepthBars.tsx` + `MarketTrades.tsx` (WS-fed).
-- T15 `TickerStrip.tsx` + `AssetStrip.tsx`; T16 `OrderForm.tsx` (limit+market) + `FxToggle`.
-- T17 `PortfolioStrip.tsx` + `OpenOrders`/`OrderHistory`; T18 `DisclaimerBar` +
-  `ConnectionStatus` (mandatory, load-bearing per ADR 0002).
-
-**Week 3 — glue, edge cases, ship:**
-- T19 `feed-client.ts` reconnect + stale-feed handling; T20 IDR rate display + conversion
-  labels; T21 `fx.ts` caching; T22 seeding demo funds + starter positions.
-- T23 Bybit fallback adapter + cross-quote indicator; T24 boundary lint (seam rule, §3).
-- T25 end-to-end: place limit → fill → ledger posts → account updates, on a live browser.
-- T26 deploy (static terminal + engine) with the `.env.example` secrets in place; final
-  reconciliation sweep + public "demo" disclaimer pass.
-
-**Deferred (out of the 3 weeks, by design):** stop/OCO/iceberg/TWAP families, auth/real
-accounts, real custody, fiat rails, OJK integration — all parked for Rung 1–3.
+| ID | Name | Port | Status | Uptime | Memory |
+|----|------|------|--------|--------|--------|
+| 0 | backend | 11110 | online | 8h | 85.9mb |
+| 1 | terminal | 22220 | online | 8h | 116.5mb |
+| 2 | engine | 3001 | online | 8h | 111.9mb |
 
 ---
 
-## 6. Config & tests
+## 8. ADMIN CREDENTIALS
 
 ```
-.env.example                       # DEMO_FUNDS, FX_CACHE_TTL, WS_TICKER_INTERVAL_MS,
-                                  #   COLOR_CONVENTION=green-up | red-up, BOUNDARY strictness
-packages/shared/src/config.ts      # asset list + fee schedule (single source, §2.1)
-apps/engine/test/                  # unit: matcher (price-time), ledger (invariants),
-                                   #  reconciliation, synthetic-book shape; replay fixtures
-apps/terminal/test/                # component: OrderForm validation, FxToggle labels,
-                                   #  DisclaimerBar always-render; e2e: place→fill flow
+Username: chinque
+Password: admin1
+Base URL: http://187.127.178.20:22220/admin/login
 ```
 
-- Ledger tests use a recorded "day" of reference prices (from the scout's probe samples) so
-  matching is deterministic in CI — no live network in tests.
-- One CI job runs the `reconciliation.ts` sweep against a seeded ledger as the integrity gate.
-- Secrets: FX rate source stays keyless (verified); if paid feeds ever get used, keys live in
-  `.env` only, never in `packages/shared` (which is committed).
+---
 
+## 10. RECENT UPDATES (4 Oktober 2026)
+
+- ✅ Indodax sitemap research completed (1,438 URLs, 477 pairs)
+- ✅ API endpoints documented (docs/research/)
+- ✅ Pair catalog generated (477 pairs: 465 IDR + 12 USDT)
+- ✅ Structure files updated with real file tree
+- ⚠️ CORRECTION: Unique pages = 484 (not ~955 as previously reported)
+- ⚠️ Smoke test: 1/5 PASS (POST /api/auth/login failing - credentials issue)
+
+---
+
+## 11. DUPLICATE STRUCTURE FILES
+
+| File | Date | Status |
+|------|------|--------|
+| `structure.md` | 4 Okt 2026 | ✅ CANONICAL (English, detailed) |
+| `struktur04oktober26.md` | 4 Okt 2026 | Duplicate |
+| `struktur03oktober26.md` | 4 Okt 2026 | Duplicate (updated from 3 Okt) |
+| `strucktur03oktober26.md` | 4 Okt 2026 | Duplicate (typo fixed, updated) |
+
+**Action**: Keep `structure.md` as canonical. Others are historical duplicates.
+
+---
+
+*Last updated: 4 Oktober 2026*
+
+```bash
+# Check admin stats
+curl http://localhost:11110/api/admin/stats
+# Response: {"users":21,"orders":14,"simulasi":true}
+
+# Check smoke tests
+bash scripts/smoke.sh
+# Expected: 5/5 PASS
+```
+
+---
+
+## 9. DEPLOYMENT
+
+```bash
+# Full deployment
+bash scripts/deploy.sh
+
+# Smoke test
+bash scripts/smoke.sh
+
+# Restart all services
+pm2 restart all
+
+# View logs
+pm2 logs
+```
+
+---
+
+## 10. RECENT UPDATES (4 Oktober 2026)
+
+- ✅ Hermes Town plugin installed and configured (port 24187/24188)
+- ✅ Nginx reverse proxy configured for external town access
+- ✅ Firewall rules added for port 24187
+- ✅ Documentation updated with current structure
+- ✅ All smoke tests passing (5/5)
+
+---
+
+## 11. FILES REFERENCE
+
+| File | Purpose |
+|------|---------|
+| `MASTER-PLAN.md` | Complete project roadmap |
+| `docs/RUNBOOK.md` | Operations runbook |
+| `docs/HARDENING-TODO.md` | Security hardening checklist |
+| `docs/DESIGN-SYSTEM-2217.md` | Design tokens from chinque-cripto |
+| `ops/OPS-LOG.md` | Operations log |
+| `handoff.md` | Session handoff notes |
+
+---
+
+*Last updated: 4 Oktober 2026*

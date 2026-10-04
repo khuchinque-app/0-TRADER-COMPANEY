@@ -1,0 +1,9 @@
+=== Live State Check 2026-10-04 17:26:36 ===
+
+--- PM2 ---
+
+--- Ports ---
+LISTEN 0      511                      127.0.0.1:3001       0.0.0.0:*    users:(("node /home/khuc",pid=3374719,fd=26))
+LISTEN 0      511                        0.0.0.0:2217       0.0.0.0:*    users:(("node",pid=1481435,fd=21))           
+LISTEN 0      511                              *:22220            *:*    users:(("next-server (v1",pid=3374702,fd=23))
+LISTEN 0      511                              *:11110            *:*    users:(("node",pid=3374694,fd=25))           

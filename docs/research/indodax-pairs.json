@@ -1,0 +1,2890 @@
+[
+  {
+    "symbol": "BTCIDR",
+    "base": "BTC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "1INCHIDR",
+    "base": "1INCH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AAVEIDR",
+    "base": "AAVE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AAPLXIDR",
+    "base": "AAPLX",
+    "quote": "IDR",
+    "flags": [
+      "tokenized-stock"
+    ]
+  },
+  {
+    "symbol": "ABIDR",
+    "base": "AB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ACEIDR",
+    "base": "ACE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ACHIDR",
+    "base": "ACH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ACNIDR",
+    "base": "ACN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ACSIDR",
+    "base": "ACS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ACTIDR",
+    "base": "ACT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ADAIDR",
+    "base": "ADA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AEROIDR",
+    "base": "AERO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AEVOIDR",
+    "base": "AEVO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AGIIDR",
+    "base": "AGI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AIIDR",
+    "base": "AI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AIHIDR",
+    "base": "AIH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AIOZIDR",
+    "base": "AIOZ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AIXBTIDR",
+    "base": "AIXBT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ALEIDR",
+    "base": "ALE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ALICEIDR",
+    "base": "ALICE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ALGOIDR",
+    "base": "ALGO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ALLOIDR",
+    "base": "ALLO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ALTIDR",
+    "base": "ALT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AMZNXIDR",
+    "base": "AMZNX",
+    "quote": "IDR",
+    "flags": [
+      "tokenized-stock"
+    ]
+  },
+  {
+    "symbol": "AMPIDR",
+    "base": "AMP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ANIMEIDR",
+    "base": "ANIME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ANKRIDR",
+    "base": "ANKR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ANOAIDR",
+    "base": "ANOA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "APEIDR",
+    "base": "APE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "APEXIDR",
+    "base": "APEX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "API3IDR",
+    "base": "API3",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "APUIDR",
+    "base": "APU",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ARBIDR",
+    "base": "ARB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ARCIDR",
+    "base": "ARC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ARKMIDR",
+    "base": "ARKM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ASETQUIDR",
+    "base": "ASETQU",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ASTERIDR",
+    "base": "ASTER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ATHIDR",
+    "base": "ATH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ATOMIDR",
+    "base": "ATOM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AUCTIONIDR",
+    "base": "AUCTION",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AUDIOIDR",
+    "base": "AUDIO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AURAIDR",
+    "base": "AURA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AUSDIDR",
+    "base": "AUSD",
+    "quote": "IDR",
+    "flags": [
+      "stable"
+    ]
+  },
+  {
+    "symbol": "AVAIDR",
+    "base": "AVA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AVNTIDR",
+    "base": "AVNT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AVAXIDR",
+    "base": "AVAX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AXLIDR",
+    "base": "AXL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AXSIDR",
+    "base": "AXS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "AZTECIDR",
+    "base": "AZTEC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BANANAS31IDR",
+    "base": "BANANAS31",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BIDR",
+    "base": "B",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "B2IDR",
+    "base": "B2",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BALIDR",
+    "base": "BAL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BANIDR",
+    "base": "BAN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BANANAIDR",
+    "base": "BANANA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BANDIDR",
+    "base": "BAND",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BANKIDR",
+    "base": "BANK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BATIDR",
+    "base": "BAT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BCHIDR",
+    "base": "BCH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BEAMIDR",
+    "base": "BEAM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BEATIDR",
+    "base": "BEAT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BGBIDR",
+    "base": "BGB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BICOIDR",
+    "base": "BICO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BIOIDR",
+    "base": "BIO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BIRBIDR",
+    "base": "BIRB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BLURIDR",
+    "base": "BLUR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BMTIDR",
+    "base": "BMT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BNBIDR",
+    "base": "BNB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BNKRIDR",
+    "base": "BNKR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FORMIDR",
+    "base": "FORM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BOMEIDR",
+    "base": "BOME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BONEIDR",
+    "base": "BONE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BONKIDR",
+    "base": "BONK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BPIDR",
+    "base": "BP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BRIDR",
+    "base": "BR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BRETTIDR",
+    "base": "BRETT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BSVIDR",
+    "base": "BSV",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CAKEIDR",
+    "base": "CAKE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CASTIDR",
+    "base": "CAST",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CATIDR",
+    "base": "CAT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CATIIDR",
+    "base": "CATI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CELOIDR",
+    "base": "CELO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CELRIDR",
+    "base": "CELR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CGPTIDR",
+    "base": "CGPT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CHEEMSIDR",
+    "base": "CHEEMS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CHILLGUYIDR",
+    "base": "CHILLGUY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CHRIDR",
+    "base": "CHR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CHTIDR",
+    "base": "CHT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CHZIDR",
+    "base": "CHZ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CJLIDR",
+    "base": "CJL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CKBIDR",
+    "base": "CKB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CNGIDR",
+    "base": "CNG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "COINXIDR",
+    "base": "COINX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "COLLATIDR",
+    "base": "COLLAT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "C98IDR",
+    "base": "C98",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "COLIDR",
+    "base": "COL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "COMPIDR",
+    "base": "COMP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CONXIDR",
+    "base": "CONX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "COWIDR",
+    "base": "COW",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CRCLXIDR",
+    "base": "CRCLX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CREAMIDR",
+    "base": "CREAM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CROIDR",
+    "base": "CRO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CROAKIDR",
+    "base": "CROAK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CRVIDR",
+    "base": "CRV",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CSTIDR",
+    "base": "CST",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CTCIDR",
+    "base": "CTC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CTKIDR",
+    "base": "CTK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CTSIIDR",
+    "base": "CTSI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CVCIDR",
+    "base": "CVC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CVXIDR",
+    "base": "CVX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "CYBERIDR",
+    "base": "CYBER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DIDR",
+    "base": "D",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DEGENIDR",
+    "base": "DEGEN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DEPIDR",
+    "base": "DEP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DEXEIDR",
+    "base": "DEXE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DFGIDR",
+    "base": "DFG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DGBIDR",
+    "base": "DGB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DLCIDR",
+    "base": "DLC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DODOIDR",
+    "base": "DODO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DOGEIDR",
+    "base": "DOGE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DOGE2IDR",
+    "base": "DOGE2",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DOGSIDR",
+    "base": "DOGS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DOTIDR",
+    "base": "DOT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DRXIDR",
+    "base": "DRX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DUPEIDR",
+    "base": "DUPE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "DUSKIDR",
+    "base": "DUSK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "EDENIDR",
+    "base": "EDEN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "EDENAIDR",
+    "base": "EDENA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "EGLDIDR",
+    "base": "EGLD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "EIGENIDR",
+    "base": "EIGEN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ENAIDR",
+    "base": "ENA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ENJIDR",
+    "base": "ENJ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ENSIDR",
+    "base": "ENS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "EPICIDR",
+    "base": "EPIC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ETCIDR",
+    "base": "ETC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ESPIDR",
+    "base": "ESP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ETHIDR",
+    "base": "ETH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ETHFIIDR",
+    "base": "ETHFI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FANCIDR",
+    "base": "FANC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FARTCOINIDR",
+    "base": "FARTCOIN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FETIDR",
+    "base": "FET",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FFIDR",
+    "base": "FF",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FILIDR",
+    "base": "FIL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FLOKIIDR",
+    "base": "FLOKI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FLRIDR",
+    "base": "FLR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FLUXIDR",
+    "base": "FLUX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FUELIDR",
+    "base": "FUEL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "FUNIDR",
+    "base": "FUN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GALAIDR",
+    "base": "GALA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GAMEIDR",
+    "base": "GAME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GENIUSIDR",
+    "base": "GENIUS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GLIDRIDR",
+    "base": "GLIDR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GOIDRIDR",
+    "base": "GOIDR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GIGAIDR",
+    "base": "GIGA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GIGGLEIDR",
+    "base": "GIGGLE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GLMIDR",
+    "base": "GLM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GMTIDR",
+    "base": "GMT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GMXIDR",
+    "base": "GMX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GNOIDR",
+    "base": "GNO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GOATIDR",
+    "base": "GOAT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GOOGLXIDR",
+    "base": "GOOGLX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GPSIDR",
+    "base": "GPS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GRASSIDR",
+    "base": "GRASS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GIDR",
+    "base": "G",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GRIFFAINIDR",
+    "base": "GRIFFAIN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GRTIDR",
+    "base": "GRT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GTCIDR",
+    "base": "GTC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GWEIIDR",
+    "base": "GWEI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HIDR",
+    "base": "H",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "H2OIDR",
+    "base": "H2O",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HAEDALIDR",
+    "base": "HAEDAL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HARTIDR",
+    "base": "HART",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HBARIDR",
+    "base": "HBAR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HFTIDR",
+    "base": "HFT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HIGHIDR",
+    "base": "HIGH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HIVEIDR",
+    "base": "HIVE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HMSTRIDR",
+    "base": "HMSTR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HNTIDR",
+    "base": "HNT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HOMEIDR",
+    "base": "HOME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HONEYIDR",
+    "base": "HONEY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HOTIDR",
+    "base": "HOT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HUMAIDR",
+    "base": "HUMA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HYPEIDR",
+    "base": "HYPE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "HYPERIDR",
+    "base": "HYPER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MYROIDR",
+    "base": "MYRO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MYXIDR",
+    "base": "MYX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IDIDR",
+    "base": "ID",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ICNTIDR",
+    "base": "ICNT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ICPIDR",
+    "base": "ICP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IDRXIDR",
+    "base": "IDRX",
+    "quote": "IDR",
+    "flags": [
+      "stable"
+    ]
+  },
+  {
+    "symbol": "IDRTIDR",
+    "base": "IDRT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ILVIDR",
+    "base": "ILV",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IMXIDR",
+    "base": "IMX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "INDRIDR",
+    "base": "INDR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "INJIDR",
+    "base": "INJ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IOIDR",
+    "base": "IO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IOSTIDR",
+    "base": "IOST",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IOTAIDR",
+    "base": "IOTA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IOTXIDR",
+    "base": "IOTX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "IQIDR",
+    "base": "IQ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ISLMIDR",
+    "base": "ISLM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "JASMYIDR",
+    "base": "JASMY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "JELLYJELLYIDR",
+    "base": "JELLYJELLY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "JOEIDR",
+    "base": "JOE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "JUPIDR",
+    "base": "JUP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "JSTIDR",
+    "base": "JST",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "JTOIDR",
+    "base": "JTO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KAIAIDR",
+    "base": "KAIA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KAITOIDR",
+    "base": "KAITO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KDAGIDR",
+    "base": "KDAG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KERNELIDR",
+    "base": "KERNEL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KMNOIDR",
+    "base": "KMNO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KNCIDR",
+    "base": "KNC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KOMAIDR",
+    "base": "KOMA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KRDIDR",
+    "base": "KRD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KSMIDR",
+    "base": "KSM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "KTAIDR",
+    "base": "KTA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LDOIDR",
+    "base": "LDO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LEOIDR",
+    "base": "LEO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LITIDR",
+    "base": "LIT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LINEAIDR",
+    "base": "LINEA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LINKIDR",
+    "base": "LINK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LISTAIDR",
+    "base": "LISTA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "L3IDR",
+    "base": "L3",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LADYSIDR",
+    "base": "LADYS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LSKIDR",
+    "base": "LSK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LPTIDR",
+    "base": "LPT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LQTYIDR",
+    "base": "LQTY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LRCIDR",
+    "base": "LRC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LTCIDR",
+    "base": "LTC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LUNAIDR",
+    "base": "LUNA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LUNCIDR",
+    "base": "LUNC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LYFEIDR",
+    "base": "LYFE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MAGICIDR",
+    "base": "MAGIC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MANAIDR",
+    "base": "MANA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MANTAIDR",
+    "base": "MANTA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MARSCOINIDR",
+    "base": "MARSCOIN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MASKIDR",
+    "base": "MASK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MAVIDR",
+    "base": "MAV",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MAVIAIDR",
+    "base": "MAVIA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MCTIDR",
+    "base": "MCT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MEIDR",
+    "base": "ME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MELANIAIDR",
+    "base": "MELANIA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MEMEIDR",
+    "base": "MEME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "METIDR",
+    "base": "MET",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "METAIDR",
+    "base": "META",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "METISIDR",
+    "base": "METIS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MEWIDR",
+    "base": "MEW",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MITOIDR",
+    "base": "MITO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MNTIDR",
+    "base": "MNT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MOCAIDR",
+    "base": "MOCA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MOGIDR",
+    "base": "MOG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MOLTIDR",
+    "base": "MOLT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MONIDR",
+    "base": "MON",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MOODENGIDR",
+    "base": "MOODENG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MOONPIGIDR",
+    "base": "MOONPIG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MORPHOIDR",
+    "base": "MORPHO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MOVEIDR",
+    "base": "MOVE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MPROIDR",
+    "base": "MPRO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MRSIDR",
+    "base": "MRS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MSHDIDR",
+    "base": "MSHD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MTCIDR",
+    "base": "MTC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "MUBARAKIDR",
+    "base": "MUBARAK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NBTIDR",
+    "base": "NBT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NEARIDR",
+    "base": "NEAR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NEIROIDR",
+    "base": "NEIRO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NEOIDR",
+    "base": "NEO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NEOIDRIDR",
+    "base": "NEOIDR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NEONIDR",
+    "base": "NEON",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NEWTIDR",
+    "base": "NEWT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NEXOIDR",
+    "base": "NEXO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NIGHTIDR",
+    "base": "NIGHT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NMDIDR",
+    "base": "NMD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NMRIDR",
+    "base": "NMR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NOMIDR",
+    "base": "NOM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NOVAIDR",
+    "base": "NOVA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NPCIDR",
+    "base": "NPC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NRGIDR",
+    "base": "NRG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NUSAIDR",
+    "base": "NUSA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "NVDAXIDR",
+    "base": "NVDAX",
+    "quote": "IDR",
+    "flags": [
+      "tokenized-stock"
+    ]
+  },
+  {
+    "symbol": "NXAIDR",
+    "base": "NXA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "OGNIDR",
+    "base": "OGN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "OKBIDR",
+    "base": "OKB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "OKUSDIDR",
+    "base": "OKUSD",
+    "quote": "IDR",
+    "flags": [
+      "stable"
+    ]
+  },
+  {
+    "symbol": "ONDOIDR",
+    "base": "ONDO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ONLIDR",
+    "base": "ONL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ONTIDR",
+    "base": "ONT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "OPIDR",
+    "base": "OP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ORBSIDR",
+    "base": "ORBS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ORCAIDR",
+    "base": "ORCA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ORDERIDR",
+    "base": "ORDER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PAXGIDR",
+    "base": "PAXG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PAYAIIDR",
+    "base": "PAYAI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PENDLEIDR",
+    "base": "PENDLE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PENGUIDR",
+    "base": "PENGU",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PEOPLEIDR",
+    "base": "PEOPLE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PEPEIDR",
+    "base": "PEPE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PERPIDR",
+    "base": "PERP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PLPAIDR",
+    "base": "PLPA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PLUMEIDR",
+    "base": "PLUME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "GNSIDR",
+    "base": "GNS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PHAIDR",
+    "base": "PHA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PIEVERSEIDR",
+    "base": "PIEVERSE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PIPPINIDR",
+    "base": "PIPPIN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PIXELIDR",
+    "base": "PIXEL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PMIDR",
+    "base": "PM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PNUTIDR",
+    "base": "PNUT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "POLSIDR",
+    "base": "POLS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "POLIDR",
+    "base": "POL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "POLYIDR",
+    "base": "POLY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PONDIDR",
+    "base": "POND",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PONKEIDR",
+    "base": "PONKE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PORTALIDR",
+    "base": "PORTAL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "POPCATIDR",
+    "base": "POPCAT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "POWRIDR",
+    "base": "POWR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PRIMEIDR",
+    "base": "PRIME",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PROMIDR",
+    "base": "PROM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PROVEIDR",
+    "base": "PROVE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PUFFERIDR",
+    "base": "PUFFER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PUMPIDR",
+    "base": "PUMP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "PYTHIDR",
+    "base": "PYTH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "QNTIDR",
+    "base": "QNT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RADIDR",
+    "base": "RAD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RAREIDR",
+    "base": "RARE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RAYIDR",
+    "base": "RAY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "REDIDR",
+    "base": "RED",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "REPIDR",
+    "base": "REP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "REQIDR",
+    "base": "REQ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "REZIDR",
+    "base": "REZ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RFCIDR",
+    "base": "RFC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RIVERIDR",
+    "base": "RIVER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RLCIDR",
+    "base": "RLC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RENDERIDR",
+    "base": "RENDER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RPLIDR",
+    "base": "RPL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RSRIDR",
+    "base": "RSR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "RVNIDR",
+    "base": "RVN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SANDIDR",
+    "base": "SAND",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SAFEIDR",
+    "base": "SAFE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SAHARAIDR",
+    "base": "SAHARA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SAPIENIDR",
+    "base": "SAPIEN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SENTIDR",
+    "base": "SENT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SFPIDR",
+    "base": "SFP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SHIBIDR",
+    "base": "SHIB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SHELLIDR",
+    "base": "SHELL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SHREDIDR",
+    "base": "SHRED",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SIGNIDR",
+    "base": "SIGN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SHOWIDR",
+    "base": "SHOW",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SKLIDR",
+    "base": "SKL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SKRIDR",
+    "base": "SKR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SKYIDR",
+    "base": "SKY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SKYAIDR",
+    "base": "SKYA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SKYAIIDR",
+    "base": "SKYAI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SLPIDR",
+    "base": "SLP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SNIDR",
+    "base": "SN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SNTIDR",
+    "base": "SNT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SNXIDR",
+    "base": "SNX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SOLIDR",
+    "base": "SOL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SOLAYERIDR",
+    "base": "SOLAYER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SOLVIDR",
+    "base": "SOLV",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SOMIIDR",
+    "base": "SOMI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SIDR",
+    "base": "S",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SOONIDR",
+    "base": "SOON",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SPELLIDR",
+    "base": "SPELL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SPKIDR",
+    "base": "SPK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SPXIDR",
+    "base": "SPX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SQDIDR",
+    "base": "SQD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SSVIDR",
+    "base": "SSV",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "STGIDR",
+    "base": "STG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "STIKIDR",
+    "base": "STIK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "STOIDR",
+    "base": "STO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "STRKIDR",
+    "base": "STRK",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "STREAMIDR",
+    "base": "STREAM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "STRMIDR",
+    "base": "STRM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SUIIDR",
+    "base": "SUI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SUNIDR",
+    "base": "SUN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SUNDOGIDR",
+    "base": "SUNDOG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SUPERIDR",
+    "base": "SUPER",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SUSHIIDR",
+    "base": "SUSHI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SXTIDR",
+    "base": "SXT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "SYRUPIDR",
+    "base": "SYRUP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TAGIDR",
+    "base": "TAG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TAIKOIDR",
+    "base": "TAIKO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TELIDR",
+    "base": "TEL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TENIDR",
+    "base": "TEN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TFUELIDR",
+    "base": "TFUEL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "THETAIDR",
+    "base": "THETA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TIDR",
+    "base": "T",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TIAIDR",
+    "base": "TIA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TLMIDR",
+    "base": "TLM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TMGIDR",
+    "base": "TMG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TNSRIDR",
+    "base": "TNSR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TOKENIDR",
+    "base": "TOKEN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TONIDR",
+    "base": "TON",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TOSHIIDR",
+    "base": "TOSHI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TRACIDR",
+    "base": "TRAC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TRBIDR",
+    "base": "TRB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TRIAIDR",
+    "base": "TRIA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TROLLSOLIDR",
+    "base": "TROLLSOL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TRUMPIDR",
+    "base": "TRUMP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TRXIDR",
+    "base": "TRX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TSLAXIDR",
+    "base": "TSLAX",
+    "quote": "IDR",
+    "flags": [
+      "tokenized-stock"
+    ]
+  },
+  {
+    "symbol": "TURBOIDR",
+    "base": "TURBO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TURTLEIDR",
+    "base": "TURTLE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "TUSDIDR",
+    "base": "TUSD",
+    "quote": "IDR",
+    "flags": [
+      "stable"
+    ]
+  },
+  {
+    "symbol": "UBIDR",
+    "base": "UB",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "UAIIDR",
+    "base": "UAI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "UCJLIDR",
+    "base": "UCJL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "UMAIDR",
+    "base": "UMA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "UNIIDR",
+    "base": "UNI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "UNMDIDR",
+    "base": "UNMD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "USDCIDR",
+    "base": "USDC",
+    "quote": "IDR",
+    "flags": [
+      "stable"
+    ]
+  },
+  {
+    "symbol": "USATIDR",
+    "base": "USAT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "USDTIDR",
+    "base": "USDT",
+    "quote": "IDR",
+    "flags": [
+      "stable"
+    ]
+  },
+  {
+    "symbol": "USDTOTCIDR",
+    "base": "USDTOTC",
+    "quote": "IDR",
+    "flags": [
+      "otc"
+    ]
+  },
+  {
+    "symbol": "USDTOTCRCIDR",
+    "base": "USDTOTCRC",
+    "quote": "IDR",
+    "flags": [
+      "otc"
+    ]
+  },
+  {
+    "symbol": "USELESSIDR",
+    "base": "USELESS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VANRYIDR",
+    "base": "VANRY",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VBGIDR",
+    "base": "VBG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VCGIDR",
+    "base": "VCG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VELOIDR",
+    "base": "VELO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VELOFINIDR",
+    "base": "VELOFIN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VELVETIDR",
+    "base": "VELVET",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VETIDR",
+    "base": "VET",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VEXIDR",
+    "base": "VEX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VINEIDR",
+    "base": "VINE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VIRTUALIDR",
+    "base": "VIRTUAL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VOXELIDR",
+    "base": "VOXEL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VRAIDR",
+    "base": "VRA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "VVVIDR",
+    "base": "VVV",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "W3FIDR",
+    "base": "W3F",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "W3SIDR",
+    "base": "W3S",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WAVESIDR",
+    "base": "WAVES",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WBTCIDR",
+    "base": "WBTC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WCTIDR",
+    "base": "WCT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WEALTHIDR",
+    "base": "WEALTH",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WIFIDR",
+    "base": "WIF",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WLDIDR",
+    "base": "WLD",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WLFIIDR",
+    "base": "WLFI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WOOIDR",
+    "base": "WOO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WIDR",
+    "base": "W",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XAUTIDR",
+    "base": "XAUT",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XCNIDR",
+    "base": "XCN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XDCIDR",
+    "base": "XDC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XPLIDR",
+    "base": "XPL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XLMIDR",
+    "base": "XLM",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "WEMIXIDR",
+    "base": "WEMIX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XRIDR",
+    "base": "XR",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XRPIDR",
+    "base": "XRP",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XTZIDR",
+    "base": "XTZ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "XVSIDR",
+    "base": "XVS",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "YFIIDR",
+    "base": "YFI",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "YFIIIDR",
+    "base": "YFII",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "YGGIDR",
+    "base": "YGG",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZAMAIDR",
+    "base": "ZAMA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZBCNIDR",
+    "base": "ZBCN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZENIDR",
+    "base": "ZEN",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZEREBROIDR",
+    "base": "ZEREBRO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZETAIDR",
+    "base": "ZETA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZILIDR",
+    "base": "ZIL",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZKCIDR",
+    "base": "ZKC",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZKJIDR",
+    "base": "ZKJ",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZORAIDR",
+    "base": "ZORA",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZROIDR",
+    "base": "ZRO",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "ZRXIDR",
+    "base": "ZRX",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "BTCUSDT",
+    "base": "BTC",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "BONKUSDT",
+    "base": "BONK",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "BTTUSDT",
+    "base": "BTT",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "ETHUSDT",
+    "base": "ETH",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "FLOKIUSDT",
+    "base": "FLOKI",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "IDRXUSDT",
+    "base": "IDRX",
+    "quote": "USDT",
+    "flags": [
+      "stable"
+    ]
+  },
+  {
+    "symbol": "KITEIDR",
+    "base": "KITE",
+    "quote": "IDR",
+    "flags": []
+  },
+  {
+    "symbol": "LUNCUSDT",
+    "base": "LUNC",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "PEPEUSDT",
+    "base": "PEPE",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "PUNDIXUSDT",
+    "base": "PUNDIX",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "SHIBUSDT",
+    "base": "SHIB",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "XECUSDT",
+    "base": "XEC",
+    "quote": "USDT",
+    "flags": []
+  },
+  {
+    "symbol": "VCGUSDT",
+    "base": "VCG",
+    "quote": "USDT",
+    "flags": []
+  }
+]
