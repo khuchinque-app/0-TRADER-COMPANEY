@@ -1,5 +1,5 @@
 // FxToggle component - USDT ⇄ IDR display toggle
-// Allows users to switch between USD and IDR display
+// Uses Indodax USDT/IDR ticker as reference rate (not a real venue)
 
 'use client';
 
@@ -15,6 +15,7 @@ export default function FxToggle({ usdtValue, fxRate, label = 'USDT' }: Props) {
   const [isIdr, setIsIdr] = useState(false);
   const [displayValue, setDisplayValue] = useState(usdtValue);
   const [currencySymbol, setCurrencySymbol] = useState('$');
+  const [isStale, setIsStale] = useState(false);
 
   useEffect(() => {
     if (isIdr && fxRate) {
@@ -46,6 +47,11 @@ export default function FxToggle({ usdtValue, fxRate, label = 'USDT' }: Props) {
       <span className={`text-sm font-mono ${isIdr ? 'text-[var(--cyan)]' : 'text-[var(--text-primary)]'}`}>
         {currencySymbol}{displayValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </span>
+      {isStale && (
+        <span className="text-[10px] text-[var(--text-muted)]">
+          Reference rate: Indodax USDT/IDR, not a real venue
+        </span>
+      )}
     </div>
   );
 }

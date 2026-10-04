@@ -7,6 +7,7 @@ import type { Matcher } from '../matching/matcher';
 import type { Ledger } from '../ledger/ledger';
 import type { FeedAdapter } from '../feed/feed';
 import { fxProvider } from '../feed/fx';
+import { indodaxFxProvider } from '../feed/indodax';
 import { ENGINE_PORT, PAIRS } from '@trading/shared';
 import { mockAuth, AUTH_ENABLED } from './auth';
 
@@ -174,6 +175,16 @@ export function createRestServer(
       res.json({ rate: { usdToIdr: rate, fetchedAt: Date.now() } });
     } catch (_e) {
       res.status(503).json({ error: 'FX fetch failed' });
+    }
+  });
+
+  // USDT/IDR rate from Indodax (reference only, not a real venue)
+  app.get('/api/fx/usdt-idr', async (_req, res) => {
+    try {
+      const state = indodaxFxProvider.getState();
+      res.json(state);
+    } catch (_e) {
+      res.status(503).json({ error: 'USDT/IDR fetch failed' });
     }
   });
 
