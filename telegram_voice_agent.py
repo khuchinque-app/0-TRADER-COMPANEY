@@ -64,6 +64,12 @@ async def get_agent_response(user_text: str) -> str:
         # Ambil balasan dari JSON respons
         return data.get("reply", data.get("response", data.get("text", "Maaf, terjadi kesalahan.")))
 
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP error contacting local agent: {e}")
+        return "Maaf, endpoint /api/chat belum tersedia. Gunakan perintah /help untuk daftar perintah."
+    except requests.exceptions.ConnectionError as e:
+        print(f"Connection error: {e}")
+        return "Maaf, server backend tidak dapat dihubungi."
     except Exception as e:
         print(f"Error contacting local agent: {e}")
         return "Maaf, saya sedang mengalami gangguan koneksi ke server utama."
