@@ -241,6 +241,44 @@ app.get("/api/fx/usdt-idr", async (req, res) => {
   }
 });
 
+// TICKER ENDPOINT (Indodax)
+app.get("/api/ticker/:pair", async (req, res) => {
+  try {
+    const pair = String(req.params.pair).toUpperCase();
+    const base = process.env.INDODAX_BASE_URL || "https://indodax.com";
+    const url = `${base}/api/ticker/${pair.toLowerCase()}`;
+
+    const timeout = setTimeout(() => {
+      res.status(408).json({ error: "timeout", pair });
+    }, 5000);
+
+    fetch(url, { signal: AbortSignal.timeout(5000) })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data: any) => {
+        clearTimeout(timeout);
+        const t = data.ticker || {};
+        res.json({
+          pair,
+          last: parseFloat(t.last || 0),
+          high: parseFloat(t.high || 0),
+          low: parseFloat(t.low || 0),
+          vol: parseFloat(t.vol_idr || t.vol_usdt || 0),
+          buy: parseFloat(t.buy || 0),
+          sell: parseFloat(t.sell || 0),
+        });
+      })
+      .catch((err) => {
+        clearTimeout(timeout);
+        res.status(502).json({ error: "ticker_failed", pair, message: err.message });
+      });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
 // WALLET ROUTES (M2)
 app.get("/api/wallet/balance", (req, res) => {
   const userId = getUserId(req);

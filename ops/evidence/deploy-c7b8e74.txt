@@ -1,0 +1,27 @@
+=== Deploy Evidence 2026-10-04 11:41:24 UTC ===
+
+SHA: c7b8e74
+
+--- PM2 Status ---
+┌────┬─────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name        │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼─────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ backend     │ default     │ N/A     │ fork    │ 3977194  │ 25s    │ 193  │ online    │ 0%       │ 79.5mb   │ khuchin… │ disabled │
+│ 2  │ engine      │ default     │ 0.1.0   │ fork    │ 3374719  │ 10h    │ 1    │ online    │ 0%       │ 113.0mb  │ khuchin… │ disabled │
+│ 1  │ terminal    │ default     │ N/A     │ fork    │ 3374702  │ 10h    │ 54   │ online    │ 0%       │ 120.7mb  │ khuchin… │ disabled │
+└────┴─────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+host metrics | cpu: 24.3% | ram usage: 25.2% | lo: ⇓ 0.001mb/s ⇑ 0.001mb/s | eth0: ⇓ 0.02mb/s ⇑ 0.052mb/s | disk: ⇓ 3.433mb/s ⇑ 0.501mb/s / 82.65%
+
+--- Smoke Test ---
+=== SMOKE TEST ===
+Timestamp: 2026-10-04T11:41:24Z
+
+[1/5] Testing /health...
+  PASS
+[2/5] Testing POST /api/auth/login...
+  PASS
+[3/5] Testing GET /api/auth/me...
+  PASS
+[4/5] Testing GET /api/markets...
+  PASS
+[5/5] Testing terminal proxy...
