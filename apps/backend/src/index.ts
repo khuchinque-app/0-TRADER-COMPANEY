@@ -672,22 +672,33 @@ app.post("/api/chat", (req, res) => {
     return res.status(400).json({ error: "message_required" });
   }
   const lower = String(message).toLowerCase();
-  let reply = "Saya mendengar pesan Anda.";
+  let reply = "";
 
-  if (lower.includes("halo") || lower.includes("hai") || lower.includes("hello")) {
-    reply = "Halo Lord! Bot suara siap membantu. Silakan kirim perintah trading atau pertanyaan.";
-  } else if (lower.includes("price") || lower.includes("harga") || lower.includes("btc")) {
-    reply = "Untuk melihat harga Bitcoin, silakan buka halaman market di browser atau tanya saya detail pair tertentu.";
-  } else if (lower.includes("trade") || lower.includes("beli") || lower.includes("jual")) {
-    reply = "Fitur trading tersedia di halaman trade. Kirim pair seperti BTCIDR untuk melihat ticker live.";
-  } else if (lower.includes("wallet") || lower.includes("saldo") || lower.includes("balance")) {
-    reply = "Saldo Anda tersedia di menu wallet. Gunakan /faucet untuk mendapatkan saldo simulasi.";
-  } else if (lower.includes("help") || lower.includes("bantu") || lower.includes("cara")) {
-    reply = "Perintah tersedia: /help untuk bantuan, kirim teks atau suara untuk chat. Trading paper hanya, tidak ada uang nyata.";
+  // Context-aware responses about Trading Company
+  if (lower.includes("halo") || lower.includes("hai") || lower.includes("hello") || lower.includes("hi")) {
+    reply = "Halo Lord! Saya bot suara untuk Trading Company. Sistem ini adalah platform paper trading dengan data real dari Indodax. 477 pair tersedia, ledger USDT, IDR hanya display. Ada apa?";
+  } else if (lower.includes("project") || lower.includes("ini apa") || lower.includes("apa itu") || lower.includes("ceritakan")) {
+    reply = "Ini adalah project Trading Company. Kami membangun platform trading paper — simulasi tanpa uang nyata — dengan data pasar real-time dari Indodax. Backend API di port 11110, frontend di port 22220. Ledger internal pakai USDT, tampilan IDR bisa di-toggle. Semua order dan portfolio tersimpan di SQLite ledger.db.";
+  } else if (lower.includes("paper") || lower.includes("simulasi") || lower.includes("tidak nyata")) {
+    reply = "Trading paper artinya simulasi. Tidak ada uang sungguhan. Anda bisa beli jual BTC, ETH, dan 475 pair lainnya dengan dana virtual. Hasilnya tercatat di ledger tapi tidak pernah keluar masuk rekening nyata. Aman untuk latihan.";
+  } else if (lower.includes("price") || lower.includes("harga") || lower.includes("btc") || lower.includes("eth")) {
+    reply = "Harga live bisa dilihat di halaman market. Akses melalui browser di port 22220, atau tanya saya pair tertentu seperti BTCIDR atau ETHUSDT. Data diambil langsung dari Indodax API.";
+  } else if (lower.includes("trade") || lower.includes("beli") || lower.includes("jual") || lower.includes("order")) {
+    reply = "Fitur trading tersedia di halaman /trade/[PAIR]. Anda bisa kirim order buy atau sell dengan tipe limit atau market. Semua order tercatat di ledger SQLite dan bisa dilihat di halaman portfolio.";
+  } else if (lower.includes("wallet") || lower.includes("saldo") || lower.includes("balance") || lower.includes("faucet")) {
+    reply = "Saldo simulasi bisa didapat lewat /faucet setiap 60 detik. Asset yang tersedia: USDT, BTC, ETH, SOL, BNB, XRP, LINK, AAVE. Jumlah bervariasi sesuai aset. Saldo tersimpan di tabel balances dalam ledger.db.";
+  } else if (lower.includes("help") || lower.includes("bantu") || lower.includes("cara") || lower.includes("command")) {
+    reply = "Perintah yang tersedia: kirim teks atau suara untuk chat tentang project, trading, wallet, atau harga. Bot akan membalas dengan voice note HD. Untuk trading manual, buka browser di port 22220. Faucet untuk saldo gratis.";
   } else if (lower.includes("test")) {
-    reply = "Test berhasil! Bot suara berjalan dengan baik. Saya adalah agen voice untuk Trading Company.";
+    reply = "Test berhasil! Bot suara berjalan dengan baik. Saya adalah agen voice untuk Trading Company — membalas pesan teks dan suara dengan voice note HD berbahasa Indonesia.";
+  } else if (lower.includes("indodax") || lower.includes("pair") || lower.includes("market")) {
+    reply = "Indodax menyediakan 477 pair trading — 465 pasangan IDR dan 12 pasangan USDT. Data ticker diambil langsung dari API Indodax dan di-cache di backend selama 60 detik. Halaman market menampilkan semua pair dengan pencarian dan filter.";
+  } else if (lower.includes("port") || lower.includes("api") || lower.includes("backend")) {
+    reply = "Port backend API di 11110, frontend terminal di 22220, dan static files di 2217. Endpoint penting: /api/markets untuk daftar pair, /api/ticker/PASS untuk harga live, /api/fx/usdt-idr untuk kurs, /api/chat untuk bot suara.";
+  } else if (lower.includes("bot") || lower.includes("suara") || lower.includes("voice")) {
+    reply = "Saya adalah bot suara untuk Trading Company. Menggunakan ElevenLabs untuk text-to-speech HD dan backend lokal untuk memproses permintaan. Kirim voice note atau teks, saya akan balas dengan voice note juga.";
   } else {
-    reply = "Terima kasih atas pesan Anda. Saya akan memproses permintaan tersebut.";
+    reply = "Saya mengerti pesan Anda tentang Trading Company. Ini adalah platform paper trading dengan data real Indodax, 477 pair, ledger USDT, dan tampilan IDR toggle. Ada yang bisa saya bantu tentang trading, wallet, atau project ini?";
   }
 
   res.json({ reply, message, simulasi: true });
