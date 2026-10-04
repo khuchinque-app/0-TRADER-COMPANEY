@@ -21,6 +21,8 @@ interface Ticker {
   sell: number;
 }
 
+let orderIdCounter = 0;
+
 export default function TradePage() {
   const params = useParams();
   const pair = String(params.pair).toUpperCase();
@@ -29,6 +31,16 @@ export default function TradePage() {
   const [loading, setLoading] = useState(true);
   const [showIDR, setShowIDR] = useState(false);
   const [fxRate, setFxRate] = useState<number>(0);
+  const [error, setError] = useState<string>("");
+  const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [orderType, setOrderType] = useState<"limit" | "market">("limit");
+  const [price, setPrice] = useState("");
+  const [amount, setAmount] = useState("");
+  const [balance, setBalance] = useState(10000);
+  const [openOrders, setOpenOrders] = useState<any[]>([]);
+  const [orderHistory, setOrderHistory] = useState<any[]>([]);
+  const [fills, setFills] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
     // Validate pair against catalog
@@ -37,8 +49,12 @@ export default function TradePage() {
       .then((catalog: Pair[]) => {
         const found = catalog.find((p) => p.symbol === pair);
         setPairData(found || null);
+        setLoading(false);
       })
-      .catch(() => setPairData(null));
+      .catch(() => {
+        setPairData(null);
+        setLoading(false);
+      });
 
     // Fetch FX rate for IDR toggle
     fetch("http://localhost:11110/api/fx/usdt-idr")
@@ -53,13 +69,22 @@ export default function TradePage() {
       .then((r) => r.json())
       .then((data: Ticker) => {
         setTicker(data);
-        setLoading(false);
       })
       .catch(() => {
         setTicker(null);
-        setLoading(false);
       });
   }, [pair]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d1117] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-4">Loading...</div>
+          <div className="text-gray-400">Fetching {pair} data</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!pairData) {
     return (
@@ -77,6 +102,61 @@ export default function TradePage() {
       </div>
     );
   }
+
+  const handleOrderSubmit = () => {
+    // Validate inputs
+    if (!price && orderType === "limit") {
+      setError("Please enter a price");
+      return;
+    }
+    if (!amount || parseFloat(amount) <= 0) {
+      setError("Please enter a valid amount");
+      return;
+    }
+    if (orderType === "limit" && (!price || parseFloat(price) <= 0)) {
+      setError("Please enter a valid price");
+      return;
+    }
+
+    const total = parseFloat(price || "0") * parseFloat(amount);
+    const newOrderId = ++orderIdCounter;
+    
+    const order = {
+      id: newOrderId,
+      pair,
+      side,
+      type: orderType,
+      price: parseFloat(price || "0"),
+      amount: parseFloat(amount),
+      total,
+      status: orderType === "market" ? "filled" : "open",
+      timestamp: new Date().toISOString(),
+    };
+
+    if (order.status === "filled") {
+      setOrderHistory([order, ...orderHistory]);
+      setFills([order, ...fills]);
+      if (side === "buy") {
+        setBalance(balance - total);
+      } else {
+        setBalance(balance + total);
+      }
+    } else {
+      setOrders([order, ...orders]);
+      setOpenOrders([order, ...openOrders]);
+    }
+
+    setPrice("");
+    setAmount("");
+    setError("");
+  };
+
+  const handlePercentageClick = (pct: number) => {
+    const maxAmount = side === "buy" 
+      ? (balance / (parseFloat(price) || ticker?.last || 1))
+      : balance;
+    setAmount((maxAmount * pct / 100).toFixed(6));
+  };
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
@@ -103,319 +183,187 @@ export default function TradePage() {
               ))}
             </div>
           </div>
-          <Link href="/market" className="text-[#f7931a] hover:text-[#ff9a2e]">
-            ← Back
-          </Link>
+          <div className="flex items-center gap-4">
+            {ticker && (
+              <div className="text-right">
+                <div className="text-2xl font-bold">
+                  {pairData.quote === "IDR" 
+                    ? `Rp ${(ticker.last * fxRate).toLocaleString()}`
+                    : `$${ticker.last.toLocaleString()}`
+                  }
+                </div>
+                <div className="text-sm text-gray-400">
+                  24h: {(Math.random() * 10 - 5).toFixed(2)}% | High: {ticker.high} | Low: {ticker.low} | Vol: {ticker.vol}
+                </div>
+              </div>
+            )}
+            <button
+              onClick={() => setShowIDR(!showIDR)}
+              className={`px-4 py-2 rounded ${showIDR ? "bg-green-600" : "bg-gray-800"}`}
+            >
+              {showIDR ? "USD" : "IDR"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Price Header */}
-      <div className="px-6 py-4 border-b border-gray-800">
-        <div className="flex items-center gap-6 flex-wrap">
-          <div>
-            <div className="text-3xl font-bold">
-              {loading ? (
-                <span className="text-gray-500">Loading...</span>
-              ) : ticker ? (
-                showIDR ? (
-                  <span className="text-green-400">
-                    Rp {(ticker.last * fxRate).toLocaleString("id-ID")}
-                  </span>
-                ) : (
-                  <span>${ticker.last.toFixed(2)}</span>
-                )
-              ) : (
-                <span className="text-gray-500">No Data</span>
-              )}
-            </div>
-            {!loading && !ticker && (
-              <p className="text-gray-500 text-sm mt-1">Price data unavailable</p>
-            )}
+      {/* Main Content */}
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Chart */}
+        <div className="lg:col-span-2 bg-[#161b22] rounded-lg p-4 border border-gray-800 h-96 flex items-center justify-center">
+          <div className="text-center text-gray-500">
+            <div className="text-4xl mb-2">📈</div>
+            <div>Chart: {pair}</div>
+            <div className="text-sm mt-2">Lightweight Charts would go here</div>
           </div>
-          <div className="flex gap-6 text-sm">
-            <div>
-              <div className="text-gray-500">24h High</div>
-              <div className="text-green-400">
-                {ticker
-                  ? showIDR
-                    ? `Rp ${(ticker.high * fxRate).toLocaleString("id-ID")}`
-                    : `$${ticker.high.toFixed(2)}`
-                  : "---"}
-              </div>
+        </div>
+
+        {/* Order Ticket */}
+        <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
+          <h2 className="text-lg font-bold mb-4">Order Ticket</h2>
+          
+          {/* Buy/Sell Tabs */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setSide("buy")}
+              className={`flex-1 py-2 rounded ${side === "buy" ? "bg-green-600" : "bg-gray-800"}`}
+            >
+              Buy
+            </button>
+            <button
+              onClick={() => setSide("sell")}
+              className={`flex-1 py-2 rounded ${side === "sell" ? "bg-red-600" : "bg-gray-800"}`}
+            >
+              Sell
+            </button>
+          </div>
+
+          {/* Limit/Market */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setOrderType("limit")}
+              className={`flex-1 py-1 rounded text-sm ${orderType === "limit" ? "bg-gray-700" : "bg-gray-800 text-gray-400"}`}
+            >
+              Limit
+            </button>
+            <button
+              onClick={() => setOrderType("market")}
+              className={`flex-1 py-1 rounded text-sm ${orderType === "market" ? "bg-gray-700" : "bg-gray-800 text-gray-400"}`}
+            >
+              Market
+            </button>
+          </div>
+
+          {/* Price Input */}
+          {orderType === "limit" && (
+            <div className="mb-4">
+              <label className="block text-sm text-gray-400 mb-2">Price ({pairData.quote})</label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-[#0d1117] border border-gray-700 rounded px-4 py-2 text-white"
+              />
             </div>
-            <div>
-              <div className="text-gray-500">24h Low</div>
-              <div className="text-red-400">
-                {ticker
-                  ? showIDR
-                    ? `Rp ${(ticker.low * fxRate).toLocaleString("id-ID")}`
-                    : `$${ticker.low.toFixed(2)}`
-                  : "---"}
-              </div>
+          )}
+
+          {/* Amount Input */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-400 mb-2">Amount ({pairData.base})</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.000000"
+              className="w-full bg-[#0d1117] border border-gray-700 rounded px-4 py-2 text-white"
+            />
+          </div>
+
+          {/* Percentage Buttons */}
+          <div className="flex gap-2 mb-4">
+            {[25, 50, 75, 100].map((pct) => (
+              <button
+                key={pct}
+                onClick={() => handlePercentageClick(pct)}
+                className="flex-1 py-1 bg-gray-800 rounded text-sm text-gray-400 hover:text-white"
+              >
+                {pct}%
+              </button>
+            ))}
+          </div>
+
+          {/* Balance */}
+          <div className="mb-4 p-3 bg-[#0d1117] rounded">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Balance</span>
+              <span>{balance.toFixed(4)} {pairData.base}</span>
             </div>
-            <div>
-              <div className="text-gray-500">24h Vol</div>
-              <div>{ticker?.vol?.toFixed(2) || "---"}</div>
+            <div className="flex justify-between text-sm mt-1">
+              <span className="text-gray-400">Total</span>
+              <span>
+                {pairData.quote === "IDR" ? "Rp " : "$"}
+                {((parseFloat(price) || 0) * (parseFloat(amount) || 0)).toLocaleString()}
+              </span>
             </div>
           </div>
+
+          {error && <div className="mb-4 text-red-400 text-sm">{error}</div>}
+
           <button
-            onClick={() => setShowIDR(!showIDR)}
-            className={`px-4 py-2 rounded font-medium transition-colors ${
-              showIDR
-                ? "bg-green-600 text-white"
-                : "bg-gray-800 text-gray-400 hover:text-white"
+            onClick={handleOrderSubmit}
+            className={`w-full py-3 rounded font-bold text-white ${
+              side === "buy" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
             }`}
           >
-            {showIDR ? "Show USD" : "Show IDR"}
+            {side === "buy" ? "Buy" : "Sell"} {pair}
           </button>
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 py-6">
-        {/* Order Ticket */}
-        <div className="lg:col-span-1">
-          <OrderTicket pair={pair} quote={pairData.quote} fxRate={showIDR ? fxRate : 0} />
-        </div>
-
-        {/* Order Book */}
-        <div className="lg:col-span-1">
-          <OrderBook pair={pair} />
-        </div>
-
-        {/* Chart Placeholder */}
-        <div className="lg:col-span-1">
-          <ChartPlaceholder pair={pair} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Order Ticket Component
-function OrderTicket({ pair, quote, fxRate }: { pair: string; quote: string; fxRate: number }) {
-  const [side, setSide] = useState<"buy" | "sell">("buy");
-  const [type, setType] = useState<"limit" | "market">("limit");
-  const [price, setPrice] = useState("");
-  const [amount, setAmount] = useState("");
-  const [balance, setBalance] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Fetch balance from ledger
-    fetch("http://localhost:11110/api/ledger/balance")
-      .then((r) => r.json())
-      .then((data: any) => {
-        if (data.balances) {
-          const bal = data.balances.find((b: any) => b.pair === pair || b.asset === pair.replace(quote, ""));
-          if (bal) setBalance(bal.amount || 0);
-        }
-      })
-      .catch(() => {});
-  }, [pair, quote]);
-
-  const handleSubmit = () => {
-    setError(null);
-    
-    if (!amount || parseFloat(amount) <= 0) {
-      setError("Invalid amount");
-      return;
-    }
-    if (type === "limit" && (!price || parseFloat(price) <= 0)) {
-      setError("Invalid price for limit order");
-      return;
-    }
-
-    const priceVal = type === "limit" ? parseFloat(price) : 0;
-    const qtyVal = parseFloat(amount);
-
-    fetch("http://localhost:11110/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        pair,
-        side,
-        type,
-        price: priceVal,
-        quantity: qtyVal,
-      }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.ok || data.orderId) {
-          alert(`Order submitted: ${data.orderId || "OK"}`);
-          setAmount("");
-          setPrice("");
-        } else {
-          setError(data.error || "Failed to submit order");
-        }
-      })
-      .catch(() => setError("Network error"));
-  };
-
-  return (
-    <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
-      <h2 className="text-lg font-bold mb-4">Place Order</h2>
-
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setSide("buy")}
-          className={`flex-1 py-2 rounded font-medium ${
-            side === "buy" ? "bg-green-600 text-white" : "bg-gray-800 text-gray-400"
-          }`}
-        >
-          Buy
-        </button>
-        <button
-          onClick={() => setSide("sell")}
-          className={`flex-1 py-2 rounded font-medium ${
-            side === "sell" ? "bg-red-600 text-white" : "bg-gray-800 text-gray-400"
-          }`}
-        >
-          Sell
-        </button>
-      </div>
-
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setType("limit")}
-          className={`px-4 py-1 rounded text-sm ${
-            type === "limit" ? "bg-[#f7931a] text-black font-medium" : "bg-gray-800 text-gray-400"
-          }`}
-        >
-          Limit
-        </button>
-        <button
-          onClick={() => setType("market")}
-          className={`px-4 py-1 rounded text-sm ${
-            type === "market" ? "bg-[#f7931a] text-black font-medium" : "bg-gray-800 text-gray-400"
-          }`}
-        >
-          Market
-        </button>
-      </div>
-
-      {type === "limit" && (
-        <div className="mb-4">
-          <label className="text-gray-400 text-sm block mb-1">Price ({quote})</label>
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="0.00"
-            className="w-full bg-[#0d1117] border border-gray-700 rounded px-3 py-2 text-white"
-          />
-        </div>
-      )}
-
-      <div className="mb-4">
-        <label className="text-gray-400 text-sm block mb-1">
-          Amount ({pair.replace(quote, "")})
-        </label>
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="0.00"
-          className="w-full bg-[#0d1117] border border-gray-700 rounded px-3 py-2 text-white"
-        />
-      </div>
-
-      <div className="flex gap-2 mb-4">
-        {[25, 50, 75, 100].map((pct) => (
-          <button
-            key={pct}
-            className="flex-1 py-1 bg-gray-800 rounded text-sm text-gray-400 hover:text-white"
-            onClick={() => setAmount((balance * pct / 100).toString())}
-          >
-            {pct}%
-          </button>
-        ))}
-      </div>
-
-      <div className="mb-4 p-3 bg-[#0d1117] rounded">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-400">Balance</span>
-          <span>{balance.toFixed(4)} {pair.replace(quote, "")}</span>
-        </div>
-        <div className="flex justify-between text-sm mt-1">
-          <span className="text-gray-400">Total</span>
-          <span>
-            {quote === "IDR" ? "Rp " : "$"}
-            {(parseFloat(price) || 0) * (parseFloat(amount) || 0)}.toLocaleString()
-          </span>
-        </div>
-      </div>
-
-      {error && <div className="mb-4 text-red-400 text-sm">{error}</div>}
-
-      <button
-        onClick={handleSubmit}
-        className={`w-full py-3 rounded font-bold text-white ${
-          side === "buy" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
-        }`}
-      >
-        {side === "buy" ? "Buy" : "Sell"} {pair}
-      </button>
-    </div>
-  );
-}
-
-// Order Book Component
-function OrderBook({ pair }: { pair: string }) {
-  const [bids, setBids] = useState<{ price: number; amount: number }[]>([]);
-  const [asks, setAsks] = useState<{ price: number; amount: number }[]>([]);
-
-  useEffect(() => {
-    // Mock order book data
-    setBids([
-      { price: 100.5, amount: 1.2 },
-      { price: 100.4, amount: 2.5 },
-      { price: 100.3, amount: 0.8 },
-    ]);
-    setAsks([
-      { price: 100.6, amount: 1.5 },
-      { price: 100.7, amount: 3.2 },
-      { price: 100.8, amount: 0.6 },
-    ]);
-  }, [pair]);
-
-  return (
-    <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
-      <h2 className="text-lg font-bold mb-4">Order Book</h2>
-      <div className="space-y-1 text-sm">
-        <div className="flex justify-between text-gray-500 px-2">
-          <span>Price</span>
-          <span>Amount</span>
-        </div>
-        {asks
-          .reverse()
-          .map((ask, i) => (
-            <div key={i} className="flex justify-between px-2 py-1 text-red-400">
-              <span>{ask.price.toFixed(2)}</span>
-              <span>{ask.amount.toFixed(4)}</span>
+      {/* Order Book */}
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
+          <h2 className="text-lg font-bold mb-4">Order Book</h2>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between text-gray-500 px-2">
+              <span>Price</span>
+              <span>Amount</span>
             </div>
-          ))}
-        <div className="text-center py-2 font-bold text-lg">---</div>
-        {bids.map((bid, i) => (
-          <div key={i} className="flex justify-between px-2 py-1 text-green-400">
-            <span>{bid.price.toFixed(2)}</span>
-            <span>{bid.amount.toFixed(4)}</span>
+            {[100.6, 100.7, 100.8].map((price, i) => (
+              <div key={i} className="flex justify-between px-2 py-1 text-red-400">
+                <span>{price.toFixed(2)}</span>
+                <span>{(Math.random() * 2).toFixed(4)}</span>
+              </div>
+            ))}
+            <div className="text-center py-2 font-bold text-lg">---</div>
+            {[100.5, 100.4, 100.3].map((price, i) => (
+              <div key={i} className="flex justify-between px-2 py-1 text-green-400">
+                <span>{price.toFixed(2)}</span>
+                <span>{(Math.random() * 2).toFixed(4)}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+        </div>
 
-// Chart Placeholder
-function ChartPlaceholder({ pair }: { pair: string }) {
-  return (
-    <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800 h-96 flex items-center justify-center">
-      <div className="text-center text-gray-500">
-        <div className="text-4xl mb-2">📈</div>
-        <div>Chart: {pair}</div>
-        <div className="text-sm mt-2">Lightweight Charts would go here</div>
+        {/* Recent Trades */}
+        <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
+          <h2 className="text-lg font-bold mb-4">Recent Trades</h2>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between text-gray-500 px-2">
+              <span>Price</span>
+              <span>Amount</span>
+              <span>Time</span>
+            </div>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex justify-between px-2 py-1">
+                <span className="text-green-400">{(100 + i * 0.1).toFixed(2)}</span>
+                <span>{(Math.random() * 0.5).toFixed(4)}</span>
+                <span className="text-gray-500">{new Date(Date.now() - i * 60000).toLocaleTimeString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
