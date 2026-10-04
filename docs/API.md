@@ -121,36 +121,27 @@ Check backend health.
 }
 ```
 
-## FX Endpoints
-
-### GET /api/fx
-Legacy USD/IDR rate (open.er-api.com fallback).
-
-**Response:**
-```json
-{
-  "rate": {
-    "usdToIdr": 15000,
-    "fetchedAt": 1728000000000
-  }
-}
-```
+## FX Rate Endpoint
 
 ### GET /api/fx/usdt-idr
-Indodax USDT/IDR ticker rate for display toggle. Reference only, not a real venue.
+Get current USD/IDR exchange rate from Indodax ticker.
 
 **Response:**
 ```json
 {
-  "rate": 15000.50,
+  "rate": 17857,
   "source": "indodax",
-  "ts": 1728000000000,
+  "ts": 1791113925053,
   "stale": false
 }
 ```
 
-**Fields:**
-- `rate`: Current USDT/IDR rate from Indodax
-- `source`: "indodax" or "fallback"
-- `ts`: Timestamp of last successful fetch (ms)
-- `stale`: true if serving cached rate past TTL
+**Query Params:** None  
+**Authentication:** Not required (public rate)
+
+**Error Responses:**
+- `500 Internal Server Error` — if Indodax API unavailable and no cached rate
+
+---
+
+*Last updated: 4 Oktober 2026*

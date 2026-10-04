@@ -1,9 +1,48 @@
-=== Live State Check 2026-10-04 17:26:36 ===
+=== Live State Check 2026-10-04 11:36:24 UTC ===
 
 --- PM2 ---
+┌────┬─────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name        │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼─────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ backend     │ default     │ N/A     │ fork    │ 3374694  │ 10h    │ 188  │ online    │ 0%       │ 89.8mb   │ khuchin… │ disabled │
+│ 2  │ engine      │ default     │ 0.1.0   │ fork    │ 3374719  │ 10h    │ 1    │ online    │ 0%       │ 112.9mb  │ khuchin… │ disabled │
+│ 1  │ terminal    │ default     │ N/A     │ fork    │ 3374702  │ 10h    │ 54   │ online    │ 0%       │ 120.7mb  │ khuchin… │ disabled │
+└────┴─────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+host metrics | cpu: 20.1% | ram usage: 25.2% | eth0: ⇓ 0.019mb/s ⇑ 0.011mb/s | disk: ⇓ 0.599mb/s ⇑ 1.636mb/s / 82.65%
 
 --- Ports ---
 LISTEN 0      511                      127.0.0.1:3001       0.0.0.0:*    users:(("node /home/khuc",pid=3374719,fd=26))
 LISTEN 0      511                        0.0.0.0:2217       0.0.0.0:*    users:(("node",pid=1481435,fd=21))           
 LISTEN 0      511                              *:22220            *:*    users:(("next-server (v1",pid=3374702,fd=23))
 LISTEN 0      511                              *:11110            *:*    users:(("node",pid=3374694,fd=25))           
+
+--- Health ---
+{"status":"ok","service":"trading-backend","port":11110,"timestamp":"2026-10-04T11:36:24.760Z"}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/health</pre>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/health</pre>
+</body>
+</html>
+
+--- Git ---
+commit d36480f52d16e30b25f2ddd535b76e7e367c7895
+Author: khuchinque-app <khuchinque@users.noreply.github.com>
+Date:   Sun Oct 4 17:29:33 2026 +0700
+
+    docs: indodax research + structure update

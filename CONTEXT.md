@@ -17,11 +17,25 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 |-----------|--------|------|-------|
 | Backend API | ✅ Running | 11110 | Express + auth + admin |
 | Terminal Frontend | ✅ Running | 22220 | Next.js dashboard |
-| Trading Engine | ✅ Running | 3001 | WebSocket + matching |
+| Trading Engine | ✅ Running | 3001 | WebSocket + matching (health endpoint missing) |
+| Static Files | ✅ Running | 2217 | Design system |
 | Database | ✅ Active | - | SQLite ledger.db |
-| Smoke Tests | ✅ 5/5 PASS | - | All endpoints verified |
+| Smoke Tests | ⚠️ 1/5 PASS | - | POST /api/auth/login FAILING |
 
-**VPS:** 187.127.178.20
+**VPS:** 187.127.178.20  
+**Admin Login:** chinque / admin1  
+**Hermes Town:** Removed (Oct 4, 2026)
+
+---
+
+## Indodax Reference Data (4 Oktober 2026)
+
+- **Total sitemap URLs**: 1,438 (7 homepage + 477×3 mirror pages)
+- **Unique trading pairs**: 477 (465 IDR + 12 USDT)
+- **Unique web pages**: 484 (7 homepage + 477 market pages)
+- **Shortlist status**: BTC✓ ETH✓ SOL✓ BNB✓ XRP✓ LINK✓ AAVE✓ (all have IDR pairs; BTC+ETH also USDT)
+- **Purpose**: Reference prices for paper trading simulation (IDR display toggle)
+- **Source**: `docs/research/indodax-sitemap.md`, `indodax-pairs.json`
 
 ---
 
@@ -55,20 +69,11 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
   accounts are a clean add-on later (Q8).
 - Asset shortlist: BTC, ETH, SOL, BNB, XRP, LINK (AAVE fallback).
 - Chart lib = `lightweight-charts`; depth bars = our own CSS.
+- **IDR display rate**: Indodax USDT/IDR ticker (`/api/ticker/usdtidr`). Internal quote = USDT; IDR is a labeled display toggle (Q7).
 
 ---
 
-## Locked facts & decisions — Indodax (4 Oktober 2026)
-
-- **Q7 stays locked:** IDR display rate comes from the Indodax USDT/IDR ticker, NOT from a hardcoded value or open.er-api.com.
-- **New term:** `IDR display rate` — the rate used only for UI display. It is fetched from `GET /api/fx/usdt-idr` which polls the Indodax public API. The ledger stays USDT and is never touched by this rate.
-- **Ledger asset is still USDT.** IDR is a display-only toggle with the label "Reference rate: Indodax USDT/IDR, not a real venue".
-
-## Locked facts & decisions — Indodax (4 Oktober 2026)
-
-- **Q7 stays locked:** IDR display rate comes from the Indodax USDT/IDR ticker, NOT from a hardcoded value or open.er-api.com.
-- **New term:** `IDR display rate` — the rate used only for UI display. It is fetched from `GET /api/fx/usdt-idr` which polls the Indodax public API. The ledger stays USDT and is never touched by this rate.
-- **Ledger asset is still USDT.** IDR is a display-only toggle with the label "Reference rate: Indodax USDT/IDR, not a real venue". (settled in rounds 1–2, 2026-09-23)
+## Resolved domain terms (settled in rounds 1–2, 2026-09-23)
 
 - **Order** — a simulated buy/sell instruction placed by a demo account. MVP types: *market*
   and *limit* only.
@@ -77,27 +82,16 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 - **Order Book** — the synthetic bids/asks the terminal shows; in the demo it is seeded from
   the reference mid, not a real order flow.
 - **Ticker** — the 24h reference price stats shown in the asset strip.
-- **Demo account** — the guest, funded-by-fiction identity a browser carries (stable user id).
-- **Market trades / tape** — the recent-fill scroll below the book (simulated maker fills).
+|- **Demo account** — the guest, funded-by-fiction identity a browser carries (stable user id).
+|- **Market trades / tape** — the recent-fill scroll below the book (simulated maker fills).
+|- **IDR display rate** — the reference exchange rate (USDT→IDR) from Indodax ticker API; used by the IDR display toggle, not stored in ledger.
 
 ---
 
-## Indodax reference data (4 Oct 2026)
+## Still open
 
-Source: VPS-verified scrape of Indodax public API.
-
-| Metric | Value |
-|--------|-------|
-| Total pairs | 477 |
-| IDR pairs | 465 |
-| USDT pairs | 12 |
-
-**What we use it for:**
-- Catalog validation: every symbol in our asset shortlist (BTC, ETH, SOL, BNB, XRP, LINK) has a corresponding IDR pair in the dataset.
-- IDR display rate: the `USDTIDR` ticker from Indodax provides the reference rate for the display toggle.
-- Documentation pointer: see `docs/research/indodax-pairs.json`, `docs/research/indodax-api-samples.md`, `docs/research/indodax-sitemap.md`.
-
-**Still open: COLOR_CONVENTION**
+- **Color convention**: green-up (Western, recommended) vs. Indonesian red-up. Kept as a
+  config flag `COLOR_CONVENTION`; not yet decided.
 
 ---
 
