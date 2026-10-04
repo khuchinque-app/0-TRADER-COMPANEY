@@ -120,7 +120,17 @@ export default function TradePage() {
     const total = (parseFloat(price || "0") * parseFloat(amount)).toFixed(2);
     const newOrderId = ++orderIdCounter;
     
-    const order = {\n      id: newOrderId,\n      pair,\n      side,\n      type: orderType,\n      price: parseFloat(price || "0"),\n      amount: parseFloat(amount),\n      total: parseFloat(total),\n      status: orderType === "market" ? "filled" : "open",\n      timestamp: new Date().toISOString(),\n    };
+    const order = {
+      id: newOrderId,
+      pair,
+      side,
+      type: orderType,
+      price: parseFloat(price || "0"),
+      amount: parseFloat(amount),
+      total: parseFloat(total),
+      status: orderType === "market" ? "filled" : "open",
+      timestamp: new Date().toISOString(),
+    };
 
     if (order.status === "filled") {
       setOrderHistory([order, ...orderHistory]);
