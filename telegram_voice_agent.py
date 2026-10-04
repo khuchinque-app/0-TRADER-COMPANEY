@@ -19,6 +19,15 @@ ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")
 
 BOT_USERNAME = "ChinQueVPSVoiceBot"
+MAIN_BOT_USERNAME = "Herme_KhuChinQue_bot"
+
+def should_respond(text: str) -> bool:
+    """Only respond when BOTH @Herme_KhuChinQue_bot AND @ChinQueVPSVoiceBot are mentioned."""
+    if not text:
+        return False
+    has_main = f"@{MAIN_BOT_USERNAME}" in text or MAIN_BOT_USERNAME in text
+    has_voice = f"@{BOT_USERNAME}" in text or BOT_USERNAME in text
+    return has_main and has_voice
 
 # Initialize ElevenLabs client
 elevenlabs_client = None
@@ -95,11 +104,10 @@ async def generate_voice(text: str, output_path: str) -> bool:
 
 # --- 4. TELEGRAM HANDLERS ---
 async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles incoming voice messages — only when @ChinQueVPSVoiceBot is mentioned."""
-    # Check if bot username is mentioned
+    """Handles incoming voice messages — only when BOTH bots are mentioned."""
     text = update.message.text or ""
-    if BOT_USERNAME not in text and f"@{BOT_USERNAME}" not in text:
-        return  # Not for us, ignore
+    if not should_respond(text):
+        return  # Not our trigger, ignore
     
     await update.message.reply_text("🎧 Mendengarkan...")
     
@@ -132,12 +140,14 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
             os.remove(fp)
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles text messages — only when @ChinQueVPSVoiceBot is mentioned."""
+    """Handles text messages — only when BOTH bots are mentioned."""
     text = update.message.text or ""
-    if BOT_USERNAME not in text and f"@{BOT_USERNAME}" not in text:
-        return  # Not for us, ignore
+    if not should_respond(text):
+        return  # Not our trigger, ignore
     
+    # Strip both bot mentions to get the actual message
     user_text = text.replace(f"@{BOT_USERNAME}", "").replace(BOT_USERNAME, "").strip()
+    user_text = user_text.replace(f"@{MAIN_BOT_USERNAME}", "").replace(MAIN_BOT_USERNAME, "").strip()
     if not user_text:
         user_text = "test"
     
