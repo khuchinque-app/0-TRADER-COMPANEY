@@ -17,14 +17,25 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 |-----------|--------|------|-------|
 | Backend API | ✅ Running | 11110 | Express + auth + admin |
 | Terminal Frontend | ✅ Running | 22220 | Next.js dashboard |
-| Trading Engine | ✅ Running | 3001 | WebSocket + matching |
+| Trading Engine | ✅ Running | 3001 | WebSocket + matching (health endpoint missing) |
 | Static Files | ✅ Running | 2217 | Design system |
 | Database | ✅ Active | - | SQLite ledger.db |
-| Smoke Tests | ✅ 5/5 PASS | - | All endpoints verified |
+| Smoke Tests | ⚠️ 1/5 PASS | - | POST /api/auth/login FAILING |
 
 **VPS:** 187.127.178.20  
 **Admin Login:** chinque / admin1  
-**Hermes Town:** Port 24187 (localhost) + 24188 (nginx proxy)
+**Hermes Town:** Removed (Oct 4, 2026)
+
+---
+
+## Indodax Reference Data (4 Oktober 2026)
+
+- **Total sitemap URLs**: 1,438 (7 homepage + 477×3 mirror pages)
+- **Unique trading pairs**: 477 (465 IDR + 12 USDT)
+- **Unique web pages**: 484 (7 homepage + 477 market pages)
+- **Shortlist status**: BTC✓ ETH✓ SOL✓ BNB✓ XRP✓ LINK✓ AAVE✓ (all have IDR pairs; BTC+ETH also USDT)
+- **Purpose**: Reference prices for paper trading simulation (IDR display toggle)
+- **Source**: `docs/research/indodax-sitemap.md`, `indodax-pairs.json`
 
 ---
 
@@ -58,6 +69,7 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
   accounts are a clean add-on later (Q8).
 - Asset shortlist: BTC, ETH, SOL, BNB, XRP, LINK (AAVE fallback).
 - Chart lib = `lightweight-charts`; depth bars = our own CSS.
+- **IDR display rate**: Indodax USDT/IDR ticker (`/api/ticker/usdtidr`). Internal quote = USDT; IDR is a labeled display toggle (Q7).
 
 ---
 
@@ -70,8 +82,9 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 - **Order Book** — the synthetic bids/asks the terminal shows; in the demo it is seeded from
   the reference mid, not a real order flow.
 - **Ticker** — the 24h reference price stats shown in the asset strip.
-- **Demo account** — the guest, funded-by-fiction identity a browser carries (stable user id).
-- **Market trades / tape** — the recent-fill scroll below the book (simulated maker fills).
+|- **Demo account** — the guest, funded-by-fiction identity a browser carries (stable user id).
+|- **Market trades / tape** — the recent-fill scroll below the book (simulated maker fills).
+|- **IDR display rate** — the reference exchange rate (USDT→IDR) from Indodax ticker API; used by the IDR display toggle, not stored in ledger.
 
 ---
 

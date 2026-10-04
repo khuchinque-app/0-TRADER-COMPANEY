@@ -19,6 +19,54 @@ const db = new Database(dbPath);
 db.pragma("journal_mode=WAL");
 db.pragma("foreign_keys=ON");
 
+// FX CACHE (Indodax USDT/IDR rate)
+let fxCache: { rate: number; ts: number; source: string } | null = null;
+const FX_TTL_MS = parseInt(process.env.FX_TTL_MS || "60000"); // default 1 min
+const FX_STALE_MAX_MS = parseInt(process.env.FX_STALE_MAX_MS || "300000"); // default 5 min
+
+function getUsdtIdrRate(): Promise<{ rate: number; source: string; ts: number; stale: boolean }> {
+  return new Promise((resolve, reject) => {
+    const now = Date.now();
+    if (fxCache && (now - fxCache.ts) < FX_TTL_MS) {
+      return resolve({ ...fxCache, stale: false });
+    }
+    if (fxCache && (now - fxCache.ts) < FX_STALE_MAX_MS) {
+      return resolve({ ...fxCache, stale: true });
+    }
+    const base = process.env.INDODAX_BASE_URL || "https://indodax.com";
+    const url = `${base}/api/ticker/usdtidr`;
+    const timeout = setTimeout(() => {
+      if (fxCache) {
+        resolve({ ...fxCache, stale: true });
+      } else {
+        reject(new Error("timeout"));
+      }
+    }, 5000);
+    fetch(url, { signal: AbortSignal.timeout(5000) })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<any>;
+      })
+      .then((data: any) => {
+        // Indodax returns {"ticker": {"last": "..."}}
+        const last = data.ticker?.last || data.last;
+        const rate = parseFloat(last);
+        if (isNaN(rate)) throw new Error("invalid_rate");
+        fxCache = { rate, ts: now, source: "indodax" };
+        clearTimeout(timeout);
+        resolve({ rate, source: "indodax", ts: now, stale: false });
+      })
+      .catch(err => {
+        clearTimeout(timeout);
+        if (fxCache) {
+          resolve({ ...fxCache, stale: true });
+        } else {
+          reject(err);
+        }
+      });
+  });
+}
+
 function hashPassword(pw: string): string {
   const salt = randomBytes(16);
   const hash = scryptSync(pw, salt, 64);
@@ -178,6 +226,16 @@ app.get("/api/markets", (_req, res) => {
       simulasi: true
     }));
     res.json({ markets, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
+// FX RATE ENDPOINT
+app.get("/api/fx/usdt-idr", async (req, res) => {
+  try {
+    const data = await getUsdtIdrRate();
+    res.json(data);
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message });
   }

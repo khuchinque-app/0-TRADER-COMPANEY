@@ -114,9 +114,34 @@ Check backend health.
 **Response:**
 ```json
 {
-  \"status\": \"ok\",
-  \"service\": \"trading-backend\",
-  \"port\": \"11110\",
-  \"timestamp\": \"2026-10-03T19:58:27.716Z\"
+  "status": "ok",
+  "service": "trading-backend",
+  "port": "11110",
+  "timestamp": "2026-10-03T19:58:27.716Z"
 }
 ```
+
+## FX Rate Endpoint
+
+### GET /api/fx/usdt-idr
+Get current USD/IDR exchange rate from Indodax ticker.
+
+**Response:**
+```json
+{
+  "rate": 17857,
+  "source": "indodax",
+  "ts": 1791113925053,
+  "stale": false
+}
+```
+
+**Query Params:** None  
+**Authentication:** Not required (public rate)
+
+**Error Responses:**
+- `500 Internal Server Error` — if Indodax API unavailable and no cached rate
+
+---
+
+*Last updated: 4 Oktober 2026*
