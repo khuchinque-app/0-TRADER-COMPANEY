@@ -66,3 +66,9 @@ export const TERMINAL_PORT = parseInt(process.env.TERMINAL_PORT || '3000', 10);
 
 // FX cache TTL (seconds)
 export const FX_CACHE_TTL_SECONDS = 6 * 60 * 60; // 6 hours
+
+// Indodax FX source settings
+export const INDODAX_BASE_URL = process.env.INDODAX_BASE_URL || 'https://api.indodax.com';
+export const FX_SOURCE = process.env.FX_SOURCE || 'indodax'; // 'indodax' | 'fallback'
+export const FX_TTL_MS = parseInt(process.env.FX_TTL_MS || '600000', 10); // 10 minutes
+export const FX_STALE_MAX_MS = parseInt(process.env.FX_STALE_MAX_MS || '1800000', 10); // 30 minutes

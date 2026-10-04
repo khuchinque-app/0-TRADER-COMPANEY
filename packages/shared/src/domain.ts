@@ -101,6 +101,13 @@ export interface FxRate {
   fetchedAt: number;
 }
 
+export interface FxUsdtIdrResponse {
+  rate: number;
+  source: string;
+  ts: number;
+  stale?: boolean;
+}
+
 export interface JournalEntry {
   id: string;
   timestamp: number;

@@ -114,9 +114,43 @@ Check backend health.
 **Response:**
 ```json
 {
-  \"status\": \"ok\",
-  \"service\": \"trading-backend\",
-  \"port\": \"11110\",
-  \"timestamp\": \"2026-10-03T19:58:27.716Z\"
+  "status": "ok",
+  "service": "trading-backend",
+  "port": "11110",
+  "timestamp": "2026-10-03T19:58:27.716Z"
 }
 ```
+
+## FX Endpoints
+
+### GET /api/fx
+Legacy USD/IDR rate (open.er-api.com fallback).
+
+**Response:**
+```json
+{
+  "rate": {
+    "usdToIdr": 15000,
+    "fetchedAt": 1728000000000
+  }
+}
+```
+
+### GET /api/fx/usdt-idr
+Indodax USDT/IDR ticker rate for display toggle. Reference only, not a real venue.
+
+**Response:**
+```json
+{
+  "rate": 15000.50,
+  "source": "indodax",
+  "ts": 1728000000000,
+  "stale": false
+}
+```
+
+**Fields:**
+- `rate`: Current USDT/IDR rate from Indodax
+- `source`: "indodax" or "fallback"
+- `ts`: Timestamp of last successful fetch (ms)
+- `stale`: true if serving cached rate past TTL
