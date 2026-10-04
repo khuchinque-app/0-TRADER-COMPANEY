@@ -76,7 +76,7 @@ fi
 
 echo "[8/10] Testing FX rate endpoint... "
 RESP=$(curl -s http://localhost:11110/api/fx/usdt-idr)
-RATE=$(echo "$RESP" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get(rate, 0))")
+RATE=$(echo "$RESP" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('rate', 0))")
 if [ "$RATE" -gt 0 ] 2>/dev/null; then
   test_pass "FX rate: $RATE"
 else

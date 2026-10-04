@@ -215,17 +215,40 @@ app.get("/api/admin/integrity", (req, res) => {
 // MARKETS
 app.get("/api/markets", (_req, res) => {
   try {
-    const marketsEnv = process.env.MARKETS || "BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT";
-    const markets = marketsEnv.split(",").map((m: string) => ({
-      symbol: m.trim(),
-      baseAsset: m.trim().replace("USDT", ""),
-      quoteAsset: "USDT",
-      status: "trading",
-      price: "0.00",
-      source: "sim",
-      simulasi: true
-    }));
-    res.json({ markets, simulasi: true });
+    // Load from Indodax catalog if available
+    const catalogPath = "/home/khuchinque/0-TRADER-COMPANEY/docs/research/indodax-pairs.json";
+    let markets: any[] = [];
+
+    try {
+      const fs = require('fs');
+      if (fs.existsSync(catalogPath)) {
+        const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+        markets = catalog.map((p: any) => ({
+          symbol: p.symbol,
+          baseAsset: p.base,
+          quoteAsset: p.quote,
+          status: "trading",
+          price: "0.00",
+          source: "indodax",
+          simulasi: true,
+          flags: p.flags || []
+        }));
+      }
+    } catch (e) {
+      // Fallback to env var
+      const marketsEnv = process.env.MARKETS || "BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT";
+      markets = marketsEnv.split(",").map((m: string) => ({
+        symbol: m.trim(),
+        baseAsset: m.trim().replace("USDT", ""),
+        quoteAsset: "USDT",
+        status: "trading",
+        price: "0.00",
+        source: "sim",
+        simulasi: true
+      }));
+    }
+
+    res.json({ markets, simulasi: true, total: markets.length });
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message });
   }
