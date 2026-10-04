@@ -2,15 +2,14 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-// Load pair catalog at startup
+const CATALOG_PATH = "/home/khuchinque/0-TRADER-COMPANEY/docs/research/indodax-pairs.json";
+
 let pairCatalog: any[] = [];
 
 try {
-  const catalogPath = path.resolve(process.cwd(), "docs/research/indodax-pairs.json");
-  const data = fs.readFileSync(catalogPath, "utf-8");
+  const data = fs.readFileSync(CATALOG_PATH, "utf-8");
   pairCatalog = JSON.parse(data);
 } catch {
-  // Fallback if file not found
   pairCatalog = [];
 }
 

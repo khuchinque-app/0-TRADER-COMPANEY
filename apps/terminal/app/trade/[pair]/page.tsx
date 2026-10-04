@@ -198,16 +198,36 @@ function OrderTicket({ pair, quote, fxRate }: { pair: string; quote: string; fxR
   const [type, setType] = useState<"limit" | "market">("limit");
   const [price, setPrice] = useState("");
   const [amount, setAmount] = useState("");
+  const [balance, setBalance] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch balance from ledger
+    fetch("http://localhost:11110/api/ledger/balance")
+      .then((r) => r.json())
+      .then((data: any) => {
+        if (data.balances) {
+          const bal = data.balances.find((b: any) => b.pair === pair || b.asset === pair.replace(quote, ""));
+          if (bal) setBalance(bal.amount || 0);
+        }
+      })
+      .catch(() => {});
+  }, [pair, quote]);
 
   const handleSubmit = () => {
+    setError(null);
+    
     if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid amount");
+      setError("Invalid amount");
       return;
     }
     if (type === "limit" && (!price || parseFloat(price) <= 0)) {
-      alert("Please enter a valid price");
+      setError("Invalid price for limit order");
       return;
     }
+
+    const priceVal = type === "limit" ? parseFloat(price) : 0;
+    const qtyVal = parseFloat(amount);
 
     fetch("http://localhost:11110/api/orders", {
       method: "POST",
@@ -216,19 +236,21 @@ function OrderTicket({ pair, quote, fxRate }: { pair: string; quote: string; fxR
         pair,
         side,
         type,
-        price: type === "limit" ? parseFloat(price) : 0,
-        quantity: parseFloat(amount),
+        price: priceVal,
+        quantity: qtyVal,
       }),
     })
       .then((r) => r.json())
       .then((data) => {
-        if (data.ok) {
-          alert(`Order submitted: ${data.orderId}`);
+        if (data.ok || data.orderId) {
+          alert(`Order submitted: ${data.orderId || "OK"}`);
+          setAmount("");
+          setPrice("");
         } else {
-          alert(`Failed: ${data.error || "Unknown error"}`);
+          setError(data.error || "Failed to submit order");
         }
       })
-      .catch(() => alert("Failed to submit order"));
+      .catch(() => setError("Network error"));
   };
 
   return (
@@ -304,6 +326,7 @@ function OrderTicket({ pair, quote, fxRate }: { pair: string; quote: string; fxR
           <button
             key={pct}
             className="flex-1 py-1 bg-gray-800 rounded text-sm text-gray-400 hover:text-white"
+            onClick={() => setAmount((balance * pct / 100).toString())}
           >
             {pct}%
           </button>
@@ -312,6 +335,10 @@ function OrderTicket({ pair, quote, fxRate }: { pair: string; quote: string; fxR
 
       <div className="mb-4 p-3 bg-[#0d1117] rounded">
         <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Balance</span>
+          <span>{balance.toFixed(4)} {pair.replace(quote, "")}</span>
+        </div>
+        <div className="flex justify-between text-sm mt-1">
           <span className="text-gray-400">Total</span>
           <span>
             {quote === "IDR" ? "Rp " : "$"}
@@ -319,6 +346,8 @@ function OrderTicket({ pair, quote, fxRate }: { pair: string; quote: string; fxR
           </span>
         </div>
       </div>
+
+      {error && <div className="mb-4 text-red-400 text-sm">{error}</div>}
 
       <button
         onClick={handleSubmit}
