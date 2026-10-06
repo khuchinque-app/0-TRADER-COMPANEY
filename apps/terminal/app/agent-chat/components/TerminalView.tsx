@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 interface TerminalViewProps {
   lines: string[];
 }
