@@ -7,6 +7,10 @@ const nextConfig = {
     // renders no widget and posts no turnstileToken, and the engine's dev
     // verifier (TURNSTILE_SECRET unset) accepts the request unchanged.
     NEXT_PUBLIC_TURNSTILE_SITEKEY: process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY || '',
+    // Color convention flag: 'green-up' (Western, default) or 'red-up'
+    // (Indonesian/Chinese). Drives up/down color variables across price,
+    // book, tape, chart, and P&L. See CONTEXT.md — Color convention.
+    NEXT_PUBLIC_COLOR_CONVENTION: process.env.NEXT_PUBLIC_COLOR_CONVENTION || 'green-up',
   },
   async rewrites() {
     return [

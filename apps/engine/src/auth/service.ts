@@ -39,7 +39,7 @@ export type AuditEvent =
   | 'otp_fail' | 'login' | 'logout' | 'logout_all' | 'refresh' | 'session_issue'
   | 'wallet_deposit' | 'wallet_withdraw'
   // spec D: order events carry an audit row too (orders.ts / quick.ts)
-  | 'order_place' | 'quick_execute'
+  | 'order_place' | 'order_cancel' | 'quick_execute'
   | 'profile_update' | 'preferences_update'
   | 'staking_subscribe' | 'ai_subscribe';
 

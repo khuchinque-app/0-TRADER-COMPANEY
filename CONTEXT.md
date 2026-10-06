@@ -7,7 +7,7 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 **Visual reference:** Bitget's spot-trading terminal (cues, not a pixel-clone / not their brand).
 **Data:** reference prices from public Binance/Bybit feeds, clearly labeled.
 
-**Last updated:** 4 Oktober 2026
+**Last updated:** 6 Oktober 2026
 
 ---
 
@@ -70,6 +70,12 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 - Asset shortlist: BTC, ETH, SOL, BNB, XRP, LINK (AAVE fallback).
 - Chart lib = `lightweight-charts`; depth bars = our own CSS.
 - **IDR display rate**: Indodax USDT/IDR ticker (`/api/ticker/usdtidr`). Internal quote = USDT; IDR is a labeled display toggle (Q7).
+- **Color convention**: **green-up by default** (Western: green = up/gain, red = down/loss). Indonesian/Chinese red-up is
+  a single-flag flip: set `NEXT_PUBLIC_COLOR_CONVENTION=red-up` when building the terminal (flag name in
+  `apps/terminal/next.config.js`, applied as `data-color-convention` on `<html>` by `layout.tsx`). Implemented with CSS
+  variables — canonical `--color-up`/`--color-down` (+ dim/glow variants) swap in `[data-color-convention='red-up']` and
+  feed the legacy tokens (`--gain/--loss`, `--pos/--neg`, `--stx-profit/--stx-loss`, dims) used by price, book, tape,
+  chart, and P&L (T09, 2026-10-06).
 
 ---
 
@@ -90,8 +96,7 @@ documented as deferred, NOT part of this build. See `.planning/findings.md` for 
 
 ## Still open
 
-- **Color convention**: green-up (Western, recommended) vs. Indonesian red-up. Kept as a
-  config flag `COLOR_CONVENTION`; not yet decided.
+- ~~**Color convention**: green-up (Western, recommended) vs. Indonesian red-up (Q6)~~ — **resolved 2026-10-06 (T09)**: green-up default, `NEXT_PUBLIC_COLOR_CONVENTION=red-up` flips via CSS variables. See Locked facts.
 
 ---
 

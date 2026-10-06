@@ -44,28 +44,28 @@ export default function MarketPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-white">
+    <div className="min-h-screen strata-bg text-strata-text-primary">
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-4">
-        <h1 className="text-2xl font-bold text-[#f7931a]">Market</h1>
-        <p className="text-gray-400 text-sm mt-1">
+      <div className="strata-border-b strata-surface-1 px-6 py-4">
+        <h1 className="text-2xl font-bold strata-accent-default">Market</h1>
+        <p className="text-strata-text-secondary text-sm mt-1">
           Paper Trading — All {pairs.length} pairs loaded from Indodax catalog
         </p>
       </div>
 
       {/* Controls */}
-      <div className="px-6 py-4 border-b border-gray-800 flex gap-4">
+      <div className="px-6 py-4 strata-border-b strata-surface-1 flex gap-4">
         <input
           type="text"
           placeholder="Search pair..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-[#161b22] border border-gray-700 rounded px-4 py-2 text-white w-64"
+          className="strata-focus bg-strata-surface-2 border strata-border-default rounded px-4 py-2 text-strata-text-primary w-64"
         />
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value as any)}
-          className="bg-[#161b22] border border-gray-700 rounded px-4 py-2 text-white"
+          className="strata-focus bg-strata-surface-2 border strata-border-default rounded px-4 py-2 text-strata-text-primary"
         >
           <option value="all">All Pairs</option>
           <option value="IDR">IDR Only</option>
@@ -75,10 +75,10 @@ export default function MarketPage() {
 
       {/* Table */}
       <div className="px-6 py-4">
-        <div className="bg-[#161b22] rounded-lg overflow-hidden">
+        <div className="strata-surface-card overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800 text-gray-400 text-left text-sm">
+              <tr className="strata-border-b strata-text-tertiary text-left text-sm">
                 <th className="px-4 py-3">Pair</th>
                 <th className="px-4 py-3">Base</th>
                 <th className="px-4 py-3">Quote</th>
@@ -89,13 +89,13 @@ export default function MarketPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-4 py-8 text-center strata-text-tertiary">
                     Loading pairs...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-4 py-8 text-center strata-text-tertiary">
                     No pairs found
                   </td>
                 </tr>
@@ -104,10 +104,10 @@ export default function MarketPage() {
                   <tr
                     key={p.symbol}
                     onClick={() => router.push(`/trade/${p.symbol}`)}
-                    className="border-b border-gray-800 hover:bg-[#1c2128] cursor-pointer transition-colors"
+                    className="strata-border-b hover:strata-surface-1 cursor-pointer transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium">{p.symbol}</td>
-                    <td className="px-4 py-3 text-gray-300">{p.base}</td>
+                    <td className="px-4 py-3 font-medium strata-text-primary">{p.symbol}</td>
+                    <td className="px-4 py-3 strata-text-secondary">{p.base}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`px-2 py-1 rounded text-xs ${
@@ -124,7 +124,7 @@ export default function MarketPage() {
                         {p.flags.map((f) => (
                           <span
                             key={f}
-                            className="px-2 py-1 bg-gray-800 rounded text-xs text-gray-400"
+                            className="px-2 py-1 bg-strata-surface-2 rounded text-xs strata-text-tertiary"
                           >
                             {FLAGS_LABELS[f] || f}
                           </span>
@@ -132,7 +132,7 @@ export default function MarketPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button className="text-[#f7931a] hover:text-[#ff9a2e] text-sm font-medium">
+                      <button className="text-strata-accent-default hover:text-strata-accent-hover text-sm font-medium">
                         Trade →
                       </button>
                     </td>
@@ -141,7 +141,7 @@ export default function MarketPage() {
               )}
             </tbody>
           </table>
-          <div className="px-4 py-3 text-gray-500 text-sm border-t border-gray-800">
+          <div className="px-4 py-3 strata-text-tertiary text-sm strata-border-t">
             Showing {filtered.length} of {pairs.length} pairs
           </div>
         </div>

@@ -58,7 +58,54 @@ export function createOrderEntryRouter(deps: OrderEntryDeps): Router {
     extraBody: { simulasi: true },
   });
 
-  router.post('/api/orders', mockAuth, rateLimit, async (req: Request, res: Response) => {
+  // Cancel a resting order (REST mirror of the WS 'cancel' frame).
+    // POST /api/orders/:orderId/cancel  body: { userId }
+    // Releases the reserved balance: the matcher's reservedFor() only counts
+    // non-terminal orders, so a cancelled order stops reserving immediately.
+    // Not money-moving in the ledger (no balance rows change), so no
+    // Idempotency-Key is required; the order snapshot is persisted.
+    router.post('/api/orders/:orderId/cancel', mockAuth, rateLimit, async (req: Request, res: Response) => {
+      const { orderId } = req.params;
+      const { userId } = req.body ?? {};
+
+      const effectiveUser = AUTH_ENABLED ? (req as any).userId : userId;
+      if (AUTH_ENABLED && userId !== effectiveUser) {
+        res.status(403).json({ error: 'body userId does not match session token' });
+        return;
+      }
+      if (!effectiveUser || !orderId) {
+        res.status(400).json({ error: 'userId and orderId are required' });
+        return;
+      }
+
+      try {
+        const order = deps.matcher.cancelOrder(String(effectiveUser), String(orderId));
+        if (!order) {
+          res.status(404).json({ error: 'Order not found, not yours, or already settled' });
+          return;
+        }
+        // Persist the cancelled snapshot (guarded: can be a settlement race)
+        try {
+          await deps.ledger.recordOrder(order);
+        } catch (e) {
+          console.error('[REST orders] cancel persist failed:', e instanceof Error ? e.message : e);
+        }
+        deps.broadcast({ type: 'cancel_ack', payload: order });
+        deps.audit(
+          (req as any).rayId ?? null,
+          String(effectiveUser),
+          'order_cancel',
+          `cancel ${order.side} ${order.type} ${order.quantity} ${order.pair} id=${order.id}`,
+        );
+        res.status(200).json({ simulasi: true, order });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        res.status(500).json({ error: 'cancel failed' });
+        console.error('[REST orders] cancel error:', msg);
+      }
+    });
+
+    router.post('/api/orders', mockAuth, rateLimit, async (req: Request, res: Response) => {
     const idemKey = req.header('Idempotency-Key');
     // Charset mirrors wallet.ts: forbids '|' so the composite per-user
     // cacheKey below can never be forged into another user's bucket.

@@ -1,65 +1,67 @@
-// MarketTrades component - recent fill "tape"
-// Shows recent trades with price, size, time, colored by side
+// T07: Market trades tape — the venue's recent-fill scroll.
+// Consumes the backend endpoint GET /api/trades/:symbol (Next.js /api rewrite)
+// which returns the 50 most recent trades per symbol — synthetic ticks derived
+// from the price feed plus real user ledger fills (flagged mine: true).
+// Rows: time, price, size, side-colored; scrollable, newest first.
 
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Fill } from '@trading/shared';
+import { fetchTrades, TapeTrade } from '../../app/trade/[pair]/api';
 
 interface Props {
-  pair: string;
+  symbol: string; // base asset, e.g. "BTC"
 }
 
-const ENGINE_URL = process.env.NEXT_PUBLIC_ENGINE_URL || 'http://localhost:3001';
+const POLL_MS = 5000;
 
-export default function MarketTrades({ pair }: Props) {
-  const [fills, setFills] = useState<Fill[]>([]);
+export default function MarketTrades({ symbol }: Props) {
+  const [trades, setTrades] = useState<TapeTrade[]>([]);
 
   useEffect(() => {
-    // Fetch recent fills
-    const fetchFills = async () => {
-      try {
-        const res = await fetch(`${ENGINE_URL}/api/market/${pair}`);
-        const data = await res.json();
-        if (data.recentFills) {
-          setFills(data.recentFills);
-        }
-      } catch (e) {
-        console.error('Failed to fetch fills:', e);
-      }
+    let cancelled = false;
+    const load = () => {
+      fetchTrades(symbol)
+        .then((rows) => !cancelled && setTrades(rows))
+        .catch(() => {});
     };
+    load();
+    const timer = setInterval(load, POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [symbol]);
 
-    fetchFills();
-
-    // Refresh every 5 seconds
-    const interval = setInterval(fetchFills, 5000);
-    return () => clearInterval(interval);
-  }, [pair]);
-
-  if (fills.length === 0) {
+  if (trades.length === 0) {
     return (
       <div className="p-3 text-[var(--text-muted)] text-xs">No trades yet</div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-3 py-2 border-b border-[var(--border)] flex justify-between items-center">
-        <span className="text-xs text-[var(--text-secondary)] font-mono">TAPE</span>
-        <span className="text-xs text-[var(--text-muted)]">{fills.length} trades</span>
+    <div className="flex flex-col">
+      <div className="flex justify-between text-gray-500 px-2 pb-1 text-xs font-medium">
+        <span>Price (USDT)</span>
+        <span>Amount ({symbol})</span>
+        <span>Time</span>
       </div>
-      <div className="flex-1 overflow-auto">
-        {fills.map((fill) => (
+      {/* Scrolling tape: newest trade at the top, older rows scroll up/out */}
+      <div className="max-h-96 overflow-y-auto space-y-px text-sm">
+        {trades.map((t) => (
           <div
-            key={fill.id}
-            className={`px-3 py-1.5 border-b border-[var(--border)] flex justify-between items-center text-xs ${
-              fill.side === 'buy' ? 'text-[var(--gain)]' : 'text-[var(--loss)]'
-            }`}
+            key={t.id}
+            className={`flex justify-between px-2 py-0.5 items-center rounded ${
+              t.side === 'buy' ? 'text-[var(--gain)]' : 'text-[var(--loss)]'
+            } ${t.mine ? 'bg-[#f7931a]/10' : ''}`}
           >
-            <span className="font-mono">${fill.price.toFixed(2)}</span>
-            <span className="font-mono text-[var(--text-secondary)]">{fill.quantity.toFixed(4)}</span>
-            <span className="text-[var(--text-muted)]">
-              {new Date(fill.timestamp).toLocaleTimeString('en-US', { hour12: false })}
+            <span className="font-mono">{t.price.toLocaleString('en-US', { maximumFractionDigits: 8 })}</span>
+            <span className="font-mono text-gray-300">
+              {t.size.toLocaleString('en-US', { maximumFractionDigits: 8 })}
+            </span>
+            <span className="text-gray-500 font-mono text-xs">
+              {new Date(t.time).toLocaleTimeString('en-US', { hour12: false })}
+              {t.mine ? <span className="ml-1 text-[#f7931a] font-bold">MY</span> : null}
             </span>
           </div>
         ))}

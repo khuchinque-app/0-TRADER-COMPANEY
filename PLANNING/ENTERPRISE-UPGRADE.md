@@ -20,14 +20,14 @@
 | `payment.ts` | `/api/payment/*` | ✅ WORKING (sandbox) |
 
 #### Database Schema Extensions (6 new tables)
-- `recurring_plans` — 定期投资计划
-- `deposit_addresses` — 存款地址管理
-- `withdrawal_whitelist` — 提款白名单
-- `referrals` — 推荐系统
-- `support_tickets` — 客服工单
-- `api_keys` — API密钥管理
-- `payment_invoices` — 支付发票（Duitku集成）
-- `education_content` — 教育内容
+- `recurring_plans` — Recurring investment plans
+- `deposit_addresses` — Deposit address management
+- `withdrawal_whitelist` — Withdrawal whitelist
+- `referrals` — Referral system
+- `support_tickets` — Customer support tickets
+- `api_keys` — API key management
+- `payment_invoices` — Payment invoices (Duitku integration)
+- `education_content` — Education content
 
 #### Payment Integration Architecture
 
