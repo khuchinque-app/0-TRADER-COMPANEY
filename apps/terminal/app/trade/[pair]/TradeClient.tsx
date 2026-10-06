@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchPairData, fetchTicker, fetchFXRate } from "./api";
+import { fetchPairData, fetchTicker, fetchFXRate, fetchBook, OrderBook, BookLevel } from "./api";
 
 interface Pair {
   symbol: string;
@@ -41,13 +41,27 @@ export default function TradeClient({ pairData }: TradeClientProps) {
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [fills, setFills] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [book, setBook] = useState<OrderBook | null>(null);
 
   useEffect(() => {
-    fetchFXRate().then(setFxRate).catch(() => setFxRate(15000));
-    fetchTicker(pair)
-      .then((data) => setTicker(data))
-      .catch(() => setTicker(null));
-  }, [pair]);
+    let cancelled = false;
+    const load = () => {
+      fetchFXRate().then((r) => !cancelled && setFxRate(r)).catch(() => {});
+      fetchTicker(pair)
+        .then((data) => !cancelled && setTicker(data))
+        .catch(() => !cancelled && setTicker(null));
+      // T05: synthetic book refreshes with the price feed (polled every 5s).
+      fetchBook(pairData.base)
+        .then((b) => !cancelled && setBook(b))
+        .catch(() => !cancelled && setBook(null));
+    };
+    load();
+    const timer = setInterval(load, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [pair, pairData.base]);
 
   const handleOrderSubmit = () => {
     if (!price && orderType === "limit") {
@@ -280,25 +294,14 @@ export default function TradeClient({ pairData }: TradeClientProps) {
       <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
           <h2 className="text-lg font-bold mb-4">Order Book</h2>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between text-gray-500 px-2">
-              <span>Price</span>
-              <span>Amount</span>
+          {book && book.asks.length === 15 && book.bids.length === 15 ? (
+            <OrderBookView book={book} base={pairData.base} showIDR={showIDR} fxRate={fxRate} />
+          ) : (
+            <div className="text-sm text-gray-500 py-8 text-center">
+              Synthetic order book available for the shortlisted assets
+              (BTC, ETH, SOL, BNB, XRP, LINK).
             </div>
-            {[100.6, 100.7, 100.8].map((price, i) => (
-              <div key={i} className="flex justify-between px-2 py-1 text-red-400">
-                <span>{price.toFixed(2)}</span>
-                <span>{(Math.random() * 2).toFixed(4)}</span>
-              </div>
-            ))}
-            <div className="text-center py-2 font-bold text-lg">---</div>
-            {[100.5, 100.4, 100.3].map((price, i) => (
-              <div key={i} className="flex justify-between px-2 py-1 text-green-400">
-                <span>{price.toFixed(2)}</span>
-                <span>{(Math.random() * 2).toFixed(4)}</span>
-              </div>
-            ))}
-          </div>
+          )}
         </div>
 
         {/* Recent Trades */}
@@ -323,5 +326,125 @@ export default function TradeClient({ pairData }: TradeClientProps) {
         </div>
       </div>
     </>
+  );
+}
+
+// T05: Bitget-spot style order book — asks above, mid price row, bids below,
+// with CSS-only depth bars (no chart library). Bars emanate from the center
+// line outward (asks fill left, bids fill right); width = cumulative size
+// share of the deeper side.
+function OrderBookView({
+  book,
+  base,
+  showIDR,
+  fxRate,
+}: {
+  book: OrderBook;
+  base: string;
+  showIDR: boolean;
+  fxRate: number;
+}) {
+  const displayPrice = (p: number) => (showIDR ? p * fxRate : p);
+  const decimalsFor = (p: number) => {
+    if (p >= 1000) return 2;
+    if (p >= 1) return 4;
+    if (p >= 0.01) return 6;
+    return 8;
+  };
+  const fmtPrice = (p: number) =>
+    p.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: decimalsFor(p) });
+  const fmtSize = (s: number) => {
+    const d = s >= 1000 ? 2 : s >= 1 ? 4 : 6;
+    return s.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  };
+
+  // Cumulative depth per side; bar width = share of the larger side.
+  const cum = (levels: BookLevel[]) => {
+    let acc = 0;
+    return levels.map((l) => (acc += l.size));
+  };
+  const askCum = cum(book.asks);
+  const bidCum = cum(book.bids);
+  const maxCum = Math.max(askCum[askCum.length - 1], bidCum[bidCum.length - 1]);
+  const pctOf = (c: number) => (c / maxCum) * 100;
+
+  return (
+    <div className="text-sm">
+      <div className="flex justify-between text-gray-500 px-2 pb-1">
+        <span>Price ({showIDR ? "IDR" : book.quote})</span>
+        <span>Amount ({base})</span>
+      </div>
+
+      {/* Asks: displayed descending, best ask adjacent to the mid row */}
+      <div className="space-y-px">
+        {book.asks
+          .map((lvl, i) => ({ lvl, pct: pctOf(askCum[i]) }))
+          .reverse()
+          .map(({ lvl, pct: barPct }, i) => (
+            <DepthRow
+              key={`ask-${i}`}
+              price={displayPrice(lvl.price)}
+              size={lvl.size}
+              pct={barPct}
+              side="ask"
+              fmtPrice={fmtPrice}
+              fmtSize={fmtSize}
+            />
+          ))}
+      </div>
+
+      {/* Mid price row */}
+      <div className="flex items-center justify-between px-2 py-2 my-1 bg-[#0d1117] rounded border border-gray-800">
+        <span className="text-lg font-bold text-white">{fmtPrice(displayPrice(book.mid))}</span>
+        <span className="text-xs text-gray-500">
+          spread {fmtPrice(book.spread)} · {book.source === "live" ? "live ref" : "sim"}
+        </span>
+      </div>
+
+      {/* Bids: displayed descending, best bid adjacent to the mid row */}
+      <div className="space-y-px">
+        {book.bids.map((lvl, i) => (
+          <DepthRow
+            key={`bid-${i}`}
+            price={displayPrice(lvl.price)}
+            size={lvl.size}
+            pct={pctOf(bidCum[i])}
+            side="bid"
+            fmtPrice={fmtPrice}
+            fmtSize={fmtSize}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// One book row: price + amount over a CSS-only depth bar.
+function DepthRow({
+  price,
+  size,
+  pct,
+  side,
+  fmtPrice,
+  fmtSize,
+}: {
+  price: number;
+  size: number;
+  pct: number;
+  side: "ask" | "bid";
+  fmtPrice: (p: number) => string;
+  fmtSize: (s: number) => string;
+}) {
+  return (
+    <div className="relative flex justify-between px-2 py-0.5 overflow-hidden">
+      <div
+        className={`absolute inset-y-0 ${side === "ask" ? "bg-red-500 right-1/2" : "bg-green-500 left-1/2"}`}
+        style={{ width: `${pct}%`, opacity: 0.14 }}
+      />
+      <span className={`relative ${side === "ask" ? "text-red-400" : "text-green-400"}`}>
+        {fmtPrice(price)}
+      </span>
+      <span className="relative text-gray-300">{fmtSize(size)}</span>
+    </div>
   );
 }

@@ -26,3 +26,9 @@
 - BTC/ETH use native Indodax USDT pairs; SOL/BNB/XRP/LINK/AAVE are IDR-only there, quoted in USDT via the usdtidr rate (same source)
 - AAVE included as supported fallback symbol; verify gates on the 6 shortlisted assets (AAVE informational)
 - Cold start seeds from static USD reference prices (marked source=sim) so the feed is never NaN/0 and history >= 30 candles at boot; first live tick replaces them
+
+## T05: Synthetic order book + CSS depth bars on trade page
+- Book endpoint: GET /api/book/:symbol, accepts symbol ("BTC") or pair form ("BTCUSDT"/"BTCIDR"); always quotes USDT (internal ledger quote). Unknown symbol -> 404 { error: { code, message } }.
+- Book is deterministic per symbol: fixed SPREAD_BPS / BASE_SIZE tables + constant 0.88 size decay; rebuilt from the cached price-feed tick on every request (refreshes with the price). Conventions: bids descending best-first, asks ascending best-first, best ask > best bid guaranteed.
+- Trade page polls /api/book/:base every 5s (same cadence as the price feed) and renders Bitget-spot style: asks above, mid row, bids below, CSS-only center-out depth bars (cumulative size share; no chart lib).
+- Verify: T05.sh checks 15/15 levels, best ask > best bid, sizes > 0, ordering, and the terminal API payload for a valid pair contains the book (the page consumes it via the /api/* rewrite).

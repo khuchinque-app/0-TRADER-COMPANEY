@@ -44,3 +44,29 @@ export async function fetchFXRate(): Promise<number> {
   const data: FxRate = await res.json();
   return data.rate || 15000;
 }
+
+// T05: Synthetic order book (15 bids + 15 asks around the reference mid, USDT quote).
+export interface BookLevel {
+  price: number;
+  size: number;
+}
+
+export interface OrderBook {
+  symbol: string;
+  pair: string;
+  quote: string;
+  mid: number;
+  spread: number;
+  bids: BookLevel[]; // descending, best first
+  asks: BookLevel[]; // ascending, best first
+  source: string;
+  ts: number;
+}
+
+export async function fetchBook(symbol: string): Promise<OrderBook | null> {
+  const res = await fetch(`/api/book/${symbol}`);
+  if (!res.ok) return null;
+  const data: OrderBook = await res.json();
+  if (!data || !Array.isArray(data.bids) || !Array.isArray(data.asks)) return null;
+  return data;
+}
