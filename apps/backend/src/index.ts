@@ -5,7 +5,10 @@ import path from "path";
 import Database from "better-sqlite3";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
-dotenv.config({ path: path.resolve(__dirname, "../../../../../../.env") });
+// Resolve .env from repo root (works from both src/ and dist/)
+const repoRoot = path.resolve(__dirname, "../../../../");
+const dotenvPath = path.resolve(repoRoot, ".env");
+dotenv.config({ path: dotenvPath });
 
 const app = express();
 const PORT = process.env.PORT_BACKEND || 11110;
@@ -18,6 +21,150 @@ const dbPath = process.env.DB_PATH || "/home/khuchinque/0-TRADER-COMPANEY/apps/e
 const db = new Database(dbPath);
 db.pragma("journal_mode=WAL");
 db.pragma("foreign_keys=ON");
+
+// Dev credentials (not in .env per rule #5; defaults match existing autopilot/T01.sh)
+const DEV_EMAIL = process.env.DEV_EMAIL || "dev@example.com";
+const DEV_PASS = process.env.DEV_PASS || "devpass123";
+const GUEST_START_USDT = parseFloat(process.env.GUEST_START_USDT || "10000");
+const GUEST_RATE_LIMIT = parseInt(process.env.GUEST_RATE_LIMIT || "20"); // 20 guests/hour/IP
+const GUEST_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+// Guest rate limiting (in-memory, per IP)
+const guestRateMap: Map<string, number[]> = new Map();
+
+function initDb() {
+  // Create tables if they don't exist
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      phone TEXT,
+      phone_verified INTEGER NOT NULL DEFAULT 0,
+      password_hash TEXT,
+      status TEXT NOT NULL CHECK(status IN ('pending', 'active')) DEFAULT 'pending',
+      ray_id TEXT,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE TABLE IF NOT EXISTS accounts (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL UNIQUE,
+      name TEXT,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS balances (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      account_id TEXT NOT NULL,
+      asset TEXT NOT NULL,
+      available REAL NOT NULL DEFAULT 0,
+      locked REAL NOT NULL DEFAULT 0,
+      UNIQUE(account_id, asset),
+      FOREIGN KEY (account_id) REFERENCES accounts(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_balances_account ON balances(account_id);
+  `);
+
+  // Add role column if missing (admin routes reference it)
+  const cols = db.prepare("PRAGMA table_info(users)").all() as Array<{ name: string }>;
+  if (!cols.some(c => c.name === "role")) {
+    db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'customer'");
+  }
+
+  // Create other tables needed by admin/integrity routes
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      pair TEXT NOT NULL,
+      side TEXT NOT NULL CHECK(side IN ('buy', 'sell')),
+      type TEXT NOT NULL CHECK(type IN ('limit', 'market')),
+      price REAL NOT NULL,
+      quantity REAL NOT NULL,
+      filled_quantity REAL NOT NULL DEFAULT 0,
+      status TEXT NOT NULL CHECK(status IN ('open', 'partially_filled', 'filled', 'cancelled')),
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES accounts(user_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
+    CREATE TABLE IF NOT EXISTS journal (
+      id TEXT PRIMARY KEY,
+      timestamp INTEGER NOT NULL,
+      description TEXT,
+      created_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS journal_lines (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      journal_id TEXT NOT NULL,
+      account_id TEXT NOT NULL,
+      asset TEXT NOT NULL,
+      amount REAL NOT NULL,
+      entry_type TEXT NOT NULL CHECK(entry_type IN ('debit', 'credit')),
+      FOREIGN KEY (journal_id) REFERENCES journal(id) ON DELETE CASCADE,
+      FOREIGN KEY (account_id) REFERENCES accounts(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_journal_lines_journal ON journal_lines(journal_id);
+    CREATE TABLE IF NOT EXISTS fills (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      pair TEXT NOT NULL,
+      side TEXT NOT NULL CHECK(side IN ('buy', 'sell')),
+      price REAL NOT NULL,
+      quantity REAL NOT NULL,
+      fee REAL NOT NULL,
+      fee_asset TEXT NOT NULL,
+      timestamp INTEGER NOT NULL,
+      FOREIGN KEY (order_id) REFERENCES orders(id),
+      FOREIGN KEY (user_id) REFERENCES accounts(user_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_fills_user ON fills(user_id);
+    CREATE INDEX IF NOT EXISTS idx_fills_order ON fills(order_id);
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ray_id TEXT,
+      user_id TEXT,
+      event TEXT NOT NULL,
+      detail TEXT,
+      created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_audit_ray ON audit_log(ray_id);
+  `);
+}
+
+// Run DB initialization on startup
+initDb();
+
+// Extracted idempotent seed function (used by startup hook, /api/auth/seed, and `npm run seed`)
+function seedDevAccount(): { seeded: boolean; message: string } {
+  try {
+    const hash = hashPassword(DEV_PASS);
+    const rayId = `ray-${randomBytes(8).toString("hex")}`;
+    const existing = db.prepare("SELECT id FROM users WHERE email = ?").get(DEV_EMAIL) as { id: string | null } | undefined;
+    if (!existing) {
+      const devId = `dev_${randomBytes(8).toString("hex")}`;
+      db.prepare("INSERT INTO users (id, email, password_hash, status, role, ray_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(
+        devId, DEV_EMAIL, hash, "active", "system-admin", rayId, NOW, NOW
+      );
+      return { seeded: true, message: `Seeded dev account: ${DEV_EMAIL}` };
+    }
+    if (!existing.id) {
+      // Heal a NULL id left by earlier seed versions (SQLite allows NULL in a TEXT PK)
+      const devId = `dev_${randomBytes(8).toString("hex")}`;
+      db.prepare("UPDATE users SET id = ?, password_hash = ?, status = 'active', role = 'system-admin', ray_id = ?, updated_at = ? WHERE email = ?").run(
+        devId, hash, rayId, NOW, DEV_EMAIL
+      );
+      return { seeded: true, message: `Healed dev account id: ${DEV_EMAIL}` };
+    }
+    // Refresh password hash to ensure it's always correct
+    db.prepare("UPDATE users SET password_hash = ?, status = 'active', role = 'system-admin', ray_id = ?, updated_at = ? WHERE email = ?").run(hash, rayId, NOW, DEV_EMAIL);
+    return { seeded: false, message: `Dev account already exists: ${DEV_EMAIL} (password refreshed)` };
+  } catch (e: any) {
+    return { seeded: false, message: `Seed failed: ${e.message}` };
+  }
+}
 
 // FX CACHE (Indodax USDT/IDR rate)
 let fxCache: { rate: number; ts: number; source: string } | null = null;
@@ -129,9 +276,9 @@ app.post("/api/auth/signup", async (req, res) => {
     }
     const hash = hashPassword(String(password));
     const rayId = `ray-${randomBytes(8).toString("hex")}`;
-    const stmt = db.prepare("INSERT INTO users (email, password_hash, status, ray_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)");
-    const result = stmt.run(emailLower, hash, "active", rayId, NOW, NOW);
-    const userId = String(result.lastInsertRowid);
+    const userId = `u_${randomBytes(8).toString("hex")}`;
+    const stmt = db.prepare("INSERT INTO users (id, email, password_hash, status, ray_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    stmt.run(userId, emailLower, hash, "active", rayId, NOW, NOW);
     res.status(201).json({ userId, simulasi: true });
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message });
@@ -159,6 +306,78 @@ app.post("/api/auth/login", (req, res) => {
     const payload = { sub: user.id, ray: user.ray_id, iat: Date.now() };
     const jwt = signJWT(payload, JWT_SECRET);
     res.json({ ok: true, userId: user.id, rayId: user.ray_id, redirect: "/dashboard", simulasi: true, token: jwt });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
+// Seed dev credentials (idempotent)
+app.post("/api/auth/seed", (req, res) => {
+  const result = seedDevAccount();
+  res.json({ seeded: result.seeded, message: result.message, email: DEV_EMAIL, simulasi: true });
+});
+
+// Guest demo login endpoint
+app.post("/api/auth/guest", (req, res) => {
+  try {
+    // Rate limit: GUEST_RATE_LIMIT per hour per IP
+    const ip = req.ip || req.connection?.remoteAddress || "unknown";
+    const now = Date.now();
+    const windowStart = now - GUEST_RATE_WINDOW_MS;
+    const timestamps = guestRateMap.get(ip) || [];
+    const recent = timestamps.filter((ts) => ts > windowStart);
+    if (recent.length >= GUEST_RATE_LIMIT) {
+      return res.status(429).json({ error: "rate_limited", message: "Too many guest accounts. Try again later.", simulasi: true });
+    }
+    recent.push(now);
+    guestRateMap.set(ip, recent);
+
+    // Create guest user
+    const guestId = `guest-${randomBytes(8).toString("hex")}`;
+    const guestEmail = `${guestId}@simulasi.local`;
+    const noHash = ""; // guest has no password
+    const rayId = `ray-${randomBytes(8).toString("hex")}`;
+    const result = db.prepare("INSERT INTO users (id, email, password_hash, status, role, ray_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(
+      guestId, guestEmail, noHash, "active", "customer", rayId, NOW, NOW
+    );
+    const userId = guestId;
+
+    // Create account for guest
+    const accountId = `acct-${randomBytes(8).toString("hex")}`;
+    db.prepare("INSERT INTO accounts (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)").run(
+      accountId, userId, "Guest Wallet", NOW, NOW
+    );
+
+    // Credit starting balance
+    const amount = GUEST_START_USDT;
+    const existing = db.prepare("SELECT id FROM balances WHERE account_id = ? AND asset = ?").get(accountId, "USDT") as { id: number } | undefined;
+    if (existing) {
+      db.prepare("UPDATE balances SET available = available + ? WHERE id = ?").run(amount, existing.id);
+    } else {
+      db.prepare("INSERT INTO balances (account_id, asset, available, locked) VALUES (?, ?, ?, ?)").run(accountId, "USDT", amount, 0);
+    }
+
+    // Journal entry
+    const journalId = `dep_${accountId}_USDT`;
+    db.prepare("INSERT INTO journal (id, timestamp, description, created_at) VALUES (?, ?, ?, ?)").run(journalId, NOW, `Deposit ${amount} USDT`, NOW);
+    db.prepare("INSERT INTO journal_lines (journal_id, account_id, asset, amount, entry_type) VALUES (?, ?, ?, ?, ?)").run(journalId, accountId, "USDT", amount, "debit");
+
+    const payload = { sub: userId, ray: rayId, iat: Date.now() };
+    const token = signJWT(payload, JWT_SECRET);
+
+    res.status(201).json({
+      ok: true,
+      userId,
+      accountId,
+      token,
+      wallet: {
+        accountId,
+        balances: [{ asset: "USDT", available: amount, locked: 0, total: amount }],
+        balance: amount,
+        currency: "USDT"
+      },
+      simulasi: true
+    });
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message });
   }
@@ -339,8 +558,9 @@ app.post("/api/wallet/deposit", (req, res) => {
     const insertEntry = db.transaction(() => {
       let account = db.prepare("SELECT id FROM accounts WHERE user_id = ?").get(userId) as { id: string } | undefined;
       if (!account) {
-        const result = db.prepare("INSERT INTO accounts (user_id, name, created_at) VALUES (?, ?, ?)").run(userId, "User " + userId, now);
-        account = { id: String(result.lastInsertRowid) };
+        const acctId = `acct_${randomBytes(8).toString("hex")}`;
+        db.prepare("INSERT INTO accounts (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)").run(acctId, userId, "User " + userId, now, now);
+        account = { id: acctId };
       }
       const accountId = account.id;
       const existing = db.prepare("SELECT id, available FROM balances WHERE account_id = ? AND asset = ?").get(accountId, asset) as { id: number; available: number } | undefined;
@@ -665,6 +885,11 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "trading-backend", port: PORT, timestamp: new Date().toISOString() });
 });
 
+// Alias for /api/health (used by verify scripts)
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", service: "trading-backend", port: PORT, timestamp: new Date().toISOString() });
+});
+
 // CHAT ENDPOINT (for voice agent)
 app.post("/api/chat", (req, res) => {
   const { message } = req.body ?? {};
@@ -706,4 +931,7 @@ app.post("/api/chat", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
+  // Auto-seed dev credentials on startup (idempotent)
+  const result = seedDevAccount();
+  console.log(`[${result.seeded ? "SEED" : "INFO"}] ${result.message}`);
 });
