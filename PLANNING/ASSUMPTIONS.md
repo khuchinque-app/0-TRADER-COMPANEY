@@ -20,3 +20,9 @@
 - Backend runs under the khuchinque PM2 daemon (PM2_HOME=/home/khuchinque/.pm2, app `backend`,
   /usr/bin/node v22); restarted via `pm2 restart backend` after `npm run build` in apps/backend.
 - deploy.sh (runner) + verify/T01.sh both exit 0 in the runner env (HOME=/root, system npm/node).
+
+## T04: Reference price feed (USDT quote)
+- Indodax public API is the single upstream, behind apps/backend/src/pricefeed/adapter.ts (poll 5s, /api/price/:symbol + /api/price/:symbol/history 1m candles)
+- BTC/ETH use native Indodax USDT pairs; SOL/BNB/XRP/LINK/AAVE are IDR-only there, quoted in USDT via the usdtidr rate (same source)
+- AAVE included as supported fallback symbol; verify gates on the 6 shortlisted assets (AAVE informational)
+- Cold start seeds from static USD reference prices (marked source=sim) so the feed is never NaN/0 and history >= 30 candles at boot; first live tick replaces them

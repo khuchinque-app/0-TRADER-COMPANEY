@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import path from "path";
 import Database from "better-sqlite3";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { createPriceRouter } from "./routes/price";
+import { priceFeed } from "./pricefeed/service";
 
 // Resolve .env from repo root (works from both src/ and dist/)
 const repoRoot = path.resolve(__dirname, "../../../../");
@@ -473,6 +475,9 @@ app.get("/api/markets", (_req, res) => {
   }
 });
 
+// T04: Reference price feed routes (mounted before the generic /api/ticker/:pair route)
+app.use(createPriceRouter());
+
 // FX RATE ENDPOINT
 app.get("/api/fx/usdt-idr", async (req, res) => {
   try {
@@ -931,6 +936,8 @@ app.post("/api/chat", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
+  // T04: start the reference price feed poller (immediate first poll, then every few seconds)
+  priceFeed.start();
   // Auto-seed dev credentials on startup (idempotent)
   const result = seedDevAccount();
   console.log(`[${result.seeded ? "SEED" : "INFO"}] ${result.message}`);
