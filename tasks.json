@@ -1,0 +1,160 @@
+{
+  "goal": "Simulasi Exchange runs end-to-end in simulation mode: login/guest -> browse 477 Indodax pairs -> trade the 6 shortlisted assets (market + limit) against a synthetic book -> double-entry ledger stays balanced -> docs + handoff + survives pm2 resurrect.",
+  "tasks": [
+    {
+      "id": "T01",
+      "title": "Auth works: seeded dev accounts + guest demo login",
+      "needs": [],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T01.sh",
+      "spec": [
+        "Login currently returns 'Invalid email or password' for the seeded dev credentials. Find the ROOT cause (seed missing, hash mismatch, wrong DB path/env) and fix it. Seeding must be idempotent and run on backend start (or via a documented `npm run seed`).",
+        "Guest demo (locked decision in CONTEXT.md): an endpoint creates a guest account with a starting balance of 10000 USDT (env GUEST_START_USDT) and returns a session/token. Keep abuse protection trivial (e.g. 20 guests/hour/IP).",
+        "Wrong password must return 401, never 200.",
+        "CREATE autopilot/verify/T01.sh (backend is http://127.0.0.1:11110): login with the seeded dev creds -> 200 + token; wrong password -> 401; guest creation -> token + wallet shows 10000 USDT. Real curl/jq assertions, `set -euo pipefail`, non-zero exit on any failure."
+      ]
+    },
+    {
+      "id": "T02",
+      "title": "Unknown trade pair shows 'Pair Not Found' (server-rendered)",
+      "needs": [],
+      "no_deploy": false,
+      "verify": "bash autopilot/verify/T02.sh",
+      "spec": [
+        "/trade/FAKEXYZ currently shows 'Loading...' forever. Validate the pair server-side against the 477-pair catalog (Next.js notFound() or a server component that renders a 'Pair Not Found' page with a link back to /markets).",
+        "The text must be present in the SERVER-RENDERED HTML (the smoke test uses curl, not a browser).",
+        "Valid pairs must keep working."
+      ]
+    },
+    {
+      "id": "T03",
+      "title": "Smoke suite is authoritative (exits non-zero on any failure) and passes",
+      "needs": ["T01", "T02"],
+      "verify": "bash autopilot/verify/gate_smoke.sh",
+      "spec": [
+        "The last report said '9/10 FAIL' next to a single failing check - work out which it really is. Make scripts/smoke*.sh print one line per check and exit NON-ZERO if any check fails.",
+        "Cover at least: backend up, terminal up, login, markets list >= 400 pairs, a valid /trade page, /trade/FAKEXYZ not-found.",
+        "Then make every check pass."
+      ]
+    },
+    {
+      "id": "T04",
+      "title": "Reference price feed for the 6 shortlisted assets (USDT quote)",
+      "needs": ["T03"],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T04.sh",
+      "spec": [
+        "Assets: BTC, ETH, SOL, BNB, XRP, LINK (AAVE as fallback). Internal quote is USDT. IDR is display only (needs a USDT/IDR rate).",
+        "Backend service polls a public ticker source (try Indodax public API first; keep the source behind one adapter file) every few seconds, caches the last value, and exposes GET price + short candle history per symbol.",
+        "If upstream is unreachable or returns junk, fall back to a clearly flagged simulated random walk seeded from the last good price (response field `source: 'live'|'sim'`). Never crash, never return NaN/0.",
+        "CREATE autopilot/verify/T04.sh: price endpoint returns a positive number for all 6 symbols, `source` field present, history endpoint returns >= 30 candles with open/high/low/close."
+      ]
+    },
+    {
+      "id": "T05",
+      "title": "Synthetic order book + CSS depth bars on trade page",
+      "needs": ["T04"],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T05.sh",
+      "spec": [
+        "Backend endpoint returns a synthetic book around the reference mid: 15 bids + 15 asks, spread and size decay deterministic per symbol, refreshed with the price.",
+        "Trade page renders it Bitget-spot style: asks above, mid price row, bids below, CSS-only depth bars (no chart lib).",
+        "CREATE autopilot/verify/T05.sh: book endpoint has 15/15 levels, best ask > best bid, sizes > 0, and the server-rendered or API payload for a valid pair contains the book."
+      ]
+    },
+    {
+      "id": "T06",
+      "title": "Price chart with lightweight-charts (candles + intervals)",
+      "needs": ["T04"],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T06.sh",
+      "spec": [
+        "Use lightweight-charts (locked decision). Candlesticks from the T04 history endpoint, intervals 1m / 5m / 1h switchable, live last-candle update from polling.",
+        "Must not break SSR (load the chart client-side only).",
+        "CREATE autopilot/verify/T06.sh: history endpoint serves each interval with >= 30 candles; `lightweight-charts` is in apps/terminal/package.json; trade page for a valid pair returns 200."
+      ]
+    },
+    {
+      "id": "T07",
+      "title": "Market trades tape (scrolling recent trades)",
+      "needs": ["T04"],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T07.sh",
+      "spec": [
+        "Backend endpoint returns the most recent 50 trades per symbol: synthetic ticks derived from the price feed, plus real user fills from the ledger flagged `mine: true`.",
+        "Trade page shows a scrolling tape (time, price, size, side color).",
+        "CREATE autopilot/verify/T07.sh: endpoint returns 50 rows with price/size/side/time, newest first."
+      ]
+    },
+    {
+      "id": "T08",
+      "title": "Order flow end-to-end: market + limit + cancel, ledger stays balanced",
+      "needs": ["T01", "T04", "T05"],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T08.sh",
+      "spec": [
+        "Market orders fill immediately against the synthetic book (walk the levels). Limit orders rest and fill when the reference price crosses them; cancel releases the reserved balance.",
+        "Insufficient balance -> clear 4xx error, never a negative balance. No fees beyond what already exists.",
+        "Every fill writes balanced double-entry rows to the SQLite ledger (apps/engine/data/ledger.db).",
+        "CREATE autopilot/verify/T08.sh: as a fresh guest - buy BTC market, place a limit far below market (rests), cancel it, over-spend (rejected), then assert with sqlite3 that SUM(debits)=SUM(credits) and no balance < 0."
+      ]
+    },
+    {
+      "id": "T09",
+      "title": "COLOR_CONVENTION flag (green-up default)",
+      "needs": ["T05"],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T09.sh",
+      "spec": [
+        "Single flag (env NEXT_PUBLIC_COLOR_CONVENTION = 'green-up' | 'red-up', default green-up) controls up/down colors across price, book, tape, chart, and P&L via CSS variables. Document the choice in CONTEXT.md as decided (green-up default, flag to flip).",
+        "CREATE autopilot/verify/T09.sh: flag name referenced in terminal source + CSS variables defined for both modes + trade page 200."
+      ]
+    },
+    {
+      "id": "T10",
+      "title": "IDR display toggle (labeled; USDT stays internal)",
+      "needs": ["T04"],
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T10.sh",
+      "spec": [
+        "Header toggle USDT <-> IDR changes DISPLAY only, with an explicit 'IDR (display)' label and the rate source/time visible. Orders and ledger remain USDT.",
+        "CREATE autopilot/verify/T10.sh: rate endpoint returns a positive USDT/IDR number; the terminal source contains the toggle; ledger schema has no IDR currency rows."
+      ]
+    },
+    {
+      "id": "T11",
+      "title": "Docs: README, RUNBOOK, HARDENING-TODO, HANDOFF",
+      "needs": ["T08"],
+      "no_deploy": true,
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T11.sh",
+      "spec": [
+        "README.md (what it is, simulation-only disclaimer, quick start), RUNBOOK.md (start/stop/restart pm2, ports 11110/22220, ledger location, backup, reset demo), HARDENING-TODO.md (everything deliberately left dev-grade: dev creds, open ports, http, no TLS, ...), HANDOFF.md (architecture, locked decisions, how a new coding agent picks up, known gaps).",
+        "Only document what is true now; read the code, do not invent.",
+        "CREATE autopilot/verify/T11.sh: the 4 files exist, each > 600 bytes, HARDENING-TODO mentions credentials and https, RUNBOOK mentions 11110 and 22220."
+      ]
+    },
+    {
+      "id": "T12",
+      "title": "pm2 ecosystem file + saved process list",
+      "needs": ["T03"],
+      "no_deploy": true,
+      "agent_writes_verify": true,
+      "verify": "bash autopilot/verify/T12.sh",
+      "spec": [
+        "ecosystem.config.js at repo root describing backend and terminal (and engine if it runs as its own process) with the ports already in use. `pm2 save` after. Do not touch other pm2 apps.",
+        "CREATE autopilot/verify/T12.sh: ecosystem file exists; `pm2 jlist` shows backend and terminal status online; dump file exists."
+      ]
+    },
+    {
+      "id": "T99",
+      "title": "GOAL GATE: full acceptance run (all task verifies + smoke) passes",
+      "needs": ["T01", "T02", "T03", "T04", "T05", "T06", "T07", "T08", "T09", "T10", "T11", "T12"],
+      "verify": "bash autopilot/verify/accept.sh",
+      "spec": [
+        "Run `bash autopilot/verify/accept.sh`. It re-runs every task verify and the smoke suite against the live services. Fix whatever regressed (one fix at a time, smallest change). Do not edit any verify script.",
+        "When it exits 0, reply DONE."
+      ]
+    }
+  ]
+}

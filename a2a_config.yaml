@@ -1,0 +1,14 @@
+# A2A Agent Configuration for herme-chinque
+
+a2a_agents:
+  # Herme_KhuChinQue_bot - the VPS-side autopilot agent
+  herme-khuchinque:
+    url: "http://127.0.0.1:22220"
+    auth:
+      type: bearer
+      token: "herme-khuchinque-token"
+    timeout: 120
+    capabilities:
+      - autopilot
+      - verify
+      - deploy

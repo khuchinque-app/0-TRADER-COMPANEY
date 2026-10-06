@@ -1,0 +1,26 @@
+{
+  "_comment": "Order = priority. 'bin' must be on PATH or the engine is skipped. cmd runs via bash -lc in the repo; the full prompt is in $PROMPT_FILE. Verify each CLI with: python3 autopilot/autopilot.py --selftest. If a CLI waits for tool-approval in non-interactive mode it will just time out - add its auto-approve flag here.",
+  "engines": [
+    {
+      "name": "opencode",
+      "bin": "opencode",
+      "timeout": 1800,
+      "enabled": true,
+      "cmd": "opencode run \"$(cat \"$PROMPT_FILE\")\""
+    },
+    {
+      "name": "hermes-default",
+      "bin": "hermes",
+      "timeout": 1800,
+      "enabled": true,
+      "cmd": "hermes -p default chat -q \"$(cat \"$PROMPT_FILE\")\""
+    },
+    {
+      "name": "hermes-cung",
+      "bin": "hermes",
+      "timeout": 1800,
+      "enabled": true,
+      "cmd": "hermes -p cung chat -q \"$(cat \"$PROMPT_FILE\")\""
+    }
+  ]
+}
