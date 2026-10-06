@@ -1,3 +1,48 @@
+#!/bin/bash
+# VPS Update Script for 0-TRADER-COMPANEY
+# Installs Wayfinder skills and configures Hermes Agent
+
+set -e
+
+PROJECT_DIR="/home/khuchinque/0-TRADER-COMPANEY"
+HERMES_SKILLS_DIR="$HOME/.hermes/profiles/herme-khuchinque/skills/engineering"
+
+echo "=== VPS Update Script ==="
+echo ""
+
+# Step 1: Git Pull
+echo "Step 1: Pulling latest code..."
+cd "$PROJECT_DIR"
+git pull origin master 2>/dev/null || echo "No changes to pull or not on master branch"
+echo "✅ Git pull complete"
+
+# Step 2: Install Wayfinder Skills
+echo ""
+echo "Step 2: Installing Wayfinder skills..."
+
+# Copy wayfinder skill from PLANNING to hermes skills
+if [ -d "$PROJECT_DIR/PLANNING/.agents/skills/wayfinder" ]; then
+    cp -r "$PROJECT_DIR/PLANNING/.agents/skills/wayfinder" "$HERMES_SKILLS_DIR/"
+    echo "✅ Wayfinder skill installed to $HERMES_SKILLS_DIR/wayfinder"
+else
+    echo "⚠️ Wayfinder source not found in PLANNING/.agents/skills/"
+fi
+
+# Copy other engineering skills
+for skill_dir in ask-matt code-review codebase-design diagnosing-bugs domain-modeling grill-me grill-with-docs grilling implement implement-spec improve-codebase-architecture loop-me pr retro setup-matt-pocock-skills tdd teach to-questionnaire to-spec to-tickets triage wait-what writing-beats writing-for-agents writing-fragments writing-shape wizard; do
+    if [ -d "$PROJECT_DIR/PLANNING/.agents/skills/$skill_dir" ]; then
+        cp -r "$PROJECT_DIR/PLANNING/.agents/skills/$skill_dir" "$HERMES_SKILLS_DIR/" 2>/dev/null || true
+    fi
+done
+
+echo "✅ Engineering skills installed"
+
+# Step 3: Configure Hermes MCP
+echo ""
+echo "Step 3: Configuring Hermes MCP..."
+
+# Create voice MCP server config
+cat > "$PROJECT_DIR/voice_mcp_server.py" << 'EOF'
 """Trading Voice MCP Server - FastMCP version"""
 import asyncio
 import os
@@ -76,3 +121,18 @@ async def trade_info(query: str) -> str:
 
 if __name__ == "__main__":
     mcp.run()
+EOF
+
+echo "✅ Voice MCP server configured"
+
+# Step 4: Verify Services
+echo ""
+echo "Step 4: Verifying services..."
+
+pm2 list | grep -E "backend|terminal|engine" || echo "⚠️ PM2 services not running"
+
+echo ""
+echo "=== Update Complete ==="
+echo "Project: $PROJECT_DIR"
+echo "Branch: $(git branch --show-current)"
+echo "Commit: $(git rev-parse --short HEAD)"
