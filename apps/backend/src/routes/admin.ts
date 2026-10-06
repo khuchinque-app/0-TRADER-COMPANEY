@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { DatabaseSync } from 'node:sqlite';
 
 const router = Router();
-const DB_PATH = process.env.DB_PATH || '/home/khuchinque/0-TRADER-COMPANEY/apps/engine/data/ledger.db';
+const DB_PATH = process.env.DB_PATH || path.resolve(__dirname, "../../../apps/engine/data/ledger.db");
 
 const db = new DatabaseSync(DB_PATH);
 db.exec('PRAGMA journal_mode=WAL');

@@ -6,6 +6,7 @@ import Database from "better-sqlite3";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { createPriceRouter } from "./routes/price";
 import { paymentRouter } from "./routes/payment";
+import { agentRouter } from "./routes/agent";
 import { priceFeed } from "./pricefeed/service";
 import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
 import { tapeService, TAPE_LEN, TapeTrade } from "./pricefeed/tape";
@@ -25,7 +26,7 @@ app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const dbPath = process.env.DB_PATH || "/home/khuchinque/0-TRADER-COMPANEY/apps/engine/data/ledger.db";
+const dbPath = process.env.DB_PATH || path.resolve(repoRoot, "apps/engine/data/ledger.db");
 const db = new Database(dbPath);
 db.pragma("journal_mode=WAL");
 db.pragma("foreign_keys=ON");
@@ -443,7 +444,7 @@ app.get("/api/admin/integrity", (req, res) => {
 app.get("/api/markets", (_req, res) => {
   try {
     // Load from Indodax catalog if available
-    const catalogPath = "/home/khuchinque/0-TRADER-COMPANEY/docs/research/indodax-pairs.json";
+    const catalogPath = path.resolve(repoRoot, "docs/research/indodax-pairs.json");
     let markets: any[] = [];
 
     try {

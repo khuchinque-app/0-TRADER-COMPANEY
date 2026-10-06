@@ -8,7 +8,7 @@ import Database from "better-sqlite3";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
 const repoRoot = path.resolve(__dirname, "../../");
-const dbPath = process.env.DB_PATH || "/home/khuchinque/0-TRADER-COMPANEY/apps/engine/data/ledger.db";
+const dbPath = process.env.DB_PATH || path.resolve(repoRoot, "apps/engine/data/ledger.db");
 const db = new Database(dbPath);
 
 const DEV_EMAIL = process.env.DEV_EMAIL || "dev@example.com";

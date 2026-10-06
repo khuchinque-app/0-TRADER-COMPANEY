@@ -16,10 +16,18 @@ if ! grep -q "Microsoft\|WSL" /proc/version 2>/dev/null; then
     echo ""
 fi
 
-# Source environment
-export HERMES_PROFILE=herme-chinque-local
-export TELEGRAM_BOT_TOKEN="8790650185:AAGD4Jt__L3s1vjava8tNr61F6Uw3VzjXNQ"
-export TELEGRAM_CHAT_ID="7281341176"
+# Source environment from .env file if available
+if [ -f ".env" ]; then
+    export $(grep -v '^#' .env | xargs)
+    echo "✅ Loaded .env file"
+else
+    echo "⚠️  No .env file found, using defaults"
+fi
+
+# Set defaults if not in .env
+export HERMES_PROFILE="${HERMES_PROFILE:-herme-chinque-local}"
+export TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-your-bot-token-here}"
+export TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-7281341176}"
 
 # Change to project directory
 cd /home/chinque/0-TRADER-COMPANEY 2>/dev/null || cd ~/0-TRADER-COMPANEY 2>/dev/null || {

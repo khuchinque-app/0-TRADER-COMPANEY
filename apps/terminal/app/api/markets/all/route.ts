@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const CATALOG_PATH = "/home/khuchinque/0-TRADER-COMPANEY/docs/research/indodax-pairs.json";
+const CATALOG_PATH = path.resolve(__dirname, "../../../../docs/research/indodax-pairs.json");
 
 let pairCatalog: any[] = [];
 
