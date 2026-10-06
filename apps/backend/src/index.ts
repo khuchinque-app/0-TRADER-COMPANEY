@@ -17,6 +17,9 @@ dotenv.config({ path: dotenvPath });
 const app = express();
 const PORT = process.env.PORT_BACKEND || 11110;
 
+import { rateLimit } from './middleware/rate-limit';
+
+app.use(rateLimit({ windowMs: 60000, maxRequests: 100 }));
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
