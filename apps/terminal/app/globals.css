@@ -5,17 +5,24 @@
 /* Trading Terminal — merged design: port 2217 tokens + market-monitor */
 
 :root {
+  /* ===== Vice City Neon Palette ===== */
+  --vice-sunset-pink: #FF5CA8;
+  --vice-cyan: #00F0FF;
+  --vice-neon-purple: #BC6CFF;
+  --vice-miami-peach: #FFB86B;
+  --vice-ocean-night: #0B0F2B;
+  
   /* ===== Color convention (NEXT_PUBLIC_COLOR_CONVENTION) ===== */
   /* green-up (default, Western) — green = up/gain, red = down/loss */
   /* red-up (Indonesian/Chinese) — red = up/gain, green = down/loss */
   /* The [data-color-convention] selector on :root swaps these canonical */
   /* variables so every component using --gain/--loss flips automatically. */
-  --color-up: #22C55E;       /* green-up: gain up color */
-  --color-down: #EF4444;     /* green-up: loss down color */
-  --color-up-dim: rgba(34, 197, 94, 0.12);
-  --color-down-dim: rgba(239, 68, 68, 0.12);
-  --color-up-glow: rgba(34, 197, 94, 0.4);
-  --color-down-glow: rgba(239, 68, 68, 0.4);
+  --color-up: #00FF88;       /* neon green for profit */
+  --color-down: #FF3366;     /* neon pink for loss */
+  --color-up-dim: rgba(0, 255, 136, 0.15);
+  --color-down-dim: rgba(255, 51, 102, 0.15);
+  --color-up-glow: rgba(0, 255, 136, 0.5);
+  --color-down-glow: rgba(255, 51, 102, 0.5);
 }
 
 /* Red-up convention: swap up/down colors */
@@ -47,60 +54,60 @@
 
 /* ===== Port 2217 (chinque-cripto) tokens ===== */
 :root {
-  --stx-bg: #090909;
-  --stx-sidebar: #0B0B0C;
-  --stx-surface: #101113;
-  --stx-surface-2: #141518;
-  --color-gold: #F59E0B;
-  --color-brand-border: rgba(255,255,255,0.05);
-  --color-brand-border-subtle: rgba(255,255,255,0.03);
-  --color-brand-text: #F4F4F5;
-  --color-brand-text-secondary: rgba(255,255,255,0.62);
-  --color-brand-text-muted: rgba(255,255,255,0.38);
+  --stx-bg: var(--vice-ocean-night);
+  --stx-sidebar: var(--vice-bg-dark);
+  --stx-surface: var(--vice-bg-surface);
+  --stx-surface-2: var(--vice-bg-card);
+  --color-gold: var(--vice-miami-peach);
+  --color-brand-border: rgba(0, 240, 255, 0.2);
+  --color-brand-border-subtle: rgba(255, 92, 168, 0.15);
+  --color-brand-text: #FFFFFF;
+  --color-brand-text-secondary: rgba(255, 255, 255, 0.85);
+  --color-brand-text-muted: rgba(255, 255, 255, 0.6);
 
   /* ===== Market-monitor tokens (preserved) ===== */
-  --bg-primary: #000000;
-  --bg-secondary: #0d0d0d;
-  --bg-panel: #0d0d0d;
-  --bg-hover: #161616;
-  --cyan: #3080ff;
-  --cyan-dim: rgba(48, 128, 255, 0.15);
-  --purple: #3080ff;
-  --purple-dim: rgba(48, 128, 255, 0.1);
-  --text-primary: #ffffff;
-  --text-secondary: #a8a8a8;
-  --text-muted: #8f8f8f;
-  --border: #2e2e2e;
-  --border-light: #565656;
-  --grid-line: rgba(48, 128, 255, 0.08);
+  --bg-primary: var(--vice-bg-deep);
+  --bg-secondary: var(--vice-bg-dark);
+  --bg-panel: var(--vice-bg-surface);
+  --bg-hover: var(--vice-bg-card);
+  --cyan: var(--vice-cyan);
+  --cyan-dim: rgba(0, 240, 255, 0.15);
+  --purple: var(--vice-neon-purple);
+  --purple-dim: rgba(188, 108, 255, 0.15);
+  --text-primary: var(--vice-text-primary);
+  --text-secondary: var(--vice-text-secondary);
+  --text-muted: var(--vice-text-muted);
+  --border: var(--vice-border);
+  --border-light: rgba(0, 240, 255, 0.4);
+  --grid-line: rgba(0, 240, 255, 0.1);
 
   /* Canonical */
-  --bg: #000000;
-  --panel: #0d0d0d;
-  --raised: #161616;
-  --ink: #ffffff;
-  --muted: #8f8f8f;
-  --faint: #565656;
-  --line-soft: #1c1c1c;
-  --accent: #3080ff;
-  --accent-ink: #04122b;
-  --accent-soft: #0d1f3d;
-  --warn: #e5a83a;
-  --r: 6px;
-  --r-sm: 4px;
-  --r-lg: 10px;
+  --bg: var(--vice-bg-deep);
+  --panel: var(--vice-bg-surface);
+  --raised: var(--vice-bg-card);
+  --ink: var(--vice-text-primary);
+  --muted: var(--vice-text-muted);
+  --faint: rgba(255, 255, 255, 0.4);
+  --line-soft: rgba(0, 240, 255, 0.1);
+  --accent: var(--vice-cyan);
+  --accent-ink: var(--vice-ocean-night);
+  --accent-soft: rgba(0, 240, 255, 0.1);
+  --warn: var(--vice-miami-peach);
+  --r: 12px;
+  --r-sm: 8px;
+  --r-lg: 20px;
   --ease: cubic-bezier(.22, .7, .2, 1);
-  --fast: .16s var(--ease);
-  --slow: .34s var(--ease);
+  --fast: .2s var(--ease);
+  --slow: .4s var(--ease);
 
   /* ===== Unified mapping (2217 → market-monitor) ===== */
-  --bg-unified: #090909;
-  --surface-unified: #101113;
-  --surface-2-unified: #141518;
-  --border-unified: rgba(255,255,255,0.05);
-  --text-primary-unified: #F4F4F5;
-  --text-secondary-unified: rgba(255,255,255,0.62);
-  --text-muted-unified: rgba(255,255,255,0.38);
+  --bg-unified: var(--vice-bg-dark);
+  --surface-unified: var(--vice-bg-surface);
+  --surface-2-unified: var(--vice-bg-card);
+  --border-unified: var(--vice-border);
+  --text-primary-unified: var(--vice-text-primary);
+  --text-secondary-unified: var(--vice-text-secondary);
+  --text-muted-unified: var(--vice-text-muted);
 }
 
 /* Light theme */
@@ -137,6 +144,12 @@ body {
   line-height: 1.5;
   overflow-x: hidden;
 }
+
+/* Vice City Neon Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--vice-bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--vice-cyan); border-radius: 4px; box-shadow: var(--glow-cyan); }
+::-webkit-scrollbar-thumb:hover { background: var(--vice-pink-bright); }
 
 .font-mono {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
