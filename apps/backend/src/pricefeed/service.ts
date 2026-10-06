@@ -30,9 +30,25 @@ export interface Candle {
   close: number;
 }
 
+export type IntervalId = "1m" | "5m" | "1h";
+
+export const INTERVALS: IntervalId[] = ["1m", "5m", "1h"];
+export const INTERVAL_MS: Record<IntervalId, number> = {
+  "1m": 60 * 1000,
+  "5m": 5 * 60 * 1000,
+  "1h": 60 * 60 * 1000,
+};
+
+export function intervalMs(interval: string): number | null {
+  return INTERVAL_MS[interval as IntervalId] ?? null;
+}
+
+// Minimum candle count per interval (verify requires >= 30); 1m keeps 1920 candles
+// (32h) so 5m -> ~384 aggregated and 1h -> ~32 aggregated (all >= 30).
+const MIN_CANDLES = 30;
 const POLL_MS = Math.max(1000, parseInt(process.env.PRICE_POLL_MS || "5000", 10));
-const CANDLE_BUCKET_MS = 60 * 1000; // 1-minute candles
-const HISTORY_LEN = 120; // keep up to 120 candles (verify requires >= 30)
+const CANDLE_BUCKET_MS = INTERVAL_MS["1m"];
+const HISTORY_LEN = 1920; // 1m candles: covers ~32h, yields >=30 for all intervals
 
 const bucketOf = (ts: number) => Math.floor(ts / CANDLE_BUCKET_MS) * CANDLE_BUCKET_MS;
 
@@ -72,9 +88,11 @@ class PriceFeedService {
     return this.ticks.get(symbol)!;
   }
 
-  getHistory(symbol: SymbolId): { candles: Candle[]; source: "live" | "sim"; ts: number } {
+  getHistory(symbol: SymbolId, interval: IntervalId = "1m"): { candles: Candle[]; source: "live" | "sim"; ts: number; interval: IntervalId } {
     const tick = this.ticks.get(symbol)!;
-    return { candles: this.candles.get(symbol) ?? [], source: tick.source, ts: tick.ts };
+    const raw1m = this.candles.get(symbol) ?? [];
+    if (interval === "1m") return { candles: raw1m, source: tick.source, ts: tick.ts, interval: "1m" };
+    return { candles: aggregateCandles(raw1m, INTERVAL_MS[interval]), source: tick.source, ts: tick.ts, interval };
   }
 
   isPolling(symbol: SymbolId): boolean {
@@ -148,6 +166,41 @@ class PriceFeedService {
     }
     // bucket < last.ts (clock skew): ignore the out-of-order tick
   }
+}
+
+/**
+ * Aggregate a list of 1m candles into larger interval candles.
+ * Each output candle covers a whole-number interval window containing the input bucket of its open.
+ */
+function aggregateCandles(candles: Candle[], intervalMs: number): Candle[] {
+  if (candles.length === 0) return [];
+  const windowMs = intervalMs;
+  // Group candles by floor(ts / windowMs)
+  const groups: Map<number, Candle[]> = new Map();
+  for (const c of candles) {
+    const key = Math.floor(c.ts / windowMs) * windowMs;
+    const arr = groups.get(key);
+    if (arr) arr.push(c);
+    else groups.set(key, [c]);
+  }
+  const out: Candle[] = [];
+  for (const [, arr] of groups) {
+    const first = arr[0];
+    let high = first.high;
+    let low = first.low;
+    for (const c of arr) {
+      high = Math.max(high, c.high);
+      low = Math.min(low, c.low);
+    }
+    out.push({
+      ts: first.ts,
+      open: first.open,
+      high,
+      low,
+      close: arr[arr.length - 1].close,
+    });
+  }
+  return out;
 }
 
 export const priceFeed = new PriceFeedService();

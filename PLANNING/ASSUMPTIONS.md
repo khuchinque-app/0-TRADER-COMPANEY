@@ -32,3 +32,10 @@
 - Book is deterministic per symbol: fixed SPREAD_BPS / BASE_SIZE tables + constant 0.88 size decay; rebuilt from the cached price-feed tick on every request (refreshes with the price). Conventions: bids descending best-first, asks ascending best-first, best ask > best bid guaranteed.
 - Trade page polls /api/book/:base every 5s (same cadence as the price feed) and renders Bitget-spot style: asks above, mid row, bids below, CSS-only center-out depth bars (cumulative size share; no chart lib).
 - Verify: T05.sh checks 15/15 levels, best ask > best bid, sizes > 0, ordering, and the terminal API payload for a valid pair contains the book (the page consumes it via the /api/* rewrite).
+
+## T06: Price chart with lightweight-charts (candles + intervals)
+- Chart lib loaded client-side only (dynamic import in useEffect) so SSR is never broken; type-only imports are erased at compile time.
+- Candles come from the T04 history endpoint /api/price/:symbol/history?interval= (proxied via the terminal /api/* rewrite). Intervals limited to 1m/5m/1h per the T06 spec (the dashboard's 6-timeframe selector is a separate, pre-existing widget).
+- Live last-candle update via a 5s poll (same cadence as the price feed / order book) using series.update() so the visible range is not reset; falls back to setData on interval switch / backend restart.
+- Backend HISTORY_LEN raised 180 -> 1920 (32h of 1m candles) so the 1h aggregate yields >= 30 candles (1m=1920, 5m=~385, 1h=~33). Chart shows USDT prices (internal quote); IDR display toggle is T10.
+- Non-shortlisted pairs render the chart with an "unsupported" note (history endpoint only serves the 6 shortlisted assets), mirroring the order book behavior.

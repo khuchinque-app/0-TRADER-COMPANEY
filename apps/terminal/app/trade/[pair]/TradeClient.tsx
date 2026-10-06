@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPairData, fetchTicker, fetchFXRate, fetchBook, OrderBook, BookLevel } from "./api";
+import TradePriceChart from "../../../components/chart/TradePriceChart";
 
 interface Pair {
   symbol: string;
@@ -176,13 +177,9 @@ export default function TradeClient({ pairData }: TradeClientProps) {
 
       {/* Main Content */}
       <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chart */}
-        <div className="lg:col-span-2 bg-[#161b22] rounded-lg p-4 border border-gray-800 h-96 flex items-center justify-center">
-          <div className="text-center text-gray-500">
-            <div className="text-4xl mb-2">📈</div>
-            <div>Chart: {pair}</div>
-            <div className="text-sm mt-2">Lightweight Charts would go here</div>
-          </div>
+        {/* Chart (T06: lightweight-charts, candles from T04 history endpoint) */}
+        <div className="lg:col-span-2 h-96">
+          <TradePriceChart symbol={pairData.base} pair={pair} />
         </div>
 
         {/* Order Ticket */}

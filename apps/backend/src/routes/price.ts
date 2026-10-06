@@ -8,6 +8,7 @@ import { Router } from "express";
 import { SUPPORTED_SYMBOLS, isSymbol } from "../pricefeed/adapter";
 import { priceFeed } from "../pricefeed/service";
 import { getBook } from "../pricefeed/book";
+import { INTERVALS, IntervalId, intervalMs } from "../pricefeed/service";
 
 const router = Router();
 
@@ -29,12 +30,18 @@ router.get("/api/price/:symbol/history", (req, res) => {
       error: { code: "unknown_symbol", message: `Unknown symbol: ${raw}. Supported: ${SUPPORTED_SYMBOLS.join(", ")}` },
     });
   }
-  const { candles, source, ts } = priceFeed.getHistory(raw);
+  const iv = (String(req.query.interval || "1m")).toLowerCase();
+  if (!intervalMs(iv)) {
+    return res.status(400).json({
+      error: { code: "invalid_interval", message: `interval must be one of: ${INTERVALS.join(", ")}` },
+    });
+  }
+  const { candles, source, ts, interval } = priceFeed.getHistory(raw, iv as IntervalId);
   res.json({
     symbol: raw,
     pair: `${raw}USDT`,
     quote: "USDT",
-    interval: "1m",
+    interval,
     source,
     updatedAt: ts,
     count: candles.length,
