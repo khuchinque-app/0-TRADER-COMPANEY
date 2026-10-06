@@ -52,7 +52,7 @@ export default function MarketTrades({ symbol }: Props) {
           <div
             key={t.id}
             className={`flex justify-between px-2 py-0.5 items-center rounded ${
-              t.side === 'buy' ? 'text-green-400' : 'text-red-400'
+              t.side === 'buy' ? 'text-[var(--gain)]' : 'text-[var(--loss)]'
             } ${t.mine ? 'bg-[#f7931a]/10' : ''}`}
           >
             <span className="font-mono">{t.price.toLocaleString('en-US', { maximumFractionDigits: 8 })}</span>

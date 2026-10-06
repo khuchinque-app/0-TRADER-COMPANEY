@@ -1,5 +1,23 @@
 # Progress Log
 
+## 6 Oktober 2026
+
+### T09 — COLOR_CONVENTION flag (green-up default)
+- ✅ Single env flag `NEXT_PUBLIC_COLOR_CONVENTION` ('green-up' | 'red-up', default 'green-up') wired in
+  `apps/terminal/next.config.js` (public runtime config) and applied as `data-color-convention` on `<html>` in `layout.tsx`.
+- ✅ CSS variables for both modes in `globals.css`: canonical `--color-up`/`--color-down` (+dim/glow) in `:root`
+  (green-up) and swapped in `[data-color-convention='red-up']`; legacy consumer tokens
+  (`--gain/--loss`, `--pos/--neg`, `--stx-profit/--stx-loss`, dims) mapped onto the canonical pair so price, book,
+  tape, chart and P&L flip together. Fixed the previous agent's broken `:root` structure (orphaned port-2217 tokens)
+  and the literal `--gain/--loss` redefinitions that would have overridden the convention.
+- ✅ Trade page wired: book depth rows (asks=down color, bids=up color), market tape (buy=up color, sell=down color),
+  header 24h change colored by direction; chart candles already read `--gain/--loss` via `cssVar()`.
+- ✅ Decision recorded in CONTEXT.md (Locked facts) — green-up default, flag to flip; ASSUMPTIONS.md T09 entry.
+- ✅ `autopilot/verify/T09.sh` — 8/8 PASS (flag referenced, layout/next.config default, CSS vars both modes, trade page
+  200 + SSR `data-color-convention="green-up"`).
+
+---
+
 ## 4 Oktober 2026
 
 ### Indodax Research & Integration

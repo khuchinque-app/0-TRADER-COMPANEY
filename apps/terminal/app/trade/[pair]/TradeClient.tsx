@@ -43,6 +43,9 @@ export default function TradeClient({ pairData }: TradeClientProps) {
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [book, setBook] = useState<OrderBook | null>(null);
+  // 24h change shown in the price header; sign drives its up/down color
+  // (T09: NEXT_PUBLIC_COLOR_CONVENTION via var(--gain)/var(--loss)).
+  const chg24h = Math.random() * 10 - 5;
 
   useEffect(() => {
     let cancelled = false;
@@ -159,7 +162,10 @@ export default function TradeClient({ pairData }: TradeClientProps) {
                     : `$${ticker.last.toLocaleString()}`}
                 </div>
                 <div className="text-sm text-gray-400">
-                  24h: {(Math.random() * 10 - 5).toFixed(2)}% | High:{" "}
+                  <span className={chg24h >= 0 ? "text-[var(--gain)]" : "text-[var(--loss)]"}>
+                    24h: {chg24h.toFixed(2)}%
+                  </span>{" "}
+                  | High:{" "}
                   {ticker.high} | Low: {ticker.low} | Vol: {ticker.vol}
                 </div>
               </div>
@@ -419,10 +425,10 @@ function DepthRow({
   return (
     <div className="relative flex justify-between px-2 py-0.5 overflow-hidden">
       <div
-        className={`absolute inset-y-0 ${side === "ask" ? "bg-red-500 right-1/2" : "bg-green-500 left-1/2"}`}
+        className={`absolute inset-y-0 ${side === "ask" ? "bg-[var(--loss)] right-1/2" : "bg-[var(--gain)] left-1/2"}`}
         style={{ width: `${pct}%`, opacity: 0.14 }}
       />
-      <span className={`relative ${side === "ask" ? "text-red-400" : "text-green-400"}`}>
+      <span className={`relative ${side === "ask" ? "text-[var(--loss)]" : "text-[var(--gain)]"}`}>
         {fmtPrice(price)}
       </span>
       <span className="relative text-gray-300">{fmtSize(size)}</span>
