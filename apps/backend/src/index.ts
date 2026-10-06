@@ -5,6 +5,7 @@ import path from "path";
 import Database from "better-sqlite3";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { createPriceRouter } from "./routes/price";
+import { paymentRouter } from "./routes/payment";
 import { priceFeed } from "./pricefeed/service";
 import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
 import { tapeService, TAPE_LEN, TapeTrade } from "./pricefeed/tape";
@@ -482,6 +483,7 @@ app.get("/api/markets", (_req, res) => {
 
 // T04: Reference price feed routes (mounted before the generic /api/ticker/:pair route)
 app.use(createPriceRouter());
+app.use("/api/payment", paymentRouter);
 
 // T07: Market trades tape — the 50 most recent trades per symbol. Synthetic ticks
 // derived from the price feed (tapeService rolling buffer) merged with real user
