@@ -1,0 +1,65 @@
+/**
+ * Vice City Color Palette
+ * Retro 1980s Miami Neon Aesthetic
+ */
+
+:root {
+  /* Primary Colors */
+  --vice-sunset-pink: #FF5CA8;
+  --vice-cyan: #00F0FF;
+  --vice-neon-purple: #BC6CFF;
+  --vice-miami-peach: #FFB86B;
+  --vice-ocean-night: #0B0F2B;
+  
+  /* Derived Tones */
+  --vice-pink-glow: rgba(255, 92, 168, 0.3);
+  --vice-cyan-glow: rgba(0, 240, 255, 0.3);
+  --vice-purple-glow: rgba(188, 108, 255, 0.3);
+  
+  /* UI Tokens */
+  --color-background: var(--vice-ocean-night);
+  --color-surface: rgba(11, 15, 43, 0.9);
+  --color-primary: var(--vice-cyan);
+  --color-secondary: var(--vice-sunset-pink);
+  --color-accent: var(--vice-neon-purple);
+  --color-highlight: var(--vice-miami-peach);
+  
+  /* Text Colors */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
+  
+  /* Border & Effects */
+  --color-border: rgba(0, 240, 255, 0.2);
+  --glow-pink: 0 0 20px var(--vice-pink-glow);
+  --glow-cyan: 0 0 20px var(--vice-cyan-glow);
+  --glow-purple: 0 0 20px var(--vice-purple-glow);
+}
+
+/* Class-based theme application */
+.theme-vice-city {
+  background: var(--vice-ocean-night);
+  color: var(--color-text-primary);
+}
+
+.neon-pink { color: var(--vice-sunset-pink); }
+.neon-cyan { color: var(--vice-cyan); }
+.neon-purple { color: var(--vice-neon-purple); }
+.neon-peach { color: var(--vice-miami-peach); }
+
+.border-neon {
+  border-color: var(--vice-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.btn-neon-pink {
+  background: var(--vice-sunset-pink);
+  color: white;
+  box-shadow: var(--glow-pink);
+}
+
+.btn-neon-cyan {
+  background: var(--vice-cyan);
+  color: var(--vice-ocean-night);
+  box-shadow: var(--glow-cyan);
+}
