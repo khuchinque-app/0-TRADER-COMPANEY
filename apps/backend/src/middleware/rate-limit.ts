@@ -10,10 +10,10 @@ export interface RateLimitOptions {
 }
 
 export function rateLimit(options: RateLimitOptions) {
-  const { windowMs = 60000, maxRequests = 100, keyGenerator = (req) => req.ip } = options;
+  const { windowMs = 60000, maxRequests = 100, keyGenerator = (req) => req.ip || 'unknown' } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const key = keyGenerator(req);
+    const key = keyGenerator(req) || 'unknown';
     const now = Date.now();
     
     const record = rateLimitStore.get(key);
