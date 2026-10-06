@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { DatabaseSync } from 'node:sqlite';
+import * as path from 'path';
 
 const router = Router();
 const DB_PATH = process.env.DB_PATH || path.resolve(__dirname, "../../../apps/engine/data/ledger.db");
