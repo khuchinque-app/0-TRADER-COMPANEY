@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./styles/strata-theme.css";
+@import "./styles/vice-city-theme.css";
 
 /* Trading Terminal — merged design: port 2217 tokens + market-monitor */
 
