@@ -124,19 +124,19 @@ export default function TradeClient({ pairData }: TradeClientProps) {
   return (
     <>
       {/* Paper Trading Banner */}
-      <div className="bg-[#f7931a] text-black px-6 py-2 text-center font-medium">
-        SIMULATION: no real funds — Paper Trading
+      <div className="gradient-sunset text-white px-6 py-3 text-center font-medium glow-pink">
+        🎰 PAPER TRADING — Simulated Funds
       </div>
 
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-4">
+      <div className="border-b border-vice-border bg-vice-surface px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">
               {pairData.base}/
               <span
                 className={
-                  pairData.quote === "IDR" ? "text-green-400" : "text-blue-400"
+                  pairData.quote === "IDR" ? "text-vice-profit glow-pink" : "text-vice-cyan glow-cyan"
                 }
               >
                 {pairData.quote}
@@ -146,7 +146,7 @@ export default function TradeClient({ pairData }: TradeClientProps) {
               {pairData.flags.map((f) => (
                 <span
                   key={f}
-                  className="px-2 py-1 bg-gray-800 rounded text-xs text-gray-400"
+                  className="px-2 py-1 bg-vice-surface-2 rounded text-xs text-vice-text-muted"
                 >
                   {f}
                 </span>
@@ -156,23 +156,22 @@ export default function TradeClient({ pairData }: TradeClientProps) {
           <div className="flex items-center gap-4">
             {ticker && (
               <div className="text-right">
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-vice-text-primary">
                   {pairData.quote === "IDR"
                     ? `Rp ${(ticker.last * fxRate).toLocaleString()}`
                     : `$${ticker.last.toLocaleString()}`}
                 </div>
-                <div className="text-sm text-gray-400">
-                  <span className={chg24h >= 0 ? "text-[var(--gain)]" : "text-[var(--loss)]"}>
+                <div className="text-sm text-vice-text-secondary">
+                  <span className={chg24h >= 0 ? "text-vice-profit" : "text-vice-loss"}>
                     24h: {chg24h.toFixed(2)}%
                   </span>{" "}
-                  | High:{" "}
-                  {ticker.high} | Low: {ticker.low} | Vol: {ticker.vol}
+                  | High: {ticker.high} | Low: {ticker.low} | Vol: {ticker.vol}
                 </div>
               </div>
             )}
             <button
               onClick={() => setShowIDR(!showIDR)}
-              className={`px-4 py-2 rounded ${showIDR ? "bg-green-600" : "bg-gray-800"}`}
+              className={`px-4 py-2 rounded ${showIDR ? "btn-vice-success" : "bg-vice-surface-2 text-vice-text-secondary"}`}
             >
               {showIDR ? "USD" : "IDR"}
             </button>
@@ -188,20 +187,20 @@ export default function TradeClient({ pairData }: TradeClientProps) {
         </div>
 
         {/* Order Ticket */}
-        <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
-          <h2 className="text-lg font-bold mb-4">Order Ticket</h2>
+        <div className="card-vice p-4">
+          <h2 className="text-lg font-bold mb-4 text-vice-cyan">Order Ticket</h2>
 
           {/* Buy/Sell Tabs */}
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setSide("buy")}
-              className={`flex-1 py-2 rounded ${side === "buy" ? "bg-green-600" : "bg-gray-800"}`}
+              className={`flex-1 py-2 rounded ${side === "buy" ? "btn-vice-success" : "bg-vice-surface-2 text-vice-text-secondary"}`}
             >
               Buy
             </button>
             <button
               onClick={() => setSide("sell")}
-              className={`flex-1 py-2 rounded ${side === "sell" ? "bg-red-600" : "bg-gray-800"}`}
+              className={`flex-1 py-2 rounded ${side === "sell" ? "btn-vice-danger" : "bg-vice-surface-2 text-vice-text-secondary"}`}
             >
               Sell
             </button>
@@ -211,13 +210,13 @@ export default function TradeClient({ pairData }: TradeClientProps) {
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setOrderType("limit")}
-              className={`flex-1 py-1 rounded text-sm ${orderType === "limit" ? "bg-gray-700" : "bg-gray-800 text-gray-400"}`}
+              className={`flex-1 py-1 rounded text-sm ${orderType === "limit" ? "bg-vice-cyan text-vice-ocean-night font-bold" : "bg-vice-surface-2 text-vice-text-muted"}`}
             >
               Limit
             </button>
             <button
               onClick={() => setOrderType("market")}
-              className={`flex-1 py-1 rounded text-sm ${orderType === "market" ? "bg-gray-700" : "bg-gray-800 text-gray-400"}`}
+              className={`flex-1 py-1 rounded text-sm ${orderType === "market" ? "bg-vice-cyan text-vice-ocean-night font-bold" : "bg-vice-surface-2 text-vice-text-muted"}`}
             >
               Market
             </button>
@@ -226,7 +225,7 @@ export default function TradeClient({ pairData }: TradeClientProps) {
           {/* Price Input */}
           {orderType === "limit" && (
             <div className="mb-4">
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-vice-text-secondary mb-2">
                 Price ({pairData.quote})
               </label>
               <input
@@ -234,14 +233,14 @@ export default function TradeClient({ pairData }: TradeClientProps) {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-[#0d1117] border border-gray-700 rounded px-4 py-2 text-white"
+                className="input-vice w-full"
               />
             </div>
           )}
 
           {/* Amount Input */}
           <div className="mb-4">
-            <label className="block text-sm text-gray-400 mb-2">
+            <label className="block text-sm text-vice-text-secondary mb-2">
               Amount ({pairData.base})
             </label>
             <input
@@ -249,7 +248,7 @@ export default function TradeClient({ pairData }: TradeClientProps) {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.000000"
-              className="w-full bg-[#0d1117] border border-gray-700 rounded px-4 py-2 text-white"
+              className="input-vice w-full"
             />
           </div>
 
@@ -259,7 +258,7 @@ export default function TradeClient({ pairData }: TradeClientProps) {
               <button
                 key={pct}
                 onClick={() => handlePercentageClick(pct)}
-                className="flex-1 py-1 bg-gray-800 rounded text-sm text-gray-400 hover:text-white"
+                className="flex-1 py-1 bg-vice-surface-2 rounded text-sm text-vice-text-muted hover:text-vice-cyan hover:border-vice-cyan border border-transparent transition-all"
               >
                 {pct}%
               </button>
@@ -267,25 +266,25 @@ export default function TradeClient({ pairData }: TradeClientProps) {
           </div>
 
           {/* Balance */}
-          <div className="mb-4 p-3 bg-[#0d1117] rounded">
+          <div className="mb-4 p-3 bg-vice-surface rounded border border-vice-border">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Balance</span>
-              <span>{balance.toFixed(4)} {pairData.base}</span>
+              <span className="text-vice-text-muted">Balance</span>
+              <span className="text-vice-text-primary">{balance.toFixed(4)} {pairData.base}</span>
             </div>
             <div className="flex justify-between text-sm mt-1">
-              <span className="text-gray-400">Total</span>
-              <span>
+              <span className="text-vice-text-muted">Total</span>
+              <span className="text-vice-cyan">
                 {pairData.quote === "IDR" ? "Rp " : "$"}
                 {((parseFloat(price) || 0) * (parseFloat(amount) || 0)).toLocaleString()}
               </span>
             </div>
           </div>
 
-          {error && <div className="mb-4 text-red-400 text-sm">{error}</div>}
+          {error && <div className="mb-4 text-vice-loss text-sm">{error}</div>}
 
           <button
             onClick={handleOrderSubmit}
-            className={`w-full py-3 rounded font-bold text-white ${side === "buy" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
+            className={`w-full py-3 rounded font-bold text-white ${side === "buy" ? "btn-vice-success" : "btn-vice-danger"}`}
           >
             {side === "buy" ? "Buy" : "Sell"} {pair}
           </button>
@@ -294,21 +293,21 @@ export default function TradeClient({ pairData }: TradeClientProps) {
 
       {/* Order Book */}
       <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
-          <h2 className="text-lg font-bold mb-4">Order Book</h2>
+        <div className="card-vice">
+          <h2 className="text-lg font-bold mb-4 text-vice-cyan">Order Book</h2>
           {book && book.asks.length === 15 && book.bids.length === 15 ? (
             <OrderBookView book={book} base={pairData.base} showIDR={showIDR} fxRate={fxRate} />
           ) : (
-            <div className="text-sm text-gray-500 py-8 text-center">
+            <div className="text-sm text-vice-text-muted py-8 text-center">
               Synthetic order book available for the shortlisted assets
               (BTC, ETH, SOL, BNB, XRP, LINK).
             </div>
           )}
         </div>
 
-        {/* Recent Trades (T07: market trades tape — 50 newest, side-colored) */}
-        <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
-          <h2 className="text-lg font-bold mb-4">Recent Trades</h2>
+        {/* Recent Trades */}
+        <div className="card-vice">
+          <h2 className="text-lg font-bold mb-4 text-vice-cyan">Recent Trades</h2>
           <MarketTrades symbol={pairData.base} />
         </div>
       </div>
