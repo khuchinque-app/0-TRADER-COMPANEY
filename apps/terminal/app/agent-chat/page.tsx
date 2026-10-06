@@ -11,11 +11,11 @@ export default function AgentChatPage() {
   const [activeTab, setActiveTab] = useState<TabType>("chat");
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState("");
-  const [workflowSteps, setWorkflowSteps] = useState([
-    { id: 1, label: "分析需求", status: "pending" as const },
-    { id: 2, label: "实现功能", status: "pending" as const },
-    { id: 3, label: "测试验证", status: "pending" as const },
-    { id: 4, label: "部署上线", status: "pending" as const },
+  const [workflowSteps, setWorkflowSteps] = useState<Array<{ id: number; label: string; status: "pending" | "active" | "complete" | "error" }>>([
+    { id: 1, label: "分析需求", status: "pending" },
+    { id: 2, label: "实现功能", status: "pending" },
+    { id: 3, label: "测试验证", status: "pending" },
+    { id: 4, label: "部署上线", status: "pending" },
   ]);
   const [terminalLines, setTerminalLines] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
