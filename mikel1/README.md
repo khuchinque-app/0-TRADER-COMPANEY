@@ -14,7 +14,7 @@ Aplikasi manajemen bisnis jus buah untuk teman yang jualan jus dan suka mengambi
 - [x] GitHub repository search
 - [x] Technical stack recommendations
 - [x] Database schema design
-- [x] Project structure规划
+- [x] Project structure planning
 
 ### ⏳ In Progress
 - [ ] Requirements gathering with client
