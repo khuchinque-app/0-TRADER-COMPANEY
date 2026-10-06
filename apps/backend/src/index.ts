@@ -6,6 +6,8 @@ import Database from "better-sqlite3";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { createPriceRouter } from "./routes/price";
 import { priceFeed } from "./pricefeed/service";
+import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
+import { tapeService, TAPE_LEN, TapeTrade } from "./pricefeed/tape";
 
 // Resolve .env from repo root (works from both src/ and dist/)
 const repoRoot = path.resolve(__dirname, "../../../../");
@@ -478,6 +480,55 @@ app.get("/api/markets", (_req, res) => {
 // T04: Reference price feed routes (mounted before the generic /api/ticker/:pair route)
 app.use(createPriceRouter());
 
+// T07: Market trades tape — the 50 most recent trades per symbol. Synthetic ticks
+// derived from the price feed (tapeService rolling buffer) merged with real user
+// fills from the ledger; the requester's own fills are flagged mine: true (when a
+// valid Authorization header is present). Exactly 50 rows, newest first.
+app.get("/api/trades/:symbol", (req, res) => {
+  const raw = String(req.params.symbol || "").toUpperCase();
+  const base = raw.endsWith("USDT") ? raw.slice(0, -4) : raw.endsWith("IDR") ? raw.slice(0, -3) : raw;
+  if (!isSymbol(base)) {
+    return res.status(404).json({
+      error: { code: "unknown_symbol", message: `Unknown symbol: ${raw}. Supported: ${SUPPORTED_SYMBOLS.join(", ")}` },
+    });
+  }
+  try {
+    const userId = getUserId(req);
+    const rows = db
+      .prepare("SELECT id, user_id, side, price, quantity, timestamp FROM fills WHERE pair = ?")
+      .all(`${base}USDT`) as Array<{
+        id: string;
+        user_id: string;
+        side: string;
+        price: number;
+        quantity: number;
+        timestamp: number;
+      }>;
+    const ledger: TapeTrade[] = rows.map((r) => ({
+      id: `led-${r.id}`,
+      price: Number(r.price),
+      size: Number(r.quantity),
+      side: r.side === "buy" ? "buy" : "sell",
+      time: r.timestamp < 1e12 ? r.timestamp * 1000 : r.timestamp,
+      mine: userId !== null && r.user_id === userId,
+      source: "ledger" as const,
+    }));
+    const trades = [...ledger, ...tapeService.getTrades(base, TAPE_LEN)]
+      .sort((a, b) => b.time - a.time)
+      .slice(0, TAPE_LEN);
+    res.json({
+      symbol: base,
+      pair: `${base}USDT`,
+      quote: "USDT",
+      count: trades.length,
+      trades,
+      simulasi: true,
+    });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
+});
+
 // FX RATE ENDPOINT
 app.get("/api/fx/usdt-idr", async (req, res) => {
   try {
@@ -938,6 +989,8 @@ app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
   // T04: start the reference price feed poller (immediate first poll, then every few seconds)
   priceFeed.start();
+  // T07: start the synthetic market-trades tape (appends a tick per symbol every few seconds)
+  tapeService.start();
   // Auto-seed dev credentials on startup (idempotent)
   const result = seedDevAccount();
   console.log(`[${result.seeded ? "SEED" : "INFO"}] ${result.message}`);

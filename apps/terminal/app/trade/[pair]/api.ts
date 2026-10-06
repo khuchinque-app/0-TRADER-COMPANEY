@@ -70,3 +70,23 @@ export async function fetchBook(symbol: string): Promise<OrderBook | null> {
   if (!data || !Array.isArray(data.bids) || !Array.isArray(data.asks)) return null;
   return data;
 }
+
+// T07: Market trades tape — 50 most recent trades (synthetic + ledger fills),
+// newest first. Each row: { id, price, size, side, time (ms), mine }.
+export interface TapeTrade {
+  id: string;
+  price: number;
+  size: number; // base-asset quantity
+  side: "buy" | "sell";
+  time: number; // ms epoch
+  mine: boolean; // true for the requesting user's own ledger fills
+  source?: string;
+}
+
+export async function fetchTrades(symbol: string): Promise<TapeTrade[]> {
+  const res = await fetch(`/api/trades/${symbol}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (!data || !Array.isArray(data.trades)) return [];
+  return data.trades as TapeTrade[];
+}

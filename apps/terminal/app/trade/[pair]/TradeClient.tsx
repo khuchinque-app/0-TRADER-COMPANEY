@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { fetchPairData, fetchTicker, fetchFXRate, fetchBook, OrderBook, BookLevel } from "./api";
 import TradePriceChart from "../../../components/chart/TradePriceChart";
+import MarketTrades from "../../../components/book/MarketTrades";
 
 interface Pair {
   symbol: string;
@@ -40,7 +41,6 @@ export default function TradeClient({ pairData }: TradeClientProps) {
   const [balance, setBalance] = useState(10000);
   const [openOrders, setOpenOrders] = useState<any[]>([]);
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
-  const [fills, setFills] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [book, setBook] = useState<OrderBook | null>(null);
 
@@ -95,7 +95,6 @@ export default function TradeClient({ pairData }: TradeClientProps) {
 
     if (order.status === "filled") {
       setOrderHistory([order, ...orderHistory]);
-      setFills([order, ...fills]);
       if (side === "buy") {
         setBalance(balance - order.total);
       } else {
@@ -301,25 +300,10 @@ export default function TradeClient({ pairData }: TradeClientProps) {
           )}
         </div>
 
-        {/* Recent Trades */}
+        {/* Recent Trades (T07: market trades tape — 50 newest, side-colored) */}
         <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
           <h2 className="text-lg font-bold mb-4">Recent Trades</h2>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between text-gray-500 px-2">
-              <span>Price</span>
-              <span>Amount</span>
-              <span>Time</span>
-            </div>
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex justify-between px-2 py-1">
-                <span className="text-green-400">{(100 + i * 0.1).toFixed(2)}</span>
-                <span>{(Math.random() * 0.5).toFixed(4)}</span>
-                <span className="text-gray-500">
-                  {new Date(Date.now() - i * 60000).toLocaleTimeString()}
-                </span>
-              </div>
-            ))}
-          </div>
+          <MarketTrades symbol={pairData.base} />
         </div>
       </div>
     </>

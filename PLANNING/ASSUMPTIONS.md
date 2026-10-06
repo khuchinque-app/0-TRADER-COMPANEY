@@ -39,3 +39,11 @@
 - Live last-candle update via a 5s poll (same cadence as the price feed / order book) using series.update() so the visible range is not reset; falls back to setData on interval switch / backend restart.
 - Backend HISTORY_LEN raised 180 -> 1920 (32h of 1m candles) so the 1h aggregate yields >= 30 candles (1m=1920, 5m=~385, 1h=~33). Chart shows USDT prices (internal quote); IDR display toggle is T10.
 - Non-shortlisted pairs render the chart with an "unsupported" note (history endpoint only serves the 6 shortlisted assets), mirroring the order book behavior.
+
+## T07: Market trades tape (scrolling recent trades)
+- Endpoint: GET /api/trades/:symbol (GET /api/trades/:base, pair forms BTCUSDT/BTCIDR accepted, always USDT quote); returns EXACTLY 50 rows { id, price, size, side, time (ms), mine, source }, newest first. Unknown symbol -> 404 { error: { code, message } }.
+- Synthetic ticks are a rolling per-symbol in-memory buffer (pricefeed/tape.ts TapeService): seeded with 50 rows at boot (cold-start guarantee), re-anchored once the first feed polls land (~6s) so the oldest rows track the live price instead of the cold-start seed, then one deterministic tick appended per symbol every 2.5s (no Math.random; price = feed mid + fixed per-seq bps jitter, size from the book's sizeFor, sides from a fixed buy/sell pattern). MAX_BUFFER 300.
+- Real user fills from the ledger (fills table) are merged in and flagged mine:true when the requesting user's Authorization token matches user_id; timestamps normalized to ms (fills < 1e12 treated as seconds).
+- Trade page: the fake placeholder rows in the "Recent Trades" card are replaced by components/book/MarketTrades.tsx consuming /api/trades/:base through the /api rewrite, polling every 5s (same cadence as book/price), side-colored rows with a "MY" tag for own fills.
+- BUG FIX (sibling): book route (T05) had the same pair-form bug fixed here — `slice(0,-4)` on a 3-letter IDR suffix produced "BT"; fixed to slice by the matched suffix length (4 for USDT, 3 for IDR). /api/book/BTCIDR now returns 200.
+- Verify T07.sh: 50 rows per shortlisted symbol (6), per-row price/size/side/time validity, boolean mine flag, newest-first ordering, pair forms, 404 shape, terminal proxy, trade page SSR. 31/31 PASS.

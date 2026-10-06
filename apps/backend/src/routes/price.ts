@@ -55,7 +55,7 @@ router.get("/api/price/:symbol/history", (req, res) => {
 // quotes in USDT (the internal ledger quote). Refreshes with the price feed.
 router.get("/api/book/:symbol", (req, res) => {
   const raw = String(req.params.symbol || "").toUpperCase();
-  const base = raw.endsWith("USDT") || raw.endsWith("IDR") ? raw.slice(0, -4) : raw;
+  const base = raw.endsWith("USDT") ? raw.slice(0, -4) : raw.endsWith("IDR") ? raw.slice(0, -3) : raw;
   if (!isSymbol(base)) {
     return res.status(404).json({
       error: { code: "unknown_symbol", message: `Unknown symbol: ${raw}. Supported: ${SUPPORTED_SYMBOLS.join(", ")}` },
