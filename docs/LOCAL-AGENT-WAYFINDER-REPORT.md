@@ -1,14 +1,14 @@
 # Local Agent Wayfinder Report
 
-**Date:** 2026-10-07  
+**Date:** 2026-10-07 02:20 UTC  
 **Agent:** @Herme_ChinQue_bot (Local)  
-**Status:** ✅ READY FOR DEPLOYMENT
+**Status:** ⚠️ BLOCKED — Token Revoked
 
 ---
 
 ## Executive Summary
 
-Local agent profile created and verified. Bot token confirmed active. Ready for WSL deployment.
+Local agent profile is created and configured, but **deployment is blocked** due to revoked bot token. Immediate action required from LORD to obtain fresh token from @BotFather.
 
 ---
 
@@ -17,92 +17,73 @@ Local agent profile created and verified. Bot token confirmed active. Ready for 
 | Component | Status | Details |
 |-----------|--------|---------|
 | Profile Directory | ✅ Created | `~/.hermes/profiles/herme-chinque-local/` |
-| Bot Token | ✅ Verified | 8790650185:AAEX...wv4IZI |
+| Bot Token | ❌ **INVALID** | 401 Unauthorized — needs replacement |
 | Chat ID | ✅ Set | 7281341176 (LORD's personal chat) |
 | Startup Script | ✅ Ready | `scripts/start-local-agent.sh` |
 | Documentation | ✅ Created | `ops/LOCAL-AGENT-SETUP-GUIDE.md` |
 
 ---
 
-## Deployment Checklist
+## Blocker
 
-### Required Files for WSL:
-- [ ] `scripts/start-local-agent.sh`
-- [ ] `~/.hermes/profiles/herme-chinque-local/.env`
-- [ ] Hermes CLI installed (`npm install -g @nousresearch/hermes-agent`)
+**Token Revoked:** The bot token `8790650185:AAEX...wv4IZI` is no longer valid.
 
-### Post-Deployment Tests:
-- [ ] Bot responds to `/start` command
-- [ ] Bot processes mentions in group chat
-- [ ] Code review tasks execute correctly
+**Error:**
+```json
+{"ok":false,"error_code":401,"description":"Unauthorized"}
+```
 
----
-
-## Role Definition
-
-**Primary Responsibilities:**
-1. Code review of all changes before merge
-2. Quality assurance and testing
-3. Parallel task execution with VPS agent
-4. Second opinion on architectural decisions
-
-**Communication Protocol:**
-- Group mentions: `@Herme_ChinQue_bot <task>`
-- Direct messages: Personal chat (7281341176)
-- Handoff to VPS: When production deployment needed
+**Possible Causes:**
+1. Token was reset via @BotFather `/revoke` command
+2. Token was invalidated due to security concern
+3. Bot was deleted and recreated
 
 ---
 
-## Files Created
+## Required Action
+
+**LORD must:**
+1. Open Telegram and message **@BotFather**
+2. Use `/mybots` to select @Herme_ChinQue_bot
+3. Use `/revoke` to get new token (OR create new bot)
+4. Share new token with VPS agent
+
+---
+
+## Files Prepared (Ready for Deployment)
+
+Once token is updated, these files are ready:
 
 ```
-ops/
-└── LOCAL-AGENT-SETUP-GUIDE.md    # Complete setup documentation
-
-/tmp/
-├── local-agent-package.tar.gz    # Ready-to-deploy package
-└── local-agent-summary.txt       # Quick reference summary
+📁 /tmp/local-agent-package.tar.gz (2.5KB)
+├── scripts/start-local-agent.sh    ✅
+├── ops/LOCAL-AGENT-SETUP-GUIDE.md  ✅
+├── docs/LOCAL-AGENT-WAYFINDER-REPORT.md ✅
+└── .env                            ⚠️ Needs token update
 ```
 
 ---
 
-## Next Actions
+## Next Steps
 
-1. **Download package** from VPS to WSL:
-   ```bash
-   scp khuchinque@187.127.178.20:/tmp/local-agent-package.tar.gz ~/
-   tar -xzf local-agent-package.tar.gz
-   ```
-
-2. **Install Hermes CLI** (if not already installed):
-   ```bash
-   npm install -g @nousresearch/hermes-agent
-   ```
-
-3. **Start the agent**:
-   ```bash
-   cd ~/0-TRADER-COMPANEY
-   bash scripts/start-local-agent.sh
-   ```
-
-4. **Test on Telegram**:
-   - Message @Herme_ChinQue_bot
-   - Send: "review the latest changes"
-   - Verify response
+1. **Get new token** from @BotFather
+2. **Send to me** (VPS agent) via secure channel
+3. **I will update** `.env` and verify
+4. **Test deployment** in WSL environment
+5. **Activate** @Herme_ChinQue_bot
 
 ---
 
-## Integration with VPS Agent
+## Timeline
 
-| Aspect | VPS Agent | Local Agent |
-|--------|-----------|-------------|
-| Username | @Herme_KhuChinQue_bot | @Herme_ChinQue_bot |
-| Role | Production, deployment | Review, QA, parallel tasks |
-| Profile | herme-khuchinque | herme-chinque-local |
-| Token | 8672306159:... | 8790650185:... |
-| Location | VPS (187.127.178.20) | WSL/Local machine |
+| Step | Owner | Status |
+|------|-------|--------|
+| Get new token | LORD | ⏳ Waiting |
+| Update config | VPS Agent | ⏳ Ready |
+| Deploy to WSL | LORD | ⏳ Ready |
+| Test bot | Local Agent | ⏳ Blocked |
 
 ---
 
-**Report Generated:** 2026-10-07 02:15 UTC  
-**Status:** ✅ READY FOR USER ACTION
+**Report Generated:** 2026-10-07 02:20 UTC  
+**Status:** ⚠️ BLOCKED — Awaiting Token Update
