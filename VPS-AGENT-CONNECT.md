@@ -1,67 +1,67 @@
-# VPS Agent 连接指南
+# VPS Agent Connection Guide
 
-## 当前状态
+## Current Status
 
-| 服务 | 地址 | 状态 |
-|------|------|------|
-| 后端 API | http://187.127.178.20:11110 | ✅ 运行中 |
-| 终端 Next.js | http://187.127.178.20:22220 | ✅ 运行中 |
-| A2A 网关 | 未配置 | ❌ 需要设置 |
+| Service | Address | Status |
+|---------|---------|--------|
+| Backend API | http://187.127.178.20:11110 | ✅ Running |
+| Terminal Next.js | http://187.127.178.20:22220 | ✅ Running |
+| A2A Gateway | Not configured | ❌ Needs setup |
 
-## 问题诊断
+## Problem Diagnosis
 
-`@Herme_KhuChinQue_bot` 的 A2A 网关未运行。当前配置指向 Next.js 终端应用（端口 22220），不是 Hermes A2A 网关。
+`@Herme_KhuChinQue_bot` A2A gateway is not running. Current config points to Next.js terminal app (port 22220), not Hermes A2A gateway.
 
-## 解决方案
+## Solution
 
-### 在 VPS 上设置 A2A 网关
+### Set up A2A gateway on VPS
 
 ```bash
-# 1. SSH 登录
+# 1. SSH login
 ssh root@187.127.178.20
 
-# 2. 切换到 khuchinque 用户
+# 2. Switch to khuchinque user
 su khuchinque
 
-# 3. 启动 Hermes 并配置 A2A 网关
+# 3. Start Hermes and configure A2A gateway
 hermes -p herme-khuchinque
-# 在界面中运行：
+# In the interface run:
 hermes gateway setup
-# 选择 A2A 协议，端口设为 29900（符合 2xxxx 规则）
+# Select A2A protocol, set port to 29900 (compliant with 2xxxx rule)
 
-# 4. 启动网关
+# 4. Start gateway
 hermes gateway
 
-# 5. 验证端点
+# 5. Verify endpoint
 curl http://127.0.0.1:29900/.well-known/agent-card.json
 ```
 
-### 验证 A2A 连通性
+### Verify A2A connectivity
 
-设置完成后，在本地测试：
+After setup, test locally:
 ```bash
 curl http://187.127.178.20:29900/.well-known/agent-card.json
 ```
 
-成功后会显示 agent card JSON。
+On success, agent card JSON will be displayed.
 
-## 端口合规性
+## Port Compliance
 
-遵循用户规则：**所有端口必须 >= 2000 或 >= 20000**
+Following user rule: **All ports must be >= 2000 or >= 20000**
 
-| 服务 | 端口 | 合规？ |
-|------|------|--------|
-| 后端 API | 11110 | ✅ |
-| 终端 Next.js | 22220 | ✅ |
-| A2A 网关 | 29900 | ✅ |
-| HTTP (8000) | 8000 | ❌ 需改为 28000+ |
+| Service | Port | Compliant? |
+|---------|------|------------|
+| Backend API | 11110 | ✅ |
+| Terminal Next.js | 22220 | ✅ |
+| A2A Gateway | 29900 | ✅ |
+| HTTP (8000) | 8000 | ❌ Needs migration to 28000+ |
 
-## 快速脚本
+## Quick Scripts
 
 ```bash
-# 运行 VPS 测试
+# Run VPS tests
 python3 /home/chinque/CONTINUE-CONTINUE/vps-run.py
 
-# 查看任务状态
+# Check task status
 python3 /home/chinque/project/TRADING-COMPANEY/autopilot/autopilot.py --status
 ```

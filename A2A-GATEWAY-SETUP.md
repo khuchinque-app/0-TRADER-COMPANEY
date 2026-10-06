@@ -1,44 +1,44 @@
-# VPS A2A 网关设置指南
+# VPS A2A Gateway Setup Guide
 
-## 当前状态
-- VPS 后端 API: `http://187.127.178.20:11110` ✅ 运行中
-- VPS 终端: `http://187.127.178.20:22220` ✅ 运行中（Next.js）
-- A2A 网关: ❌ 未运行
+## Current Status
+- VPS Backend API: `http://187.127.178.20:11110` ✅ Running
+- VPS Terminal: `http://187.127.178.20:22220` ✅ Running (Next.js)
+- A2A Gateway: ❌ Not configured
 
-## 设置步骤
+## Setup Steps
 
-### 1. SSH 登录 VPS
+### 1. SSH Login to VPS
 ```bash
 ssh root@187.127.178.20
 ```
 
-### 2. 切换到 khuchinque 用户
+### 2. Switch to khuchinque user
 ```bash
 su khuchinque
 ```
 
-### 3. 启动 Hermes 并配置 A2A 网关
+### 3. Start Hermes and configure A2A gateway
 ```bash
 hermes -p herme-khuchinque
 ```
 
-然后在 Hermes 界面中运行:
+Then in the Hermes interface run:
 ```
 hermes gateway setup
 ```
-选择 **A2A** 协议，端口设置为 **29900**（符合你的 2xxxx 规则）
+Select **A2A** protocol, set port to **29900** (compliant with your 2xxxx rule)
 
-### 4. 启动 A2A 网关
+### 4. Start the A2A gateway
 ```bash
 hermes gateway
 ```
 
-### 5. 验证 A2A 端点
+### 5. Verify A2A endpoint
 ```bash
 curl http://127.0.0.1:29900/.well-known/agent-card.json
 ```
 
-应该返回类似:
+Should return something like:
 ```json
 {
   "name": "herme-khuchinque",
@@ -47,9 +47,9 @@ curl http://127.0.0.1:29900/.well-known/agent-card.json
 }
 ```
 
-### 6. 更新本地配置
+### 6. Update local configuration
 
-修改 `~/.hermes/profiles/herme-chinque/config.yaml`:
+Modify `~/.hermes/profiles/herme-chinque/config.yaml`:
 
 ```yaml
 a2a_agents:
@@ -57,7 +57,7 @@ a2a_agents:
     url: "http://187.127.178.20:29900/.well-known/agent-card.json"
     auth:
       type: bearer
-      token: "your-token-here"  # 可选，如果启用了认证
+      token: "your-token-here"  # Optional, if authentication is enabled
     timeout: 120
     capabilities:
       - web_search
@@ -67,24 +67,24 @@ a2a_agents:
       - memory
 ```
 
-### 7. 启用 A2A 工具
+### 7. Enable A2A tools
 ```bash
 hermes tools enable a2a --platform telegram
 ```
 
-## 端口合规检查
+## Port Compliance Check
 
-| 服务 | 端口 | 合规？ |
-|------|------|--------|
-| 后端 API | 11110 | ✅ |
-| 终端 Next.js | 22220 | ✅ |
-| A2A 网关 | 29900 | ✅ |
+| Service | Port | Compliant? |
+|---------|------|------------|
+| Backend API | 11110 | ✅ |
+| Terminal Next.js | 22220 | ✅ |
+| A2A Gateway | 29900 | ✅ |
 
-## 测试连接
+## Test Connection
 
-在本地运行:
+Run locally:
 ```bash
 curl http://187.127.178.20:29900/.well-known/agent-card.json
 ```
 
-如果成功，就可以用 `a2a_discover` 和 `a2a_call` 工具了。
+If successful, you can use `a2a_discover` and `a2a_call` tools.
