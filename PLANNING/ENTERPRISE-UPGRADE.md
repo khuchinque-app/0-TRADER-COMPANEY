@@ -25,9 +25,9 @@
 - `withdrawal_whitelist` — Withdrawal whitelist
 - `referrals` — Referral system
 - `support_tickets` — Customer support tickets
-- `api_keys` — API密钥管理
-- `payment_invoices` — 支付发票（Duitku集成）
-- `education_content` — 教育内容
+- `api_keys` — API key management
+- `payment_invoices` — Payment invoices (Duitku integration)
+- `education_content` — Education content
 
 #### Payment Integration Architecture
 
