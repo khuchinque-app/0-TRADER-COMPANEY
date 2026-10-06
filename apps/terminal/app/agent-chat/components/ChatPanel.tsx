@@ -26,7 +26,7 @@ export function ChatPanel({ messages, messagesEndRef }: ChatPanelProps) {
           className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
         >
           <div
-            className={`max-w-[80%] p-4 rounded-2xl ${
+            className={`max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl ${
               msg.role === "user"
                 ? "btn-vice-primary rounded-br-sm"
                 : "bg-white/10 border border-cyan/20 rounded-bl-sm"
@@ -50,7 +50,7 @@ export function ChatPanel({ messages, messagesEndRef }: ChatPanelProps) {
                 <span>你</span>
               </div>
             )}
-            <p className="text-white/90 whitespace-pre-wrap">{msg.content}</p>
+            <p className="text-white/90 whitespace-pre-wrap text-sm sm:text-base">{msg.content}</p>
           </div>
         </div>
       ))}

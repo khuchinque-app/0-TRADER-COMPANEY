@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useRef, useEffect } from "react";
 import { ChatPanel } from "./components/ChatPanel";
 import { WorkflowView } from "./components/WorkflowView";
@@ -42,10 +40,10 @@ export default function AgentChatPage() {
         content: `收到指令: "${inputText}"。正在分析中...`,
         ts: Date.now(),
         steps: [
-          { id: 1, label: "分析需求", status: "active" },
-          { id: 2, label: "实现功能", status: "pending" },
-          { id: 3, label: "测试验证", status: "pending" },
-          { id: 4, label: "部署上线", status: "pending" },
+          { id: 1, label: "分析需求", status: "complete" as const },
+          { id: 2, label: "实现功能", status: "active" as const },
+          { id: 3, label: "测试验证", status: "pending" as const },
+          { id: 4, label: "部署上线", status: "pending" as const },
         ],
       };
       setMessages((prev) => [...prev, aiMessage]);
@@ -66,7 +64,7 @@ export default function AgentChatPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-ocean-night">
+    <div className="min-h-screen bg-ocean-night flex flex-col">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-ocean-night/90 backdrop-blur-lg border-b border-cyan/20">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -80,8 +78,8 @@ export default function AgentChatPage() {
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-1 bg-ocean-night/50 p-1 rounded-lg border border-cyan/10">
+          {/* Tabs - Desktop */}
+          <div className="hidden sm:flex gap-1 bg-ocean-night/50 p-1 rounded-lg border border-cyan/10">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -97,13 +95,31 @@ export default function AgentChatPage() {
               </button>
             ))}
           </div>
+
+          {/* Tabs - Mobile */}
+          <div className="sm:hidden flex gap-1 bg-ocean-night/50 p-1 rounded-lg border border-cyan/10 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "btn-vice-primary shadow-lg shadow-pink/20"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-4 w-full">
         {activeTab === "chat" && (
-          <div className="flex flex-col h-[calc(100vh-180px)]">
+          <div className="flex flex-col h-[calc(100vh-200px)] sm:h-[calc(100vh-180px)] max-h-[600px]">
             <ChatPanel
               messages={messages}
               messagesEndRef={messagesEndRef}

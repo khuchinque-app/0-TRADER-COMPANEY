@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Nav from "@/components/Nav";
 
 interface Pair {
   symbol: string;
@@ -45,6 +46,7 @@ export default function MarketPage() {
 
   return (
     <div className="min-h-screen bg-vice-dark text-vice-text-primary">
+      <Nav />
       {/* Header */}
       <div className="border-b border-vice-border bg-vice-surface px-6 py-4">
         <h1 className="text-2xl font-bold text-vice-cyan glow-cyan">Market</h1>

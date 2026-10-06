@@ -1,9 +1,9 @@
 import fs from "fs";
+import path from "path";
 import Link from "next/link";
 import TradeClient from "./TradeClient";
 
-const CATALOG_PATH =
-  "/home/khuchinque/0-TRADER-COMPANEY/docs/research/indodax-pairs.json";
+const CATALOG_PATH = path.resolve(__dirname, "../../../../docs/research/indodax-pairs.json");
 
 interface Pair {
   symbol: string;

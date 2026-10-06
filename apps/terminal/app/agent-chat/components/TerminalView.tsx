@@ -8,7 +8,7 @@ export function TerminalView({ lines }: TerminalViewProps) {
   const linesEndRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-cyan/20 flex items-center justify-center text-xl">
           🖥️
@@ -31,13 +31,13 @@ export function TerminalView({ lines }: TerminalViewProps) {
             <div className="text-white/30 italic">暂无输出...</div>
           )}
           {lines.map((line, idx) => (
-            <div key={idx} className="text-green-400 mb-1">
+            <div key={idx} className="mb-1">
               {line.startsWith("[INFO]") ? (
                 <span className="text-cyan-400">{line}</span>
               ) : line.startsWith("[ERROR]") ? (
                 <span className="text-red-400">{line}</span>
               ) : (
-                <span>{line}</span>
+                <span className="text-green-400">{line}</span>
               )}
             </div>
           ))}
