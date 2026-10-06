@@ -50,5 +50,5 @@ export default async function TradePage({ params }: PageProps) {
     );
   }
 
-  return <TradeClient pairData={pairData} />;
+  return <TradeClient pairData={{...pairData, flags: []}} />;
 }
