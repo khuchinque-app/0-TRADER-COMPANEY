@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useRef, useEffect } from "react";
 import { ChatPanel } from "./components/ChatPanel";
 import { WorkflowView } from "./components/WorkflowView";
