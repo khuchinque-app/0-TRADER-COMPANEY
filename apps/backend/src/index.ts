@@ -175,7 +175,7 @@ function seedDevAccount(): { seeded: boolean; message: string } {
   }
 }
 
-// FX CACHE (Indodax USDT/IDR rate)
+// FX CACHE (ChinQue USDT/IDR rate)
 let fxCache: { rate: number; ts: number; source: string } | null = null;
 const FX_TTL_MS = parseInt(process.env.FX_TTL_MS || "60000"); // default 1 min
 const FX_STALE_MAX_MS = parseInt(process.env.FX_STALE_MAX_MS || "300000"); // default 5 min
@@ -189,7 +189,7 @@ function getUsdtIdrRate(): Promise<{ rate: number; source: string; ts: number; s
     if (fxCache && (now - fxCache.ts) < FX_STALE_MAX_MS) {
       return resolve({ ...fxCache, stale: true });
     }
-    const base = process.env.INDODAX_BASE_URL || "https://indodax.com";
+    const base = process.env.CHINQUE_BASE_URL || "https://chinque.trade";
     const url = `${base}/api/ticker/usdtidr`;
     const timeout = setTimeout(() => {
       if (fxCache) {
@@ -204,13 +204,13 @@ function getUsdtIdrRate(): Promise<{ rate: number; source: string; ts: number; s
         return res.json() as Promise<any>;
       })
       .then((data: any) => {
-        // Indodax returns {"ticker": {"last": "..."}}
+        // ChinQue returns {"ticker": {"last": "..."}}
         const last = data.ticker?.last || data.last;
         const rate = parseFloat(last);
         if (isNaN(rate)) throw new Error("invalid_rate");
-        fxCache = { rate, ts: now, source: "indodax" };
+        fxCache = { rate, ts: now, source: "chinque" };
         clearTimeout(timeout);
-        resolve({ rate, source: "indodax", ts: now, stale: false });
+        resolve({ rate, source: "chinque", ts: now, stale: false });
       })
       .catch(err => {
         clearTimeout(timeout);
@@ -443,8 +443,8 @@ app.get("/api/admin/integrity", (req, res) => {
 // MARKETS
 app.get("/api/markets", (_req, res) => {
   try {
-    // Load from Indodax catalog if available
-    const catalogPath = path.resolve(repoRoot, "docs/research/indodax-pairs.json");
+    // Load from ChinQue catalog if available
+    const catalogPath = path.resolve(repoRoot, "docs/research/chinque-pairs.json");
     let markets: any[] = [];
 
     try {
@@ -457,7 +457,7 @@ app.get("/api/markets", (_req, res) => {
           quoteAsset: p.quote,
           status: "trading",
           price: "0.00",
-          source: "indodax",
+          source: "chinque",
           simulasi: true,
           flags: p.flags || []
         }));
@@ -480,6 +480,11 @@ app.get("/api/markets", (_req, res) => {
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message });
   }
+});
+
+// ALIAS: /market -> /api/markets
+app.get("/market", (_req, res) => {
+  res.redirect(301, '/api/markets');
 });
 
 // T04: Reference price feed routes (mounted before the generic /api/ticker/:pair route)
@@ -545,11 +550,11 @@ app.get("/api/fx/usdt-idr", async (req, res) => {
   }
 });
 
-// TICKER ENDPOINT (Indodax)
+// TICKER ENDPOINT (ChinQue)
 app.get("/api/ticker/:pair", async (req, res) => {
   try {
     const pair = String(req.params.pair).toUpperCase();
-    const base = process.env.INDODAX_BASE_URL || "https://indodax.com";
+    const base = process.env.CHINQUE_BASE_URL || "https://chinque.trade";
     const url = `${base}/api/ticker/${pair.toLowerCase()}`;
 
     const timeout = setTimeout(() => {
@@ -978,8 +983,8 @@ app.post("/api/chat", (req, res) => {
     reply = "Perintah yang tersedia: kirim teks atau suara untuk chat tentang project, trading, wallet, atau harga. Bot akan membalas dengan voice note HD. Untuk trading manual, buka browser di port 22220. Faucet untuk saldo gratis.";
   } else if (lower.includes("test")) {
     reply = "Test berhasil! Bot suara berjalan dengan baik. Saya adalah agen voice untuk Trading Company — membalas pesan teks dan suara dengan voice note HD berbahasa Indonesia.";
-  } else if (lower.includes("indodax") || lower.includes("pair") || lower.includes("market")) {
-    reply = "Indodax menyediakan 477 pair trading — 465 pasangan IDR dan 12 pasangan USDT. Data ticker diambil langsung dari API Indodax dan di-cache di backend selama 60 detik. Halaman market menampilkan semua pair dengan pencarian dan filter.";
+  } else if (lower.includes("chinque") || lower.includes("pair") || lower.includes("market")) {
+    reply = "ChinQue menyediakan 477 pair trading — 465 pasangan IDR dan 12 pasangan USDT. Data ticker diambil langsung dari API ChinQue dan di-cache di backend selama 60 detik. Halaman market menampilkan semua pair dengan pencarian dan filter.";
   } else if (lower.includes("port") || lower.includes("api") || lower.includes("backend")) {
     reply = "Port backend API di 11110, frontend terminal di 22220, dan static files di 2217. Endpoint penting: /api/markets untuk daftar pair, /api/ticker/PASS untuk harga live, /api/fx/usdt-idr untuk kurs, /api/chat untuk bot suara.";
   } else if (lower.includes("bot") || lower.includes("suara") || lower.includes("voice")) {

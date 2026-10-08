@@ -1,29 +1,27 @@
 {
   "name": "@trading/terminal",
-  "version": "0.1.0",
   "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@trading/shared": "*",
-    "lightweight-charts": "^4.1.0",
-    "next": "14.2.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "lightweight-charts": "^5.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.3",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.0",
+    "vite": "^5.1.0"
   }
 }

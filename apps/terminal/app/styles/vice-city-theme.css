@@ -63,3 +63,31 @@
   color: var(--vice-ocean-night);
   box-shadow: var(--glow-cyan);
 }
+
+/* Vice City Component Classes */
+.btn-vice-primary {
+  background: var(--vice-cyan);
+  color: var(--vice-ocean-night);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-vice-primary:hover {
+  background: var(--vice-sunset-pink);
+  color: white;
+  box-shadow: var(--glow-pink);
+}
+
+.card-vice {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: var(--glow-cyan);
+}
+
+.gradient-sunset {
+  background: linear-gradient(135deg, var(--vice-sunset-pink) 0%, var(--vice-neon-purple) 100%);
+}
