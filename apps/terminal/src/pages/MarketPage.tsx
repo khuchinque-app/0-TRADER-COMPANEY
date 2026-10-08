@@ -1,419 +1,263 @@
-import React, { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo } from 'react';
+import { MARKETS } from '../data/marketsFull';
 
-interface MarketPair {
-  symbol: string
-  base: string
-  quote: string
-  name: string
-  price: number
-  priceIdr: number
-  change24h: number
-  volume24h: number
-  marketCap: number
-  category: 'IDR' | 'USDT' | 'MEME' | 'NEW' | 'DEFI' | 'LAYER1'
-  logo?: string
-}
-
-// HARD CODED 7 MARKETS - Renders immediately without API dependency
-const HARDCODED_MARKETS: MarketPair[] = [
-  {
-    symbol: 'BTCIDR',
-    base: 'BTC',
-    quote: 'IDR',
-    name: 'Bitcoin',
-    price: 1002450000,
-    priceIdr: 1002450000,
-    change24h: 2.34,
-    volume24h: 1245678900,
-    marketCap: 15000000000000,
-    category: 'IDR',
-    logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png'
-  },
-  {
-    symbol: 'ETHIDR',
-    base: 'ETH',
-    quote: 'IDR',
-    name: 'Ethereum',
-    price: 54820000,
-    priceIdr: 54820000,
-    change24h: -1.23,
-    volume24h: 892345600,
-    marketCap: 6500000000000,
-    category: 'IDR',
-    logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png'
-  },
-  {
-    symbol: 'SOLIDR',
-    base: 'SOL',
-    quote: 'IDR',
-    name: 'Solana',
-    price: 2829000,
-    priceIdr: 2829000,
-    change24h: 5.67,
-    volume24h: 456789000,
-    marketCap: 1200000000000,
-    category: 'LAYER1',
-    logo: 'https://assets.coingecko.com/coins/images/4128/large/solana.png'
-  },
-  {
-    symbol: 'BNBidr',
-    base: 'BNB',
-    quote: 'IDR',
-    name: 'BNB',
-    price: 9706000,
-    priceIdr: 9706000,
-    change24h: 0.89,
-    volume24h: 234567800,
-    marketCap: 1500000000000,
-    category: 'IDR',
-    logo: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png'
-  },
-  {
-    symbol: 'XRPIDR',
-    base: 'XRP',
-    quote: 'IDR',
-    name: 'XRP',
-    price: 9248,
-    priceIdr: 9248,
-    change24h: -0.45,
-    volume24h: 567890000,
-    marketCap: 480000000000,
-    category: 'IDR',
-    logo: 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png'
-  },
-  {
-    symbol: 'LINKIDR',
-    base: 'LINK',
-    quote: 'IDR',
-    name: 'Chainlink',
-    price: 230800,
-    priceIdr: 230800,
-    change24h: 3.21,
-    volume24h: 123456700,
-    marketCap: 270000000000,
-    category: 'DEFI',
-    logo: 'https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png'
-  },
-  {
-    symbol: 'AAVEIDR',
-    base: 'AAVE',
-    quote: 'IDR',
-    name: 'Aave',
-    price: 1565000,
-    priceIdr: 1565000,
-    change24h: -2.10,
-    volume24h: 89012300,
-    marketCap: 230000000000,
-    category: 'DEFI',
-    logo: 'https://assets.coingecko.com/coins/images/12645/large/AAVE.png'
-  }
-]
-
-const MarketPage: React.FC = () => {
-  // Use hardcoded markets immediately - no loading state needed
-  const [markets] = useState<MarketPair[]>(HARDCODED_MARKETS)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterCategory, setFilterCategory] = useState<string>('all')
-  const [_sortBy, _setSortBy] = useState<'volume' | 'change' | 'name'>('volume')
-  const [favorites, setFavorites] = useState<string[]>([])
-  const [page, setPage] = useState(1)
-  const itemsPerPage = 50
-
-  const toggleFavorite = (symbol: string) => {
-    const newFavs = favorites.includes(symbol)
-      ? favorites.filter(f => f !== symbol)
-      : [...favorites, symbol]
-    
-    setFavorites(newFavs)
-    try {
-      localStorage.setItem('chinque_favorites', JSON.stringify(newFavs))
-    } catch (e) {
-      console.error('Failed to save favorites:', e)
-    }
-  }
-
-  // Use _sortBy to avoid unused variable warning, but we need it for useMemo
-  const sortBy = _sortBy
-
-  const formatPrice = (price: number, _quote?: string): string => {
-    return `Rp ${price.toLocaleString('id-ID')}`
-  }
-
-  const formatVolume = (vol: number): string => {
-    if (vol >= 1e12) return `${(vol / 1e12).toFixed(2)}T`
-    if (vol >= 1e9) return `${(vol / 1e9).toFixed(2)}B`
-    if (vol >= 1e6) return `${(vol / 1e6).toFixed(2)}M`
-    if (vol >= 1e3) return `${(vol / 1e3).toFixed(2)}K`
-    return vol.toFixed(0)
-  }
+export default function MarketPage() {
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('all');
+  const [page, setPage] = useState(1);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<'volume' | 'change' | 'name'>('volume');
+  const ITEMS_PER_PAGE = 10;
 
   const filteredMarkets = useMemo(() => {
-    let result = markets
-      .filter(m => 
-        (m.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         m.name.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (filterCategory === 'all' || m.category === filterCategory)
-      )
-      .sort((a, b) => {
-        // Favorites first
-        const aFav = favorites.includes(a.symbol) ? 1 : 0
-        const bFav = favorites.includes(b.symbol) ? 1 : 0
-        if (aFav !== bFav) return bFav - aFav
-        
-        // Then by selected sort
-        if (sortBy === 'volume') return b.volume24h - a.volume24h
-        if (sortBy === 'change') return b.change24h - a.change24h
-        if (sortBy === 'name') return a.name.localeCompare(b.name)
-        return 0
-      })
+    let filtered = [...MARKETS];
 
-    return result
-  }, [markets, searchTerm, filterCategory, sortBy, favorites])
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(m =>
+        m.symbol.toLowerCase().includes(searchLower) ||
+        m.name.toLowerCase().includes(searchLower)
+      );
+    }
 
-  // No loading state - markets are hardcoded and render immediately
+    if (category === 'favorite') {
+      filtered = filtered.filter(m => favorites.has(m.symbol));
+    } else if (category === 'defi') {
+      filtered = filtered.filter(m => m.category === 'defi');
+    } else if (category === 'meme') {
+      filtered = filtered.filter(m => m.category === 'meme');
+    } else if (category === 'gainers') {
+      filtered = filtered.filter(m => m.change24h > 0).sort((a, b) => b.change24h - a.change24h);
+      return filtered;
+    } else if (category === 'losers') {
+      filtered = filtered.filter(m => m.change24h < 0).sort((a, b) => a.change24h - b.change24h);
+      return filtered;
+    }
+
+    if (sortBy === 'volume') {
+      filtered.sort((a, b) => b.volume24h - a.volume24h);
+    } else if (sortBy === 'change') {
+      filtered.sort((a, b) => b.change24h - a.change24h);
+    } else if (sortBy === 'name') {
+      filtered.sort((a, b) => a.symbol.localeCompare(b.symbol));
+    }
+
+    return filtered;
+  }, [search, category, favorites, sortBy]);
+
+  const totalPages = Math.ceil(filteredMarkets.length / ITEMS_PER_PAGE);
+  const paginatedMarkets = filteredMarkets.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
+
+  const toggleFavorite = (symbol: string) => {
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(symbol)) next.delete(symbol);
+      else next.add(symbol);
+      return next;
+    });
+  };
+
+  const categories = [
+    { key: 'all', label: 'Semua' },
+    { key: 'favorite', label: '⭐ Favorit' },
+    { key: 'gainers', label: '📈 Naik' },
+    { key: 'losers', label: '📉 Turun' },
+    { key: 'defi', label: 'DeFi' },
+    { key: 'meme', label: 'Meme' },
+  ];
+
+  const formatPrice = (price: number) => {
+    if (price < 1) {
+      return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 6 })}`;
+    }
+    return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
+  };
+
+  const formatVolume = (volume: number) => {
+    if (volume >= 1000000000) {
+      return `${(volume / 1000000000).toFixed(1).replace('.', ',')}bn`;
+    } else if (volume >= 1000000) {
+      return `${(volume / 1000000).toFixed(1).replace('.', ',')}mn`;
+    }
+    return volume.toLocaleString('id-ID');
+  };
+
   return (
     <div className="min-h-screen bg-[#0b0e11] text-white">
-      {/* Header - Indodax Style */}
-      <div className="bg-[#1e2329] border-b border-[#2b3139] px-4 py-3">
-        <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-6">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-yellow-400 rounded flex items-center justify-center">
-                <span className="text-[#0b0e11] font-bold text-sm">C</span>
-              </div>
-              <span className="font-bold text-yellow-400 text-lg">ChinQueTrade</span>
-            </Link>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Market Crypto</h1>
+          <p className="text-gray-500 text-sm">Cek harga crypto (IDR) hari ini. Data referensi dari Indodax.</p>
+        </div>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-4 text-sm">
-              <Link to="/market" className="text-white font-medium border-b-2 border-yellow-400 pb-1">
-                Market
-              </Link>
-              <Link to="/trade/BTCIDR" className="text-gray-400 hover:text-white transition-colors">
-                Trade
-              </Link>
-              <Link to="/portfolio" className="text-gray-400 hover:text-white transition-colors">
-                Portfolio
-              </Link>
-            </nav>
+        {/* Search + Categories */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Cari market..."
+              className="w-full bg-[#1e2329] border border-gray-700 rounded-lg px-4 py-2.5 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 transition-colors"
+            />
+            <svg className="absolute left-3 top-3 w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
 
-          {/* Right Side */}
-          <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded hover:bg-green-600 transition-colors">
-              Trade Pro
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {categories.map(cat => (
+              <button
+                key={cat.key}
+                onClick={() => { setCategory(cat.key); setPage(1); }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                  category === cat.key
+                    ? 'bg-yellow-400 text-black'
+                    : 'bg-[#1e2329] text-gray-400 hover:text-white hover:bg-[#2b3139]'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="flex items-center justify-between mb-4 text-xs text-gray-500">
+          <span>{filteredMarkets.length} market ditemukan</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSortBy('volume')}
+              className={`px-2 py-1 rounded ${sortBy === 'volume' ? 'text-yellow-400' : 'hover:text-white'}`}
+            >
+              Vol
             </button>
-            <div className="text-xs text-gray-500">
-              <span className="text-yellow-400">DEMO</span> • Paper Trading
-            </div>
+            <button
+              onClick={() => setSortBy('change')}
+              className={`px-2 py-1 rounded ${sortBy === 'change' ? 'text-yellow-400' : 'hover:text-white'}`}
+            >
+              Perubahan
+            </button>
+            <button
+              onClick={() => setSortBy('name')}
+              className={`px-2 py-1 rounded ${sortBy === 'name' ? 'text-yellow-400' : 'hover:text-white'}`}
+            >
+              Nama
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Market Header - Indodax Style */}
-      <div className="bg-[#1e2329] border-b border-[#2b3139] px-4 py-4">
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold">Market Kategori</h1>
-              <p className="text-gray-500 text-sm mt-1">
-                {filteredMarkets.length} Aset Kripto Tersedia
-              </p>
-            </div>
-            
-            {/* Quick Stats */}
-            <div className="flex items-center gap-6 text-sm">
-              <div className="text-center">
-                <div className="text-gray-500 text-xs">BTC/IDR</div>
-                <div className="font-mono font-semibold">
-                  {formatPrice(
-                    markets.find(m => m.symbol === 'BTCIDR')?.price || 1500000000,
-                    'IDR'
-                  )}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-gray-500 text-xs">ETH/IDR</div>
-                <div className="font-mono font-semibold">
-                  {formatPrice(
-                    markets.find(m => m.symbol === 'ETHIDR')?.price || 45000000,
-                    'IDR'
-                  )}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-gray-500 text-xs">SOL/IDR</div>
-                <div className="font-mono font-semibold">
-                  {formatPrice(
-                    markets.find(m => m.symbol === 'SOLIDR')?.price || 2000000,
-                    'IDR'
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Search and Filter */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px] relative">
-              <input
-                type="text"
-                placeholder="Cari koin atau pair..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#0b0e11] border border-[#2b3139] rounded-lg px-4 py-2 pl-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400"
-              />
-              <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-            {/* Category Filters - Indodax Style */}
-            <div className="flex items-center gap-2">
-              {[
-                { key: 'all', label: 'All' },
-                { key: 'IDR', label: 'IDR Market' },
-                { key: 'USDT', label: 'USDT Market' },
-                { key: 'MEME', label: 'MEME' },
-                { key: 'NEW', label: 'New Coin' },
-              ].map((cat) => (
-                <button
-                  key={cat.key}
-                  onClick={() => setFilterCategory(cat.key as any)}
-                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    filterCategory === cat.key
-                      ? 'bg-yellow-400 text-[#0b0e11]'
-                      : 'bg-[#2b3139] text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Table Header */}
+        <div className="hidden sm:grid grid-cols-[40px_1fr_160px_120px_100px] gap-4 px-4 py-3 text-xs text-gray-500 border-b border-gray-800 font-medium">
+          <span></span>
+          <span>Nama</span>
+          <span className="text-right">Harga Terakhir</span>
+          <span className="text-right">24H Vol</span>
+          <span className="text-right">24H Chg</span>
         </div>
-      </div>
 
-      {/* Market Table - Indodax Style */}
-      <div className="px-4 py-6">
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="bg-[#1e2329] rounded-lg border border-[#2b3139] overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-[#0b0e11] border-b border-[#2b3139] text-xs text-gray-500 font-medium">
-              <div className="col-span-1"></div>
-              <div className="col-span-4">Nama</div>
-              <div className="col-span-2 text-right">Harga Terakhir</div>
-              <div className="col-span-2 text-right">24H Vol</div>
-              <div className="col-span-2 text-right">24H Chg</div>
-              <div className="col-span-1 text-center">Aksi</div>
+        {/* Market Rows */}
+        <div>
+          {paginatedMarkets.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <div className="text-4xl mb-3">🔍</div>
+              <p>Tidak ada market ditemukan</p>
             </div>
+          ) : (
+            paginatedMarkets.map(market => {
+              const changeColor = market.change24h >= 0 ? 'text-green-400' : 'text-red-400';
+              const changePrefix = market.change24h >= 0 ? '+' : '';
+              const isFav = favorites.has(market.symbol);
 
-            {/* Table Rows */}
-            <div className="divide-y divide-[#2b3139]">
-              {filteredMarkets.map((market) => (
+              return (
                 <div
                   key={market.symbol}
-                  className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-[#2b3139]/30 transition-colors items-center"
+                  className="grid grid-cols-[40px_1fr_160px_120px_100px] gap-4 px-4 py-4 items-center border-b border-gray-800/50 hover:bg-[#1e2329] transition-colors cursor-pointer"
+                  onClick={() => window.location.href = `/trade/${market.symbol}`}
                 >
-                  {/* Favorite Star */}
-                  <div className="col-span-1">
-                    <button
-                      onClick={() => toggleFavorite(market.symbol)}
-                      className="text-xl hover:scale-110 transition-transform"
-                    >
-                      {favorites.includes(market.symbol) ? (
-                        <span className="text-yellow-400">★</span>
-                      ) : (
-                        <span className="text-gray-600">☆</span>
-                      )}
-                    </button>
-                  </div>
+                  {/* Favorite */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleFavorite(market.symbol); }}
+                    className="text-lg hover:scale-125 transition-transform"
+                  >
+                    {isFav ? '⭐' : '☆'}
+                  </button>
 
-                  {/* Coin Info */}
-                  <div className="col-span-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#2b3139] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                      {market.base.slice(0, 2)}
+                  {/* Name + Icon */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 flex items-center justify-center text-lg">
+                      {market.icon}
                     </div>
                     <div>
-                      <div className="font-medium text-white">{market.symbol}</div>
+                      <div className="font-semibold text-white text-sm">{market.symbol}</div>
                       <div className="text-xs text-gray-500">{market.name}</div>
                     </div>
                   </div>
 
                   {/* Price */}
-                  <div className="col-span-2 text-right font-mono text-sm">
-                    {formatPrice(market.price, market.quote)}
+                  <div className="text-right font-medium text-white text-sm">
+                    {formatPrice(market.price)}
                   </div>
 
                   {/* Volume */}
-                  <div className="col-span-2 text-right text-gray-400 text-sm font-mono">
+                  <div className="text-right text-gray-400 text-sm">
                     {formatVolume(market.volume24h)}
                   </div>
 
                   {/* Change */}
-                  <div className="col-span-2 text-right">
-                    <span className={`font-mono text-sm ${
-                      market.change24h >= 0 ? 'text-green-500' : 'text-red-500'
-                    }`}>
-                      {market.change24h >= 0 ? '+' : ''}{market.change24h.toFixed(2)}%
-                    </span>
-                  </div>
-
-                  {/* Trade Button */}
-                  <div className="col-span-1 text-center">
-                    <Link
-                      to={`/trade/${market.symbol}`}
-                      className="px-3 py-1.5 bg-green-500/20 text-green-500 text-xs font-medium rounded hover:bg-green-500/30 transition-colors"
-                    >
-                      Trade
-                    </Link>
+                  <div className={`text-right font-semibold text-sm ${changeColor}`}>
+                    {changePrefix}{market.change24h.toFixed(2)}%
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })
+          )}
+        </div>
 
-            {/* Pagination */}
-            <div className="px-4 py-3 border-t border-[#2b3139] flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                Menampilkan {((page - 1) * itemsPerPage) + 1} - {Math.min(page * itemsPerPage, filteredMarkets.length)} dari {filteredMarkets.length} pasar
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1 bg-[#2b3139] text-gray-400 rounded text-sm hover:bg-[#3d444d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Prev
-                </button>
-                <span className="text-sm text-gray-500">
-                  Halaman {page} / {Math.ceil(filteredMarkets.length / itemsPerPage)}
-                </span>
-                <button
-                  onClick={() => setPage(p => Math.min(Math.ceil(filteredMarkets.length / itemsPerPage), p + 1))}
-                  disabled={page >= Math.ceil(filteredMarkets.length / itemsPerPage)}
-                  className="px-3 py-1 bg-[#2b3139] text-gray-400 rounded text-sm hover:bg-[#3d444d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-8">
+            <button
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 bg-[#1e2329] rounded-lg text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              ←
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  page === p
+                    ? 'bg-yellow-400 text-black'
+                    : 'bg-[#1e2329] text-gray-400 hover:text-white'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-2 bg-[#1e2329] rounded-lg text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              →
+            </button>
           </div>
+        )}
+
+        {/* Footer Info */}
+        <div className="mt-8 text-center text-xs text-gray-600">
+          <p>Data referensi dari Indodax • Paper Trading Mode • Bukan saran investasi</p>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="border-t border-[#2b3139] px-4 py-6 text-center text-xs text-gray-500">
-        <p className="mb-2">
-          Paper Trading Mode — Simulated Data • {markets.length} Pairs Available
-        </p>
-        <p>
-          Aset kripto bersifat fluktuatif dengan potensi keuntungan dan risiko kerugian yang tinggi.
-        </p>
-      </div>
     </div>
-  )
+  );
 }
-
-export default MarketPage
