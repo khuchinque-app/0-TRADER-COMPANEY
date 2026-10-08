@@ -17,17 +17,35 @@ export default function MarketPage() {
     const fetchMarkets = async () => {
       setLoading(true);
       try {
-        // Try fetching from Indodax API via CORS proxy
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://indodax.com/api/summaries');
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
+        // Try multiple CORS proxies
+        const urls = [
+          'https://corsproxy.io/?' + encodeURIComponent('https://indodax.com/api/summaries'),
+          'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://indodax.com/api/summaries'),
+          'https://cors-anywhere.herokuapp.com/https://indodax.com/api/summaries',
+        ];
 
-        if (data.tickers) {
+        let data = null;
+        for (const url of urls) {
+          try {
+            const response = await fetch(url, {
+              signal: AbortSignal.timeout(5000) // 5 second timeout
+            });
+            if (response.ok) {
+              data = await response.json();
+              break;
+            }
+          } catch (e) {
+            console.log(`Proxy failed: ${url}`);
+            continue;
+          }
+        }
+
+        if (data && data.tickers) {
           const tickers = data.tickers;
           const prices24h = data.prices_24h || {};
 
           const parsedMarkets: Market[] = Object.entries(tickers)
-            .filter(([key]) => key.endsWith('_idr')) // Only IDR pairs
+            .filter(([key]) => key.endsWith('_idr'))
             .map(([key, ticker]: [string, any]) => {
               const base = key.replace('_idr', '').toUpperCase();
               const pairKey = `${base.toLowerCase()}idr`;
@@ -35,13 +53,12 @@ export default function MarketPage() {
               const lastPrice = parseFloat(ticker.last);
               const change = price24hAgo > 0 ? ((lastPrice - price24hAgo) / price24hAgo) * 100 : 0;
 
-              // Determine category
               let cat: Market['category'] = 'all';
-              const memeCoins = ['DOGE', 'SHIB', 'PEPE', 'FARTCOIN', 'BONK', 'FLOKI', 'WIF', 'POPCAT', 'MOG', 'BRETT', 'MUBARAK', 'TROLLSOL', 'SUNDOG', 'PUMP', 'PM', 'USELESS', 'MARSCOIN', 'PIPPIN', 'BOME', 'CHILLGUY', 'NEIROCTO', 'GOAT', 'PNUT', 'PONKE', 'MYRO', 'APU', 'RFC', 'MOONPIG', 'BAN', 'GIGA', 'LUNA', 'LUNC'];
-              const defiCoins = ['AAVE', 'UNI', 'COMP', 'SNX', 'CRV', 'SUSHI', 'YFI', 'YFII', 'BAL', '1INCH', 'LINK', 'OGN', 'RLC', 'MET', 'ENA', 'ONDO', 'BR', 'GTC', 'CST', 'HONEY', 'UAI', 'JUP', 'RAY', 'ORCA', 'PENDLE', 'MORPHO', 'LDO', 'MKR', 'RPL', 'SSV'];
-              const gamingCoins = ['SAND', 'MANA', 'AXS', 'GALA', 'IMX', 'MCT', 'VANRY', 'BEAT', 'HIGH', 'PIXEL', 'PORTAL', 'MAGIC', 'SLP', 'VOXEL', 'GALAGAMES', 'COL', 'DAR', 'JELLYJELLY', 'ALICE', 'MYRIA'];
-              const layer1Coins = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOT', 'AVAX', 'NEAR', 'SUI', 'ATOM', 'ALGO', 'HBAR', 'FTM', 'ICP', 'VET', 'LTC', 'TRX', 'XLM', 'EOS', 'XTZ', 'NEO', 'QNT', 'BNB', 'THETA', 'ONE', 'FIL', 'AR'];
-              const layer2Coins = ['ARB', 'OP', 'MATIC', 'IMX', 'STRK', 'MANTA', 'METIS', 'MODE', 'BLAST', 'LINEA', 'SCROLL', 'ZKJ'];
+              const memeCoins = ['DOGE', 'SHIB', 'PEPE', 'FARTCOIN', 'BONK', 'FLOKI', 'WIF', 'POPCAT', 'MOG', 'BRETT', 'MUBARAK', 'TROLLSOL', 'SUNDOG', 'PUMP', 'PM', 'USELESS', 'MARSCOIN', 'PIPPIN'];
+              const defiCoins = ['AAVE', 'UNI', 'COMP', 'SNX', 'CRV', 'SUSHI', 'YFI', 'YFII', 'BAL', '1INCH', 'LINK', 'OGN', 'RLC', 'MET', 'ENA', 'ONDO', 'BR', 'GTC', 'CST', 'HONEY', 'UAI'];
+              const gamingCoins = ['SAND', 'MANA', 'AXS', 'GALA', 'IMX', 'MCT', 'VANRY', 'BEAT'];
+              const layer1Coins = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOT', 'AVAX', 'NEAR', 'SUI', 'ATOM', 'ALGO', 'HBAR', 'FTM', 'ICP', 'VET', 'LTC', 'TRX', 'XLM', 'QNT', 'BNB'];
+              const layer2Coins = ['ARB', 'OP', 'MATIC'];
 
               if (memeCoins.includes(base)) cat = 'meme';
               else if (defiCoins.includes(base)) cat = 'defi';
@@ -63,16 +80,21 @@ export default function MarketPage() {
                 category: cat,
               };
             })
-            .filter(m => m.volume24h > 0) // Filter out dead markets
+            .filter(m => m.volume24h > 0)
             .sort((a, b) => b.volume24h - a.volume24h);
 
           if (parsedMarkets.length > 0) {
             setMarkets(parsedMarkets);
             setTotalMarkets(parsedMarkets.length);
+            console.log(`✅ Loaded ${parsedMarkets.length} markets from Indodax API`);
           }
+        } else {
+          console.log('⚠️ Using fallback data (API fetch failed)');
+          setTotalMarkets(FALLBACK_MARKETS.length);
         }
       } catch (error) {
-        console.log('Using fallback market data (CORS blocked Indodax API)');
+        console.error('❌ Error fetching markets:', error);
+        console.log('⚠️ Using fallback data');
         setTotalMarkets(FALLBACK_MARKETS.length);
       } finally {
         setLoading(false);
@@ -80,7 +102,6 @@ export default function MarketPage() {
     };
 
     fetchMarkets();
-    // Refresh every 30 seconds
     const interval = setInterval(fetchMarkets, 30000);
     return () => clearInterval(interval);
   }, []);
