@@ -1,104 +1,109 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import LoginModal from './LoginModal';
 
-interface HeaderProps {
-  symbol: string
-  price: number
-  change24h: number
-  showIDR: boolean
-  onToggleIDR: () => void
-}
+export default function Header() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [showLogin, setShowLogin] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-const Header: React.FC<HeaderProps> = ({ 
-  symbol, 
-  price, 
-  change24h, 
-  showIDR, 
-  onToggleIDR 
-}) => {
-  const [idrate, setIdrate] = useState(15850)
-  const location = useLocation()
-
-  useEffect(() => {
-    // Fetch ID-rate
-    fetch('http://localhost:11110/api/fx/usdt-idr')
-      .then(r => r.json())
-      .then(data => setIdrate(data.rate || 15850))
-      .catch(() => {})
-  }, [])
-
-  const formatPrice = (p: number) => {
-    if (showIDR) {
-      return `Rp ${Math.round(p * idrate).toLocaleString('id-ID')}`
-    }
-    return `$${p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  }
-
-  const isTradePage = location.pathname.startsWith('/trade/')
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+    navigate('/');
+  };
 
   return (
-    <div className="bg-[#1e2329] border-b border-[#2b3139] px-4 py-3">
-      <div className="flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-yellow-400 rounded flex items-center justify-center">
-            <span className="text-[#0b0e11] font-bold text-sm">C</span>
-          </div>
-          <span className="font-bold text-yellow-400 text-lg">ChinQueTrade</span>
-        </Link>
-
-        {/* Market Selector - Show Only on Trade Page */}
-        {isTradePage && (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-[#0b0e11] rounded-lg">
-              <span className="text-gray-400 text-sm">{symbol}</span>
-              <span className="text-white font-bold text-lg">{symbol}/IDR</span>
-            </div>
-            
-            {/* Price Display */}
-            <div className="text-right">
-              <div className="text-white font-mono font-bold text-lg">
-                {formatPrice(price)}
+    <>
+      <header className="bg-[#1e2329] border-b border-gray-800 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                <span className="text-black font-bold text-sm">C</span>
               </div>
-              <div className={`text-sm ${change24h >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
-                {change24h >= 0 ? '+' : ''}{change24h.toFixed(2)}%
-              </div>
+              <span className="text-white font-bold text-xl">ChinQue<span className="text-yellow-400">Trade</span></span>
+            </Link>
+
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center gap-6">
+              <Link to="/" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+                Beranda
+              </Link>
+              <Link to="/market" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+                Market
+              </Link>
+              <Link to="/trade/BTCIDR" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+                Trading
+              </Link>
+              <Link to="/portfolio" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+                Portfolio
+              </Link>
+            </nav>
+
+            {/* Right Side */}
+            <div className="flex items-center gap-4">
+              {user ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 px-3 py-2 bg-[#0b0e11] border border-gray-700 rounded-lg hover:border-gray-600 transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-xs font-bold text-black">
+                      {user.name.charAt(0)}
+                    </div>
+                    <span className="text-white text-sm font-medium hidden sm:block">{user.name}</span>
+                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-[#1e2329] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-700">
+                        <p className="text-white text-sm font-medium">{user.name}</p>
+                        <p className="text-gray-400 text-xs">{user.email}</p>
+                      </div>
+                      <Link
+                        to="/portfolio"
+                        onClick={() => setShowUserMenu(false)}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0b0e11] hover:text-white transition-colors"
+                      >
+                        Portfolio Saya
+                      </Link>
+                      <Link
+                        to="/history"
+                        onClick={() => setShowUserMenu(false)}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#0b0e11] hover:text-white transition-colors"
+                      >
+                        Riwayat Transaksi
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-[#0b0e11] transition-colors"
+                      >
+                        Keluar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg transition-colors text-sm"
+                >
+                  Masuk / Daftar
+                </button>
+              )}
             </div>
-
-            {/* IDR Toggle */}
-            <button
-              onClick={onToggleIDR}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                showIDR
-                  ? 'bg-yellow-400 text-[#0b0e11]'
-                  : 'bg-[#2b3139] text-gray-400 hover:text-white'
-              }`}
-            >
-              {showIDR ? 'IDR' : 'USD'}
-            </button>
           </div>
-        )}
+        </div>
+      </header>
 
-        {/* Navigation - Show On Landing Page */}
-        {!isTradePage && (
-          <nav className="flex items-center gap-6">
-            <Link to="/market" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
-              Market
-            </Link>
-            <Link to="/trade/BTCIDR" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
-              Trade
-            </Link>
-            <Link to="/portfolio" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
-              Portfolio
-            </Link>
-            <button className="px-4 py-2 bg-yellow-400 text-[#0b0e11] text-sm font-bold rounded hover:bg-yellow-300 transition-colors">
-              Daftar
-            </button>
-          </nav>
-        )}
-      </div>
-    </div>
-  )
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+    </>
+  );
 }
-
-export default Header
