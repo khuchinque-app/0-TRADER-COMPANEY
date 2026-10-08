@@ -1,101 +1,76 @@
 import { useState, useMemo, useEffect } from 'react';
-import { MARKETS as FALLBACK_MARKETS, Market } from '../data/marketsFull';
+import { Market } from '../data/marketsFull';
+
+// IDR conversion rate (approximate)
+const IDR_RATE = 15850;
 
 export default function MarketPage() {
-  const [markets, setMarkets] = useState<Market[]>(FALLBACK_MARKETS);
+  const [markets, setMarkets] = useState<Market[]>([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [page, setPage] = useState(1);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'volume' | 'change' | 'name'>('volume');
-  const [loading, setLoading] = useState(false);
-  const [totalMarkets, setTotalMarkets] = useState(FALLBACK_MARKETS.length);
+  const [loading, setLoading] = useState(true);
+  const [totalMarkets, setTotalMarkets] = useState(0);
+  const [showIDR, setShowIDR] = useState(true);
   const ITEMS_PER_PAGE = 50;
 
-  // Fetch real-time data from Indodax API
+  // Fetch from MEXC API (CORS-friendly!)
   useEffect(() => {
     const fetchMarkets = async () => {
       setLoading(true);
       try {
-        // Try multiple CORS proxies
-        const urls = [
-          'https://corsproxy.io/?' + encodeURIComponent('https://indodax.com/api/summaries'),
-          'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://indodax.com/api/summaries'),
-          'https://cors-anywhere.herokuapp.com/https://indodax.com/api/summaries',
-        ];
+        const response = await fetch('https://api.mexc.com/api/v3/ticker/24hr');
+        const data = await response.json();
 
-        let data = null;
-        for (const url of urls) {
-          try {
-            const response = await fetch(url, {
-              signal: AbortSignal.timeout(5000) // 5 second timeout
-            });
-            if (response.ok) {
-              data = await response.json();
-              break;
-            }
-          } catch (e) {
-            console.log(`Proxy failed: ${url}`);
-            continue;
-          }
-        }
+        // Filter only USDT pairs and convert to Market format
+        const parsedMarkets: Market[] = data
+          .filter((ticker: any) => ticker.symbol.endsWith('USDT'))
+          .map((ticker: any) => {
+            const base = ticker.symbol.replace('USDT', '');
+            const price = parseFloat(ticker.lastPrice);
+            const change = parseFloat(ticker.priceChangePercent);
+            const volume = parseFloat(ticker.quoteVolume);
+            const high = parseFloat(ticker.highPrice);
+            const low = parseFloat(ticker.lowPrice);
 
-        if (data && data.tickers) {
-          const tickers = data.tickers;
-          const prices24h = data.prices_24h || {};
+            // Auto-categorize
+            let cat: Market['category'] = 'all';
+            const memeCoins = ['DOGE', 'SHIB', 'PEPE', 'FLOKI', 'BONK', 'WIF', 'POPCAT', 'MOG', 'BRETT', 'SUNDOG', 'PUMP', 'MARSCOIN', 'PIPPIN', 'CHILLGUY', 'GOAT', 'PNUT', 'PONKE', 'MYRO', 'APU', 'MOONPIG', 'BAN', 'GIGA', 'NEIRO', 'TURBO', 'MEME', 'BABYDOGE', 'CORGIAI', 'DOGE2', 'SHIB2', 'KISHU', 'AKITA', 'HOGE', 'ELON', 'SAMO', 'CUMMIES', 'WOJAK', 'LEASH', 'RICH', 'KOKU', 'NFP', 'TOSHI', 'MUBARAK', 'TRUMP', 'MELANIA'];
+            const defiCoins = ['AAVE', 'UNI', 'COMP', 'SNX', 'CRV', 'SUSHI', 'YFI', 'YFII', 'BAL', '1INCH', 'LINK', 'OGN', 'RLC', 'MET', 'ENA', 'ONDO', 'GTC', 'JUP', 'RAY', 'ORCA', 'PENDLE', 'MORPHO', 'LDO', 'MKR', 'RPL', 'SSV', 'DYDX', 'GMX', 'JOE', 'CAKE', 'FRAX', 'FXS', 'CVX', 'AURA', 'HOP', 'STG', 'MAI', 'ALUSD', 'MIM', 'SPELL', 'BORROW', 'VELO', 'DOLA', 'INV', 'DFN', 'CVP', 'WOMBAT', 'BOND', 'COVER', 'BADGER', 'DIGG', 'IBT', 'BANK', 'FOR', 'PERP', 'DODO', 'ACP', 'ZEE', 'BIRD', 'DEGEN', 'WHALE', 'FARM', 'PICKLE', 'PSH', 'INDEX', 'COOK', 'ROOT', 'BAC', 'BAS', 'ESD', 'DSU', 'MIS', 'MIT', 'STONK', 'KON', 'YAM', 'SFI', 'WING', 'FLM', 'MARSH', 'POND', 'HARD', 'SWINGBY', 'CTSI', 'BETA', 'TROY', 'VIDT', 'ALPACA', 'DUSK', 'FIO', 'NULS', 'POLS', 'UNFI', 'LIT', 'REEF', 'AKRO'];
+            const gamingCoins = ['SAND', 'MANA', 'AXS', 'GALA', 'IMX', 'ENJ', 'CHZ', 'PIXEL', 'PORTAL', 'MAGIC', 'SLP', 'VOXEL', 'GALAGAMES', 'COL', 'DAR', 'ALICE', 'MYRIA', 'STARL', 'UFO', 'WEMIX', 'LUNA', 'T', 'GMT', 'STEP', 'BCOIN', 'GHC', 'FIGHT', 'HERO', 'MBOX', 'REVV', 'RACA', 'TLOS', 'XWG', 'EROWAN', 'CTK', 'GPX', 'MBS', 'PBr', 'GG', 'PDT', 'SHILL', 'OAS', 'DESO', 'BRAWL', 'WOM', 'GFI', 'GXT', 'MTLX', 'PSG', 'JUV', 'ATM', 'LAZIO', 'SANTOS', 'ALPINE', 'PORTO', 'ACM', 'BAR', 'CITY', 'FOR'];
+            const layer1Coins = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOT', 'AVAX', 'NEAR', 'SUI', 'ATOM', 'ALGO', 'HBAR', 'FTM', 'ICP', 'VET', 'LTC', 'TRX', 'XLM', 'EOS', 'XTZ', 'NEO', 'QNT', 'BNB', 'THETA', 'FIL', 'AR', 'KAVA', 'ZEC', 'DASH', 'XMR', 'WAVES', 'ONT', 'ZIL', 'IOST', 'ONE', 'CELO', 'FLOW', 'MINA', 'KSM', 'MOVR', 'GLMR', 'ASTR', 'CLV', 'PHA', 'BNC', 'HDX', 'CFG', 'XRT', 'TEER', 'IMBU', 'LIS', 'PEAQ', 'SXP', 'FIRO', 'SYS', 'NAV', 'PART', 'PIVX', 'DGB', 'VIA', 'MONA', 'BTX', 'BIS', 'CRW', 'SPR', 'VTC', 'XVG', 'RDD', 'DOPE', 'NLG', 'OK', 'EMC2', 'FAIR', 'BLK', 'LBC'];
+            const layer2Coins = ['ARB', 'OP', 'MATIC', 'STRK', 'MANTA', 'METIS', 'MODE', 'BLAST', 'LINEA', 'SCROLL', 'ZKJ', 'IMX', 'LRC', 'SKL', 'AGIX', 'CELR', 'BOBA', 'SYN', 'ANY', 'POWR', 'REQ', 'NMR', 'FET', 'OCEAN', 'RNDR', 'AKT', 'TAO'];
 
-          const parsedMarkets: Market[] = Object.entries(tickers)
-            .filter(([key]) => key.endsWith('_idr'))
-            .map(([key, ticker]: [string, any]) => {
-              const base = key.replace('_idr', '').toUpperCase();
-              const pairKey = `${base.toLowerCase()}idr`;
-              const price24hAgo = parseFloat(prices24h[pairKey] || ticker.last);
-              const lastPrice = parseFloat(ticker.last);
-              const change = price24hAgo > 0 ? ((lastPrice - price24hAgo) / price24hAgo) * 100 : 0;
+            if (memeCoins.includes(base)) cat = 'meme';
+            else if (defiCoins.includes(base)) cat = 'defi';
+            else if (gamingCoins.includes(base)) cat = 'gaming';
+            else if (layer1Coins.includes(base)) cat = 'layer1';
+            else if (layer2Coins.includes(base)) cat = 'layer2';
 
-              let cat: Market['category'] = 'all';
-              const memeCoins = ['DOGE', 'SHIB', 'PEPE', 'FARTCOIN', 'BONK', 'FLOKI', 'WIF', 'POPCAT', 'MOG', 'BRETT', 'MUBARAK', 'TROLLSOL', 'SUNDOG', 'PUMP', 'PM', 'USELESS', 'MARSCOIN', 'PIPPIN'];
-              const defiCoins = ['AAVE', 'UNI', 'COMP', 'SNX', 'CRV', 'SUSHI', 'YFI', 'YFII', 'BAL', '1INCH', 'LINK', 'OGN', 'RLC', 'MET', 'ENA', 'ONDO', 'BR', 'GTC', 'CST', 'HONEY', 'UAI'];
-              const gamingCoins = ['SAND', 'MANA', 'AXS', 'GALA', 'IMX', 'MCT', 'VANRY', 'BEAT'];
-              const layer1Coins = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOT', 'AVAX', 'NEAR', 'SUI', 'ATOM', 'ALGO', 'HBAR', 'FTM', 'ICP', 'VET', 'LTC', 'TRX', 'XLM', 'QNT', 'BNB'];
-              const layer2Coins = ['ARB', 'OP', 'MATIC'];
+            return {
+              symbol: `${base}/USDT`,
+              base,
+              quote: 'USDT',
+              name: base,
+              icon: base.charAt(0),
+              price: price * (showIDR ? IDR_RATE : 1),
+              change24h: parseFloat(change.toFixed(2)),
+              volume24h: volume * (showIDR ? IDR_RATE : 1),
+              high24h: high * (showIDR ? IDR_RATE : 1),
+              low24h: low * (showIDR ? IDR_RATE : 1),
+              category: cat,
+            };
+          })
+          .filter((m: Market) => m.volume24h > 1000) // Filter out dead markets
+          .sort((a: Market, b: Market) => b.volume24h - a.volume24h);
 
-              if (memeCoins.includes(base)) cat = 'meme';
-              else if (defiCoins.includes(base)) cat = 'defi';
-              else if (gamingCoins.includes(base)) cat = 'gaming';
-              else if (layer1Coins.includes(base)) cat = 'layer1';
-              else if (layer2Coins.includes(base)) cat = 'layer2';
-
-              return {
-                symbol: `${base}/IDR`,
-                base,
-                quote: 'IDR',
-                name: ticker.name || base,
-                icon: base.charAt(0),
-                price: lastPrice,
-                change24h: parseFloat(change.toFixed(2)),
-                volume24h: parseFloat(ticker.vol_idr || '0'),
-                high24h: parseFloat(ticker.high || '0'),
-                low24h: parseFloat(ticker.low || '0'),
-                category: cat,
-              };
-            })
-            .filter(m => m.volume24h > 0)
-            .sort((a, b) => b.volume24h - a.volume24h);
-
-          if (parsedMarkets.length > 0) {
-            setMarkets(parsedMarkets);
-            setTotalMarkets(parsedMarkets.length);
-            console.log(`✅ Loaded ${parsedMarkets.length} markets from Indodax API`);
-          }
-        } else {
-          console.log('⚠️ Using fallback data (API fetch failed)');
-          setTotalMarkets(FALLBACK_MARKETS.length);
-        }
+        setMarkets(parsedMarkets);
+        setTotalMarkets(parsedMarkets.length);
+        console.log(`✅ Loaded ${parsedMarkets.length} markets from MEXC API`);
       } catch (error) {
-        console.error('❌ Error fetching markets:', error);
-        console.log('⚠️ Using fallback data');
-        setTotalMarkets(FALLBACK_MARKETS.length);
+        console.error('❌ Error fetching from MEXC:', error);
       } finally {
         setLoading(false);
       }
@@ -104,7 +79,7 @@ export default function MarketPage() {
     fetchMarkets();
     const interval = setInterval(fetchMarkets, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [showIDR]);
 
   const filteredMarkets = useMemo(() => {
     let filtered = [...markets];
@@ -176,46 +151,61 @@ export default function MarketPage() {
   ];
 
   const formatPrice = (price: number) => {
-    if (price < 1) {
-      return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 6 })}`;
-    } else if (price < 100) {
-      return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 3 })}`;
+    if (showIDR) {
+      if (price < 1) {
+        return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 2 })}`;
+      } else if (price < 100) {
+        return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
+      }
+      return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
+    } else {
+      if (price < 0.01) {
+        return `$${price.toFixed(6)}`;
+      } else if (price < 1) {
+        return `$${price.toFixed(4)}`;
+      }
+      return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-    return `Rp ${price.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
   };
 
   const formatVolume = (volume: number) => {
-    if (volume >= 1000000000000) {
-      return `${(volume / 1000000000000).toFixed(1).replace('.', ',')}tn`;
-    } else if (volume >= 1000000000) {
-      return `${(volume / 1000000000).toFixed(1).replace('.', ',')}bn`;
+    if (volume >= 1000000000) {
+      return `${(volume / 1000000000).toFixed(1).replace('.', ',')}B`;
     } else if (volume >= 1000000) {
-      return `${(volume / 1000000).toFixed(1).replace('.', ',')}mn`;
+      return `${(volume / 1000000).toFixed(1).replace('.', ',')}M`;
     } else if (volume >= 1000) {
-      return `${(volume / 1000).toFixed(1).replace('.', ',')}rb`;
+      return `${(volume / 1000).toFixed(1).replace('.', ',')}K`;
     }
-    return volume.toLocaleString('id-ID');
+    return volume.toFixed(0);
   };
 
   return (
     <div className="min-h-screen bg-[#0b0e11] text-white">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
         <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Market Crypto</h1>
             <p className="text-gray-500 text-sm">
-              Cek harga crypto (IDR) hari ini. Data live dari Indodax API.
-              {loading && <span className="text-yellow-400 ml-2">⏳ Memuat data...</span>}
+              Data live dari MEXC API • {totalMarkets} pairs tersedia
+              {loading && <span className="text-yellow-400 ml-2">⏳ Memuat...</span>}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            <span className="text-xs text-gray-500">Live • Auto-refresh 30s</span>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowIDR(!showIDR)}
+              className={`px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
+                showIDR ? 'bg-yellow-500 text-black' : 'bg-[#1e2329] text-gray-400 hover:text-white'
+              }`}
+            >
+              {showIDR ? 'IDR' : 'USD'}
+            </button>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+              <span className="text-xs text-gray-500">Live • 30s</span>
+            </div>
           </div>
         </div>
 
-        {/* Search + Categories */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <input
@@ -247,7 +237,6 @@ export default function MarketPage() {
           </div>
         </div>
 
-        {/* Stats Bar */}
         <div className="flex items-center justify-between mb-4 text-xs text-gray-500">
           <span>{filteredMarkets.length} market ditampilkan</span>
           <div className="flex gap-2">
@@ -272,7 +261,6 @@ export default function MarketPage() {
           </div>
         </div>
 
-        {/* Table Header */}
         <div className="hidden sm:grid grid-cols-[40px_1fr_160px_120px_100px] gap-4 px-4 py-3 text-xs text-gray-500 border-b border-gray-800 font-medium">
           <span></span>
           <span>Nama</span>
@@ -281,7 +269,6 @@ export default function MarketPage() {
           <span className="text-right">24H Chg</span>
         </div>
 
-        {/* Market Rows */}
         <div>
           {paginatedMarkets.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
@@ -299,7 +286,6 @@ export default function MarketPage() {
                   key={market.symbol}
                   className="grid grid-cols-[40px_1fr_160px_120px_100px] gap-4 px-4 py-3 items-center border-b border-gray-800/50 hover:bg-[#1e2329] transition-colors cursor-pointer"
                 >
-                  {/* Favorite */}
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(market.symbol); }}
                     className="text-lg hover:scale-125 transition-transform"
@@ -307,9 +293,8 @@ export default function MarketPage() {
                     {isFav ? '⭐' : '☆'}
                   </button>
 
-                  {/* Name + Icon */}
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 flex items-center justify-center text-base">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 flex items-center justify-center text-base font-bold">
                       {market.icon}
                     </div>
                     <div>
@@ -318,17 +303,14 @@ export default function MarketPage() {
                     </div>
                   </div>
 
-                  {/* Price */}
                   <div className="text-right font-medium text-white text-sm">
                     {formatPrice(market.price)}
                   </div>
 
-                  {/* Volume */}
                   <div className="text-right text-gray-400 text-sm">
                     {formatVolume(market.volume24h)}
                   </div>
 
-                  {/* Change */}
                   <div className={`text-right font-semibold text-sm ${changeColor}`}>
                     {changePrefix}{market.change24h.toFixed(2)}%
                   </div>
@@ -338,7 +320,6 @@ export default function MarketPage() {
           )}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center gap-1 mt-8 flex-wrap">
             <button
@@ -386,9 +367,8 @@ export default function MarketPage() {
           </div>
         )}
 
-        {/* Footer Info */}
         <div className="mt-8 text-center text-xs text-gray-600">
-          <p>Data live dari Indodax API • {totalMarkets} pair IDR tersedia • Auto-refresh setiap 30 detik</p>
+          <p>Data live dari MEXC API • {totalMarkets} USDT pairs • Auto-refresh 30 detik</p>
           <p className="mt-1">Paper Trading Mode • Bukan saran investasi</p>
         </div>
       </div>
