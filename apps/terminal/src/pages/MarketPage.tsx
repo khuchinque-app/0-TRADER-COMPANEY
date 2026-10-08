@@ -21,11 +21,10 @@ const MarketPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<'volume' | 'change' | 'name'>('volume')
+  const [_sortBy, _setSortBy] = useState<'volume' | 'change' | 'name'>('volume')
   const [favorites, setFavorites] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const itemsPerPage = 50
-  // Load markets from backend
   useEffect(() => {
     const loadMarkets = async () => {
       try {
@@ -279,21 +278,31 @@ const MarketPage: React.FC = () => {
     return vol.toFixed(2)
   }
 
-  const filteredMarkets = markets
-    .filter(m => 
-      (m.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       m.name.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (filterCategory === 'all' || m.category === filterCategory)
-    )
-    .sort((a, b) => {
-      // Favorites first
-      const aFav = favorites.includes(a.symbol) ? 1 : 0
-      const bFav = favorites.includes(b.symbol) ? 1 : 0
-      if (aFav !== bFav) return bFav - aFav
-      
-      // Then by volume
-      return b.volume24h - a.volume24h
-    })
+  // Use _sortBy to avoid unused variable warning, but we need it for useMemo
+  const sortBy = _sortBy
+
+  const filteredMarkets = useMemo(() => {
+    let result = markets
+      .filter(m => 
+        (m.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         m.name.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (filterCategory === 'all' || m.category === filterCategory)
+      )
+      .sort((a, b) => {
+        // Favorites first
+        const aFav = favorites.includes(a.symbol) ? 1 : 0
+        const bFav = favorites.includes(b.symbol) ? 1 : 0
+        if (aFav !== bFav) return bFav - aFav
+        
+        // Then by selected sort
+        if (sortBy === 'volume') return b.volume24h - a.volume24h
+        if (sortBy === 'change') return b.change24h - a.change24h
+        if (sortBy === 'name') return a.name.localeCompare(b.name)
+        return 0
+      })
+
+    return result
+  }, [markets, searchTerm, filterCategory, sortBy, favorites])
 
   if (loading) {
     return (
@@ -508,17 +517,27 @@ const MarketPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Pagination - Indodax Style */}
+            {/* Pagination */}
             <div className="px-4 py-3 border-t border-[#2b3139] flex items-center justify-between">
               <div className="text-sm text-gray-500">
-                Menampilkan {filteredMarkets.length} dari {markets.length} pasar
+                Menampilkan {((page - 1) * itemsPerPage) + 1} - {Math.min(page * itemsPerPage, filteredMarkets.length)} dari {filteredMarkets.length} pasar
               </div>
               <div className="flex items-center gap-2">
-                <button className="px-3 py-1 bg-[#2b3139] text-gray-400 rounded text-sm hover:bg-[#3d444d] disabled:opacity-50" disabled>
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-3 py-1 bg-[#2b3139] text-gray-400 rounded text-sm hover:bg-[#3d444d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
                   Prev
                 </button>
-                <span className="text-sm text-gray-500">1 / 10</span>
-                <button className="px-3 py-1 bg-[#2b3139] text-gray-400 rounded text-sm hover:bg-[#3d444d]">
+                <span className="text-sm text-gray-500">
+                  Halaman {page} / {Math.ceil(filteredMarkets.length / itemsPerPage)}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(Math.ceil(filteredMarkets.length / itemsPerPage), p + 1))}
+                  disabled={page >= Math.ceil(filteredMarkets.length / itemsPerPage)}
+                  className="px-3 py-1 bg-[#2b3139] text-gray-400 rounded text-sm hover:bg-[#3d444d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
                   Next
                 </button>
               </div>
