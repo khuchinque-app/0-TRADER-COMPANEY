@@ -1,3 +1,137 @@
+--- FIX-MARKET-PAGE-PROMPT.md (原始)
+
+
++++ FIX-MARKET-PAGE-PROMPT.md (修改后)
+# 🚨 URGENT FIX: Halaman /market Stuck di "Loading markets..."
+
+## Masalah
+URL: http://187.127.178.20:22221/market
+Status: **Stuck di "Loading markets..."** - tidak menampilkan 477+ markets
+
+## Diagnosa Cepat
+
+### Step 1: Cek Browser Console
+1. Buka http://187.127.178.20:22221/market
+2. Tekan **F12** → Tab **Console**
+3. Lihat error merah (screenshot jika perlu)
+
+### Step 2: Cek Network Tab
+1. **F12** → Tab **Network** → Refresh page
+2. Cek apakah ada failed request (merah)
+3. Cek apakah JavaScript bundle loading
+
+---
+
+## 🔧 Solusi 1: Rebuild & Restart (Paling Mungkin)
+
+Kemungkinan besar build belum di-deploy atau server belum restart.
+
+```bash
+# Di VPS
+cd /home/khuchinque/0-TRADER-COMPANEY/apps/terminal
+
+# Clean build
+rm -rf dist
+npm run build
+
+# Restart server (pilih yang sesuai)
+pm2 restart terminal
+# ATAU
+pm2 restart all
+# ATAU jika pakai systemd
+sudo systemctl restart terminal
+```
+
+---
+
+## 🔧 Solusi 2: Fix Routing Issue
+
+Cek file `apps/terminal/src/App.tsx` atau router config. Pastikan `/market` route mengarah ke `MarketPage` component.
+
+### Contoh App.tsx yang Benar:
+```typescript
+import { useState } from 'react';
+import MarketPage from './pages/MarketPage';
+
+function App() {
+  const [view, setView] = useState<'market' | 'terminal'>(() => {
+    // Check current path
+    if (window.location.pathname === '/market') return 'market';
+    return 'terminal';
+  });
+
+  if (view === 'market' || window.location.pathname === '/market') {
+    return (
+      <div className="min-h-screen bg-[#0b0e11]">
+        <nav className="bg-[#0b0e11] border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-black text-sm">
+              QC
+            </div>
+            <span className="text-white font-bold text-lg">ChinQue<span className="text-yellow-400">Trade</span></span>
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setView('market')}
+              className="px-4 py-2 bg-yellow-400 text-black rounded-lg font-medium text-sm"
+            >
+              Market
+            </button>
+            <button
+              onClick={() => setView('terminal')}
+              className="px-4 py-2 bg-[#1e2329] text-gray-400 hover:text-white rounded-lg font-medium text-sm transition-colors"
+            >
+              Terminal
+            </button>
+          </div>
+        </nav>
+        <MarketPage />
+      </div>
+    );
+  }
+
+  // Terminal view
+  return (
+    <div className="min-h-screen bg-[#0b0e11]">
+      <nav className="bg-[#0b0e11] border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-black text-sm">
+            QC
+          </div>
+          <span className="text-white font-bold text-lg">ChinQue<span className="text-yellow-400">Trade</span></span>
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={() => window.location.href = '/market'}
+            className="px-4 py-2 bg-[#1e2329] text-gray-400 hover:text-white rounded-lg font-medium text-sm transition-colors"
+          >
+            Market
+          </button>
+          <button
+            onClick={() => setView('terminal')}
+            className="px-4 py-2 bg-yellow-400 text-black rounded-lg font-medium text-sm"
+          >
+            Terminal
+          </button>
+        </div>
+      </nav>
+      {/* Terminal content */}
+    </div>
+  );
+}
+
+export default App;
+```
+
+---
+
+## 🔧 Solusi 3: Fix MarketPage.tsx (Fallback jika API Gagal)
+
+Jika CORS proxy tidak bekerja, gunakan fallback data langsung.
+
+### Update `apps/terminal/src/pages/MarketPage.tsx`:
+
+```typescript
 import { useState, useMemo, useEffect } from 'react';
 import { MARKETS as FALLBACK_MARKETS, Market } from '../data/marketsFull';
 
@@ -17,17 +151,35 @@ export default function MarketPage() {
     const fetchMarkets = async () => {
       setLoading(true);
       try {
-        // Try fetching from Indodax API via CORS proxy
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://indodax.com/api/summaries');
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
+        // Try multiple CORS proxies
+        const urls = [
+          'https://corsproxy.io/?' + encodeURIComponent('https://indodax.com/api/summaries'),
+          'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://indodax.com/api/summaries'),
+          'https://cors-anywhere.herokuapp.com/https://indodax.com/api/summaries',
+        ];
 
-        if (data.tickers) {
+        let data = null;
+        for (const url of urls) {
+          try {
+            const response = await fetch(url, {
+              signal: AbortSignal.timeout(5000) // 5 second timeout
+            });
+            if (response.ok) {
+              data = await response.json();
+              break;
+            }
+          } catch (e) {
+            console.log(`Proxy failed: ${url}`);
+            continue;
+          }
+        }
+
+        if (data && data.tickers) {
           const tickers = data.tickers;
           const prices24h = data.prices_24h || {};
 
           const parsedMarkets: Market[] = Object.entries(tickers)
-            .filter(([key]) => key.endsWith('_idr')) // Only IDR pairs
+            .filter(([key]) => key.endsWith('_idr'))
             .map(([key, ticker]: [string, any]) => {
               const base = key.replace('_idr', '').toUpperCase();
               const pairKey = `${base.toLowerCase()}idr`;
@@ -35,13 +187,12 @@ export default function MarketPage() {
               const lastPrice = parseFloat(ticker.last);
               const change = price24hAgo > 0 ? ((lastPrice - price24hAgo) / price24hAgo) * 100 : 0;
 
-              // Determine category
               let cat: Market['category'] = 'all';
-              const memeCoins = ['DOGE', 'SHIB', 'PEPE', 'FARTCOIN', 'BONK', 'FLOKI', 'WIF', 'POPCAT', 'MOG', 'BRETT', 'MUBARAK', 'TROLLSOL', 'SUNDOG', 'PUMP', 'PM', 'USELESS', 'MARSCOIN', 'PIPPIN', 'BOME', 'CHILLGUY', 'NEIROCTO', 'GOAT', 'PNUT', 'PONKE', 'MYRO', 'APU', 'RFC', 'MOONPIG', 'BAN', 'GIGA', 'LUNA', 'LUNC'];
-              const defiCoins = ['AAVE', 'UNI', 'COMP', 'SNX', 'CRV', 'SUSHI', 'YFI', 'YFII', 'BAL', '1INCH', 'LINK', 'OGN', 'RLC', 'MET', 'ENA', 'ONDO', 'BR', 'GTC', 'CST', 'HONEY', 'UAI', 'JUP', 'RAY', 'ORCA', 'PENDLE', 'MORPHO', 'LDO', 'MKR', 'RPL', 'SSV'];
-              const gamingCoins = ['SAND', 'MANA', 'AXS', 'GALA', 'IMX', 'MCT', 'VANRY', 'BEAT', 'HIGH', 'PIXEL', 'PORTAL', 'MAGIC', 'SLP', 'VOXEL', 'GALAGAMES', 'COL', 'DAR', 'JELLYJELLY', 'ALICE', 'MYRIA'];
-              const layer1Coins = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOT', 'AVAX', 'NEAR', 'SUI', 'ATOM', 'ALGO', 'HBAR', 'FTM', 'ICP', 'VET', 'LTC', 'TRX', 'XLM', 'EOS', 'XTZ', 'NEO', 'QNT', 'BNB', 'THETA', 'ONE', 'FIL', 'AR'];
-              const layer2Coins = ['ARB', 'OP', 'MATIC', 'IMX', 'STRK', 'MANTA', 'METIS', 'MODE', 'BLAST', 'LINEA', 'SCROLL', 'ZKJ'];
+              const memeCoins = ['DOGE', 'SHIB', 'PEPE', 'FARTCOIN', 'BONK', 'FLOKI', 'WIF', 'POPCAT', 'MOG', 'BRETT', 'MUBARAK', 'TROLLSOL', 'SUNDOG', 'PUMP', 'PM', 'USELESS', 'MARSCOIN', 'PIPPIN'];
+              const defiCoins = ['AAVE', 'UNI', 'COMP', 'SNX', 'CRV', 'SUSHI', 'YFI', 'YFII', 'BAL', '1INCH', 'LINK', 'OGN', 'RLC', 'MET', 'ENA', 'ONDO', 'BR', 'GTC', 'CST', 'HONEY', 'UAI'];
+              const gamingCoins = ['SAND', 'MANA', 'AXS', 'GALA', 'IMX', 'MCT', 'VANRY', 'BEAT'];
+              const layer1Coins = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOT', 'AVAX', 'NEAR', 'SUI', 'ATOM', 'ALGO', 'HBAR', 'FTM', 'ICP', 'VET', 'LTC', 'TRX', 'XLM', 'QNT', 'BNB'];
+              const layer2Coins = ['ARB', 'OP', 'MATIC'];
 
               if (memeCoins.includes(base)) cat = 'meme';
               else if (defiCoins.includes(base)) cat = 'defi';
@@ -63,16 +214,21 @@ export default function MarketPage() {
                 category: cat,
               };
             })
-            .filter(m => m.volume24h > 0) // Filter out dead markets
+            .filter(m => m.volume24h > 0)
             .sort((a, b) => b.volume24h - a.volume24h);
 
           if (parsedMarkets.length > 0) {
             setMarkets(parsedMarkets);
             setTotalMarkets(parsedMarkets.length);
+            console.log(`✅ Loaded ${parsedMarkets.length} markets from Indodax API`);
           }
+        } else {
+          console.log('⚠️ Using fallback data (API fetch failed)');
+          setTotalMarkets(FALLBACK_MARKETS.length);
         }
       } catch (error) {
-        console.log('Using fallback market data (CORS blocked Indodax API)');
+        console.error('❌ Error fetching markets:', error);
+        console.log('⚠️ Using fallback data');
         setTotalMarkets(FALLBACK_MARKETS.length);
       } finally {
         setLoading(false);
@@ -80,7 +236,6 @@ export default function MarketPage() {
     };
 
     fetchMarkets();
-    // Refresh every 30 seconds
     const interval = setInterval(fetchMarkets, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -179,7 +334,6 @@ export default function MarketPage() {
   return (
     <div className="min-h-screen bg-[#0b0e11] text-white">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
         <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Market Crypto</h1>
@@ -194,7 +348,6 @@ export default function MarketPage() {
           </div>
         </div>
 
-        {/* Search + Categories */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <input
@@ -226,7 +379,6 @@ export default function MarketPage() {
           </div>
         </div>
 
-        {/* Stats Bar */}
         <div className="flex items-center justify-between mb-4 text-xs text-gray-500">
           <span>{filteredMarkets.length} market ditampilkan</span>
           <div className="flex gap-2">
@@ -251,7 +403,6 @@ export default function MarketPage() {
           </div>
         </div>
 
-        {/* Table Header */}
         <div className="hidden sm:grid grid-cols-[40px_1fr_160px_120px_100px] gap-4 px-4 py-3 text-xs text-gray-500 border-b border-gray-800 font-medium">
           <span></span>
           <span>Nama</span>
@@ -260,7 +411,6 @@ export default function MarketPage() {
           <span className="text-right">24H Chg</span>
         </div>
 
-        {/* Market Rows */}
         <div>
           {paginatedMarkets.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
@@ -278,7 +428,6 @@ export default function MarketPage() {
                   key={market.symbol}
                   className="grid grid-cols-[40px_1fr_160px_120px_100px] gap-4 px-4 py-3 items-center border-b border-gray-800/50 hover:bg-[#1e2329] transition-colors cursor-pointer"
                 >
-                  {/* Favorite */}
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(market.symbol); }}
                     className="text-lg hover:scale-125 transition-transform"
@@ -286,7 +435,6 @@ export default function MarketPage() {
                     {isFav ? '⭐' : '☆'}
                   </button>
 
-                  {/* Name + Icon */}
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 flex items-center justify-center text-base">
                       {market.icon}
@@ -297,17 +445,14 @@ export default function MarketPage() {
                     </div>
                   </div>
 
-                  {/* Price */}
                   <div className="text-right font-medium text-white text-sm">
                     {formatPrice(market.price)}
                   </div>
 
-                  {/* Volume */}
                   <div className="text-right text-gray-400 text-sm">
                     {formatVolume(market.volume24h)}
                   </div>
 
-                  {/* Change */}
                   <div className={`text-right font-semibold text-sm ${changeColor}`}>
                     {changePrefix}{market.change24h.toFixed(2)}%
                   </div>
@@ -317,7 +462,6 @@ export default function MarketPage() {
           )}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center gap-1 mt-8 flex-wrap">
             <button
@@ -365,7 +509,6 @@ export default function MarketPage() {
           </div>
         )}
 
-        {/* Footer Info */}
         <div className="mt-8 text-center text-xs text-gray-600">
           <p>Data live dari Indodax API • {totalMarkets} pair IDR tersedia • Auto-refresh setiap 30 detik</p>
           <p className="mt-1">Paper Trading Mode • Bukan saran investasi</p>
@@ -374,3 +517,64 @@ export default function MarketPage() {
     </div>
   );
 }
+```
+
+---
+
+## 📋 Checklist Deploy
+
+1. ✅ Update `apps/terminal/src/pages/MarketPage.tsx` dengan kode di atas
+2. ✅ Update `apps/terminal/src/App.tsx` dengan routing yang benar
+3. ✅ Jalankan `npm run build` di `apps/terminal/`
+4. ✅ Restart server (`pm2 restart terminal` atau equivalent)
+5. ✅ Hard refresh browser (Ctrl+Shift+R)
+6. ✅ Buka http://187.127.178.20:22221/market
+7. ✅ Cek browser console (F12) untuk error
+
+---
+
+## 🎯 Expected Result
+
+Setelah fix, halaman `/market` akan menampilkan:
+- ✅ 477+ markets (jika API berhasil) atau 100+ markets (fallback)
+- ✅ Search bar berfungsi
+- ✅ 9 kategori filter
+- ✅ Pagination (50 per halaman)
+- ✅ Favorites dengan bintang
+- ✅ Sort by volume/change/name
+- ✅ Format IDR (Rp 1.462.499.000)
+- ✅ Volume abbreviation (139,4bn)
+- ✅ Auto-refresh setiap 30 detik
+
+---
+
+## 🔍 Debug Commands
+
+Jika masih stuck, jalankan di VPS:
+
+```bash
+# Cek apakah build berhasil
+cd /home/khuchinque/0-TRADER-COMPANEY/apps/terminal
+ls -la dist/
+
+# Cek log server
+pm2 logs terminal
+
+# Cek apakah server running
+pm2 status
+
+# Test API langsung dari VPS
+curl https://indodax.com/api/summaries | head -c 500
+
+# Restart semua
+pm2 restart all
+```
+
+---
+
+## ⚠️ Penting
+
+- **File `marketsFull.ts`** tidak perlu di-update karena sudah ada fallback data
+- **Yang penting** adalah `MarketPage.tsx` dan `App.tsx` sudah benar
+- Jika CORS proxy gagal, akan otomatis pakai fallback data (100+ markets)
+- Hard refresh browser setelah deploy (Ctrl+Shift+R)
