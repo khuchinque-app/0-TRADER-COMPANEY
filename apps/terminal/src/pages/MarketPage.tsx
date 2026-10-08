@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 interface MarketPair {
   symbol: string
@@ -7,19 +7,24 @@ interface MarketPair {
   quote: string
   name: string
   price: number
+  priceIdr: number
   change24h: number
   volume24h: number
-  category: 'IDR' | 'USDT' | 'MEME' | 'NEW'
+  marketCap: number
+  category: 'IDR' | 'USDT' | 'MEME' | 'NEW' | 'DEFI' | 'LAYER1'
   logo?: string
 }
 
 const MarketPage: React.FC = () => {
+  const navigate = useNavigate()
   const [markets, setMarkets] = useState<MarketPair[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterCategory, setFilterCategory] = useState<'all' | 'IDR' | 'USDT' | 'MEME' | 'NEW'>('all')
+  const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'volume' | 'change' | 'name'>('volume')
   const [favorites, setFavorites] = useState<string[]>([])
-
+  const [page, setPage] = useState(1)
+  const itemsPerPage = 50
   // Load markets from backend
   useEffect(() => {
     const loadMarkets = async () => {
