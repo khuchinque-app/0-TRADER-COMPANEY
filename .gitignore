@@ -1,16 +1,13 @@
 # Dependencies
 node_modules/
+packages/*/node_modules/
+apps/*/node_modules/
 
-# Build output
-dist/
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
+# Build outputs
+apps/backend/dist/
+apps/terminal/.next/
+apps/terminal/dist/
+apps/engine/dist/
 
 # Environment
 .env
@@ -19,46 +16,64 @@ Thumbs.db
 
 # Logs
 *.log
-npm-debug.log*
+logs/
 
-# Planning
-.planning/
-.seassonid*.txt
+# OS
+.DS_Store
+Thumbs.db
 
-# graphify knowledge-graph build artifacts
-graphify-out/
-nul
-**/nul
-.next/
-tsconfig.tsbuildinfo
-log-run.txt
-
-# Session junk
-seassonid*.txt
-nul
-log-run.txt
-
-# Reference dumps & binaries — never commit (25MB+ scraped assets, installers)
-style-grafik.zip
-indodax-tokocrypto-info.zip
-PLANNING/cloudflared.deb
-PLANNING/sitemenu-complete/sitemenu-complete-style-grafik/
-.codegraph/
-codegraph.json
-
-# SQLite runtime database — engine state, not source. The engine recreates it
-# and auto-funds demo accounts on boot; committing it meant every engine run
-# dirtied the worktree and shipped one machine's balances to everyone else.
-*.db
-*.db-shm
-*.db-wal
-
-# session probe/extraction junk — never committed
-.tw-probe/
-.out-of-scope/
-tools/.cloudflared-extract/
+# IDE
+.vscode/
+.idea/
 *.swp
+*.swo
 
-# runtime logs (may contain OTP/PII until ticket 04 fix)
-server.log
-terminal.log
+# Database
+*.db
+*.db-journal
+*.db-wal
+apps/engine/data/*.db-shm
+
+# PM2
+pm2-backup.dump
+.pm2/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# HerMES
+.hermes/
+!.hermes/profiles/
+
+# Wayfinder
+.scratch/
+
+# Backup
+*.backup.*
+*.bak
+
+# Autopilot (Local Agent)
+autopilot/
+files_extracted/
+autopilot.tar.gz
+autopilot_unpacked.py
+files.zip
+a2a_config.yaml
+engines.json
+tasks.json
+prompt.md
+local_verify.py
+vps-autopilot.py
+vps-check.sh
+vps-run.py
+setup-a2a-vps.sh
+A2A-GATEWAY-SETUP.md
+HANDOVER.md
+HANDOVER-HERMEKHU.md
+VPS-AGENT-CONNECT.md
