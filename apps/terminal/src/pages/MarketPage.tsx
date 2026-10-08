@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 interface MarketPair {
   symbol: string
@@ -16,7 +16,6 @@ interface MarketPair {
 }
 
 const MarketPage: React.FC = () => {
-  const navigate = useNavigate()
   const [markets, setMarkets] = useState<MarketPair[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
