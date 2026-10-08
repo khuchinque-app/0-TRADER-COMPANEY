@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { createChart, IChartApi } from 'lightweight-charts';
+import { createChart } from 'lightweight-charts';
 
 interface TickerData {
   symbol: string;
