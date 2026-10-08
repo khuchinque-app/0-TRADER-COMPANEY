@@ -40,7 +40,7 @@ export default function TradePage() {
   useEffect(() => {
     const fetchTicker = async () => {
       try {
-        const response = await fetch(`http://localhost:11110/api/ticker/${pair}`);
+        const response = await fetch(`http://187.127.178.20:11110/api/ticker/${pair}`);
         const data = await response.json();
         setTicker(data);
       } catch (error) {

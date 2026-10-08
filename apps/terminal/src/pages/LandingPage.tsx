@@ -9,7 +9,7 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     const loadMarkets = async () => {
       try {
-        const response = await fetch('http://localhost:11110/api/markets')
+        const response = await fetch('http://187.127.178.20:11110/api/markets')
         const data = await response.json()
         
         // Get top pairs by volume
