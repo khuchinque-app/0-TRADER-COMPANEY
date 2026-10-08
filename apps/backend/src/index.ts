@@ -12,7 +12,7 @@ import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
 import { tapeService, TAPE_LEN, TapeTrade } from "./pricefeed/tape";
 
 // Resolve .env from repo root (works from both src/ and dist/)
-const repoRoot = path.resolve(__dirname, "../../../../");
+const repoRoot = path.resolve(__dirname, "../../..");
 const dotenvPath = path.resolve(repoRoot, ".env");
 dotenv.config({ path: dotenvPath });
 
