@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Chart } from 'lightweight-charts';
+import { createChart, IChartApi } from 'lightweight-charts';
 
 interface TickerData {
   symbol: string;
@@ -33,9 +33,7 @@ export default function TradePage() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   
   const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstanceRef = useRef<Chart | null>(null);
-
-  const IDR_RATE = 15850;
+  const chartInstanceRef = useRef<any>(null);
 
   // Fetch ticker data
   useEffect(() => {
@@ -126,7 +124,7 @@ export default function TradePage() {
   useEffect(() => {
     if (!chartRef.current || chartData.length === 0) return;
 
-    const chart = Chart.create(chartRef.current, {
+    const chart = createChart(chartRef.current, {
       layout: {
         background: { color: '#1e2329' },
         textColor: '#94a3b8',

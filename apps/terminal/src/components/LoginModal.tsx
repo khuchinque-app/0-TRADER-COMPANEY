@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
-  const { login, socialLogin, isLoading } = useAuth();
+  const { login, socialLogin, register, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRegister, setIsRegister] = useState(false);
