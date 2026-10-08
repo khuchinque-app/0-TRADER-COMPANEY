@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const socialLogin = async (provider: string, _email: string, name: string) => {
+  const socialLogin = async (_provider: string, _email: string, name: string) => {
     setIsLoading(true);
     try {
       // For social login, create a guest account first
