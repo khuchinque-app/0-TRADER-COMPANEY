@@ -51,10 +51,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
-      const { token, data } = response.data;
+      const { token } = response.data;
       localStorage.setItem('auth_token', token);
       setToken(token);
-      setUser(data);
+      // Fetch user details
+      const userResponse = await axios.get(`${API_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser({ ...userResponse.data, name: userResponse.data.email.split('@')[0] });
     } finally {
       setIsLoading(false);
     }
@@ -63,24 +67,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name: string) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, { email, password, name });
-      const { token, data } = response.data;
+      const response = await axios.post(`${API_URL}/api/auth/signup`, { email, password });
+      // Auto-login after signup
+      const loginResponse = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+      const { token } = loginResponse.data;
       localStorage.setItem('auth_token', token);
       setToken(token);
-      setUser(data);
+      setUser({ id: response.data.userId, email, name, balance_usdt: 10000, balance_idr: 10000 * 15850, created_at: new Date().toISOString() });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const socialLogin = async (provider: string, email: string, name: string) => {
+  const socialLogin = async (provider: string, _email: string, name: string) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/api/auth/social-login`, { provider, email, name });
-      const { token, data } = response.data;
+      // For social login, create a guest account first
+      const response = await axios.post(`${API_URL}/api/auth/guest`);
+      const { token } = response.data;
       localStorage.setItem('auth_token', token);
       setToken(token);
-      setUser(data);
+      setUser({ id: response.data.userId, email: `${name.toLowerCase()}_user@example.com`, name, balance_usdt: 10000, balance_idr: 10000 * 15850, created_at: new Date().toISOString() });
     } finally {
       setIsLoading(false);
     }
