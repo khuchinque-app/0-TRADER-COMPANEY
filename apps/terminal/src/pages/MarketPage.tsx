@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
 interface MarketPair {
@@ -15,55 +15,110 @@ interface MarketPair {
   logo?: string
 }
 
+// HARD CODED 7 MARKETS - Renders immediately without API dependency
+const HARDCODED_MARKETS: MarketPair[] = [
+  {
+    symbol: 'BTCIDR',
+    base: 'BTC',
+    quote: 'IDR',
+    name: 'Bitcoin',
+    price: 1002450000,
+    priceIdr: 1002450000,
+    change24h: 2.34,
+    volume24h: 1245678900,
+    marketCap: 15000000000000,
+    category: 'IDR',
+    logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png'
+  },
+  {
+    symbol: 'ETHIDR',
+    base: 'ETH',
+    quote: 'IDR',
+    name: 'Ethereum',
+    price: 54820000,
+    priceIdr: 54820000,
+    change24h: -1.23,
+    volume24h: 892345600,
+    marketCap: 6500000000000,
+    category: 'IDR',
+    logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png'
+  },
+  {
+    symbol: 'SOLIDR',
+    base: 'SOL',
+    quote: 'IDR',
+    name: 'Solana',
+    price: 2829000,
+    priceIdr: 2829000,
+    change24h: 5.67,
+    volume24h: 456789000,
+    marketCap: 1200000000000,
+    category: 'LAYER1',
+    logo: 'https://assets.coingecko.com/coins/images/4128/large/solana.png'
+  },
+  {
+    symbol: 'BNBidr',
+    base: 'BNB',
+    quote: 'IDR',
+    name: 'BNB',
+    price: 9706000,
+    priceIdr: 9706000,
+    change24h: 0.89,
+    volume24h: 234567800,
+    marketCap: 1500000000000,
+    category: 'IDR',
+    logo: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png'
+  },
+  {
+    symbol: 'XRPIDR',
+    base: 'XRP',
+    quote: 'IDR',
+    name: 'XRP',
+    price: 9248,
+    priceIdr: 9248,
+    change24h: -0.45,
+    volume24h: 567890000,
+    marketCap: 480000000000,
+    category: 'IDR',
+    logo: 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png'
+  },
+  {
+    symbol: 'LINKIDR',
+    base: 'LINK',
+    quote: 'IDR',
+    name: 'Chainlink',
+    price: 230800,
+    priceIdr: 230800,
+    change24h: 3.21,
+    volume24h: 123456700,
+    marketCap: 270000000000,
+    category: 'DEFI',
+    logo: 'https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png'
+  },
+  {
+    symbol: 'AAVEIDR',
+    base: 'AAVE',
+    quote: 'IDR',
+    name: 'Aave',
+    price: 1565000,
+    priceIdr: 1565000,
+    change24h: -2.10,
+    volume24h: 89012300,
+    marketCap: 230000000000,
+    category: 'DEFI',
+    logo: 'https://assets.coingecko.com/coins/images/12645/large/AAVE.png'
+  }
+]
+
 const MarketPage: React.FC = () => {
-  const [markets, setMarkets] = useState<MarketPair[]>([])
-  const [loading, setLoading] = useState(true)
+  // Use hardcoded markets immediately - no loading state needed
+  const [markets] = useState<MarketPair[]>(HARDCODED_MARKETS)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [_sortBy, _setSortBy] = useState<'volume' | 'change' | 'name'>('volume')
   const [favorites, setFavorites] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const itemsPerPage = 50
-  useEffect(() => {
-    const loadMarkets = async () => {
-      try {
-        const response = await fetch('http://localhost:11110/api/markets')
-        const data = await response.json()
-        
-        // Categorize and format markets
-        const categorized: MarketPair[] = data.markets.map((m: any) => ({
-            symbol: m.symbol,
-            base: m.baseAsset,
-            quote: m.quoteAsset,
-            name: getCoinName(m.baseAsset),
-            price: parseFloat(m.price) || generatePrice(m.baseAsset, m.quoteAsset),
-            change24h: (Math.random() - 0.5) * 20,
-            volume24h: Math.random() * 1000000000,
-            category: m.quoteAsset === 'IDR' ? 'IDR' : m.quoteAsset === 'USDT' ? 'USDT' : 'IDR',
-            logo: `/assets/logos/${m.baseAsset.toLowerCase()}.svg`,
-          }))
-        
-        // Sort by volume
-        categorized.sort((a, b) => b.volume24h - a.volume24h)
-        
-        setMarkets(categorized)
-        setLoading(false)
-      } catch (error) {
-        console.error('Failed to load markets:', error)
-        setLoading(false)
-      }
-    }
-
-    loadMarkets()
-  }, [])
-
-  // Load favorites from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('chinque_favorites')
-    if (saved) {
-      setFavorites(JSON.parse(saved))
-    }
-  }, [])
 
   const toggleFavorite = (symbol: string) => {
     const newFavs = favorites.includes(symbol)
@@ -71,202 +126,18 @@ const MarketPage: React.FC = () => {
       : [...favorites, symbol]
     
     setFavorites(newFavs)
-    localStorage.setItem('chinque_favorites', JSON.stringify(newFavs))
+    try {
+      localStorage.setItem('chinque_favorites', JSON.stringify(newFavs))
+    } catch (e) {
+      console.error('Failed to save favorites:', e)
+    }
   }
 
-  const getCoinName = (symbol: string): string => {
-    const names: Record<string, string> = {
-      'BTC': 'Bitcoin',
-      'ETH': 'Ethereum',
-      'SOL': 'Solana',
-      'BNB': 'BNB',
-      'XRP': 'XRP',
-      'ADA': 'Cardano',
-      'DOGE': 'Dogecoin',
-      'DOT': 'Polkadot',
-      'MATIC': 'Polygon',
-      'LINK': 'Chainlink',
-      'AVAX': 'Avalanche',
-      'UNI': 'Uniswap',
-      'ATOM': 'Cosmos',
-      'LTC': 'Litecoin',
-      'XLM': 'Stellar',
-      'ALGO': 'Algorand',
-      'VET': 'VeChain',
-      'FIL': 'Filecoin',
-      'TRX': 'TRON',
-      'ETC': 'Ethereum Classic',
-      'XMR': 'Monero',
-      'AAVE': 'Aave',
-      'MKR': 'Maker',
-      'COMP': 'Compound',
-      'SUSHI': 'SushiSwap',
-      'YFI': 'yearn.finance',
-      'SNX': 'Synthetix',
-      'CRV': 'Curve DAO Token',
-      'BAL': 'Balancer',
-      'REN': 'Ren',
-      'ZRX': '0x',
-      'KNC': 'Kyber Network',
-      'BNT': 'Bancor',
-      'STORJ': 'Storj',
-      'GRT': 'The Graph',
-      'ENJ': 'Enjin Coin',
-      'CHZ': 'Chiliz',
-      'BAT': 'Basic Attention Token',
-      'ZIL': 'Zilliqa',
-      'HOT': 'Holo',
-      'IOST': 'IOST',
-      'ONE': 'Harmony',
-      'FTM': 'Fantom',
-      'NEAR': 'NEAR Protocol',
-      'APT': 'Aptos',
-      'SUI': 'Sui',
-      'SEI': 'Sei',
-      'TIA': 'Celestia',
-      'DYP': 'Dypius',
-      'MEME': 'Memecoin',
-      'PEPE': 'Pepe',
-      'BONK': 'Bonk',
-      'WIF': 'dogwifhat',
-      'FARTCOIN': 'Fartcoin',
-      'USELESS': 'Useless Coin',
-      'PM': 'PumpMeme',
-      'COL': 'Clash of Lilliput',
-      'BR': 'Bedrock',
-      'HYPE': 'Hyperliquid',
-      'ASTER': 'Aster',
-      'NOVA': 'NOVA',
-      'UAI': 'UnifAI Network',
-      'MCT': 'Metacraft',
-      'TROLLSOL': 'TROLL (SOL)',
-      'PENGU': 'Pudgy Penguins',
-      'MUBARAK': 'Mubarak',
-      'STIK': 'Staika',
-      'QNT': 'Quant',
-      'WLD': 'Worldcoin',
-      'SAND': 'The Sandbox',
-      'AXS': 'Axie Infinity',      'APE': 'ApeCoin',
-      'IMX': 'Immutable X',
-      'GALA': 'Gala',
-      'ILV': 'Illuvium',
-      'PYR': 'Rly Token',
-      'SUPER': 'SuperFarm',
-      'SLP': 'Smooth Love Potion',
-      'STAR': 'StarAtlas',
-      'ANC': 'Anchor',
-      'LOOKS': 'LooksRare',
-      'ENS': 'Ethereum Name Service',
-      'RPL': 'Rocket Pool',
-      'EUL': 'Euler',
-      'PERP': 'Perpetual Protocol',
-      'API3': 'API3',
-      'BADGER': 'Badger DAO',
-      'KEEP': 'Keep Network',
-      'NKN': 'NKN',
-      'OCEAN': 'Ocean Protocol',
-      'BAND': 'Band Protocol',
-      'CELR': 'Celer Network',
-      'CVC': 'Civic',
-      'DATA': 'Streamr DATAcoin',
-      'DENT': 'Dent',
-      'DOCK': 'Dock',
-      'DUSK': 'Dusk',
-      'EVX': 'evx.io',
-      'FUN': 'FunFair',
-      'GSWAP': 'G-Swap',
-      'HEX': 'HEX',
-      'ICX': 'ICON',
-      'KAVA': 'Kava',
-      'KMD': 'Komodo',
-      'KSM': 'Kusama',
-      'LRC': 'Loopring',
-      'MANA': 'Decentraland',
-      'MINA': 'Mina',
-      'MLN': 'Enzyme',
-      'MOVER': 'Mover',
-      'NMR': 'Numeraire',
-      'NU': 'NuCypher',
-      'OMG': 'OMG Network',
-      'ONT': 'Ontology',
-      'ORN': 'Orion Protocol',
-      'PHA': 'Phala Network',
-      'POLY': 'Polymath',
-      'POLS': 'Polkastarter',
-      'POND': 'Marlin',
-      'QSP': 'Quantstamp',
-      'RAD': 'Radicle',
-      'RARI': 'Rarible',
-      'RENBTC': 'renBTC',
-      'ROOK': 'Keeper DAO',
-      'RUNE': 'THORChain',
-      'SCRT': 'Secret',
-      'SFP': 'SafePal',
-      'SNT': 'Status',
-      'SOC': 'Socios.com',
-      'SUSD': 'Synth sUSD',
-      'SXP': 'Swipe',
-      'SYS': 'Syscoin',
-      'T': 'Terrarium',
-      'TFUEL': 'Theta Fuel',
-      'TOMOE': 'TOMOE',
-      'TORN': 'Tornado Cash',
-      'TRB': 'Tellor',
-      'TROY': 'Troy',
-      'TWT': 'Trust Wallet Token',
-      'UST': 'TerraUSD',
-      'UTK': 'UTRK',
-      'VANRY': 'Vanar Chain',
-      'VOXEL': 'Voxies',
-      'WRX': 'WazirX',
-      'XEC': 'eCash',
-      'XEM': 'NEM',
-      'XTZ': 'Tezos',
-      'XVS': 'Venus',
-      'ZEC': 'Zcash',
-      'ZEN': 'Horizen',
-    }
-    return names[symbol] || symbol
-  }
+  // Use _sortBy to avoid unused variable warning, but we need it for useMemo
+  const sortBy = _sortBy
 
-  const generatePrice = (base: string, quote: string): number => {
-    // Generate realistic prices based on coin
-    const prices: Record<string, number> = {
-      'BTC': quote === 'IDR' ? 1500000000 : 60000,
-      'ETH': quote === 'IDR' ? 45000000 : 3500,
-      'SOL': quote === 'IDR' ? 2000000 : 150,
-      'BNB': quote === 'IDR' ? 13000000 : 580,
-      'XRP': quote === 'IDR' ? 25000 : 0.52,
-      'ADA': quote === 'IDR' ? 4500 : 0.015,
-      'DOGE': quote === 'IDR' ? 1500 : 0.005,
-      'DOT': quote === 'IDR' ? 30000 : 10,
-      'MATIC': quote === 'IDR' ? 5000 : 0.007,
-      'LINK': quote === 'IDR' ? 250000 : 14.5,
-      'AVAX': quote === 'IDR' ? 200000 : 55,
-      'UNI': quote === 'IDR' ? 200000 : 12,
-      'ATOM': quote === 'IDR' ? 300000 : 18,
-      'LTC': quote === 'IDR' ? 2500000 : 150,
-      'XLM': quote === 'IDR' ? 3500 : 0.005,
-      'ALGO': quote === 'IDR' ? 2000 : 0.001,
-      'VET': quote === 'IDR' ? 500 : 0.02,
-      'FIL': quote === 'IDR' ? 200000 : 12,
-      'TRX': quote === 'IDR' ? 500 : 0.005,
-      'ETC': quote === 'IDR' ? 1000000 : 45,
-      'XMR': quote === 'IDR' ? 3000000 : 175,
-      'AAVE': quote === 'IDR' ? 4500000 : 265,
-    }
-    return prices[base] || (quote === 'IDR' ? Math.random() * 100000 : Math.random() * 100)
-  }
-
-  const formatPrice = (price: number, quote: string): string => {
-    if (quote === 'IDR') {
-      return `Rp ${price.toLocaleString('id-ID')}`
-    }
-    return price < 1 
-      ? `$${price.toFixed(6)}`
-      : price < 100 
-        ? `$${price.toFixed(4)}`
-        : `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  const formatPrice = (price: number, _quote?: string): string => {
+    return `Rp ${price.toLocaleString('id-ID')}`
   }
 
   const formatVolume = (vol: number): string => {
@@ -274,11 +145,8 @@ const MarketPage: React.FC = () => {
     if (vol >= 1e9) return `${(vol / 1e9).toFixed(2)}B`
     if (vol >= 1e6) return `${(vol / 1e6).toFixed(2)}M`
     if (vol >= 1e3) return `${(vol / 1e3).toFixed(2)}K`
-    return vol.toFixed(2)
+    return vol.toFixed(0)
   }
-
-  // Use _sortBy to avoid unused variable warning, but we need it for useMemo
-  const sortBy = _sortBy
 
   const filteredMarkets = useMemo(() => {
     let result = markets
@@ -303,17 +171,7 @@ const MarketPage: React.FC = () => {
     return result
   }, [markets, searchTerm, filterCategory, sortBy, favorites])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0b0e11]">
-        <div className="text-center">
-          <div className="text-yellow-400 text-2xl font-bold mb-4">ChinQueTrade</div>
-          <div className="text-gray-500 animate-pulse">Loading markets...</div>
-        </div>
-      </div>
-    )
-  }
-
+  // No loading state - markets are hardcoded and render immediately
   return (
     <div className="min-h-screen bg-[#0b0e11] text-white">
       {/* Header - Indodax Style */}

@@ -440,45 +440,125 @@ app.get("/api/admin/integrity", (req, res) => {
   }
 });
 
-// MARKETS
+// MARKETS - Returns 7 hardcoded major pairs for instant rendering
 app.get("/api/markets", (_req, res) => {
   try {
-    // Load from ChinQue catalog if available
-    const catalogPath = path.resolve(repoRoot, "docs/research/chinque-pairs.json");
-    let markets: any[] = [];
-
-    try {
-      const fs = require('fs');
-      if (fs.existsSync(catalogPath)) {
-        const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-        markets = catalog.map((p: any) => ({
-          symbol: p.symbol,
-          baseAsset: p.base,
-          quoteAsset: p.quote,
-          status: "trading",
-          price: "0.00",
-          source: "chinque",
-          simulasi: true,
-          flags: p.flags || []
-        }));
-      }
-    } catch (e) {
-      // Fallback to env var
-      const marketsEnv = process.env.MARKETS || "BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT";
-      markets = marketsEnv.split(",").map((m: string) => ({
-        symbol: m.trim(),
-        baseAsset: m.trim().replace("USDT", ""),
-        quoteAsset: "USDT",
+    const markets = [
+      {
+        symbol: "BTCIDR",
+        baseAsset: "BTC",
+        quoteAsset: "IDR",
         status: "trading",
-        price: "0.00",
-        source: "sim",
-        simulasi: true
-      }));
-    }
+        price: "1002450000",
+        change24h: 2.34,
+        volume24h: 1245678900,
+        marketCap: 15000000000000,
+        category: "IDR",
+        source: "chinque",
+        simulasi: true,
+        flags: []
+      },
+      {
+        symbol: "ETHIDR",
+        baseAsset: "ETH",
+        quoteAsset: "IDR",
+        status: "trading",
+        price: "54820000",
+        change24h: -1.23,
+        volume24h: 892345600,
+        marketCap: 6500000000000,
+        category: "IDR",
+        source: "chinque",
+        simulasi: true,
+        flags: []
+      },
+      {
+        symbol: "SOLIDR",
+        baseAsset: "SOL",
+        quoteAsset: "IDR",
+        status: "trading",
+        price: "2829000",
+        change24h: 5.67,
+        volume24h: 456789000,
+        marketCap: 1200000000000,
+        category: "LAYER1",
+        source: "chinque",
+        simulasi: true,
+        flags: []
+      },
+      {
+        symbol: "BNBidr",
+        baseAsset: "BNB",
+        quoteAsset: "IDR",
+        status: "trading",
+        price: "9706000",
+        change24h: 0.89,
+        volume24h: 234567800,
+        marketCap: 1500000000000,
+        category: "IDR",
+        source: "chinque",
+        simulasi: true,
+        flags: []
+      },
+      {
+        symbol: "XRPIDR",
+        baseAsset: "XRP",
+        quoteAsset: "IDR",
+        status: "trading",
+        price: "9248",
+        change24h: -0.45,
+        volume24h: 567890000,
+        marketCap: 480000000000,
+        category: "IDR",
+        source: "chinque",
+        simulasi: true,
+        flags: []
+      },
+      {
+        symbol: "LINKIDR",
+        baseAsset: "LINK",
+        quoteAsset: "IDR",
+        status: "trading",
+        price: "230800",
+        change24h: 3.21,
+        volume24h: 123456700,
+        marketCap: 270000000000,
+        category: "DEFI",
+        source: "chinque",
+        simulasi: true,
+        flags: []
+      },
+      {
+        symbol: "AAVEIDR",
+        baseAsset: "AAVE",
+        quoteAsset: "IDR",
+        status: "trading",
+        price: "1565000",
+        change24h: -2.10,
+        volume24h: 89012300,
+        marketCap: 230000000000,
+        category: "DEFI",
+        source: "chinque",
+        simulasi: true,
+        flags: []
+      }
+    ];
 
-    res.json({ markets, simulasi: true, total: markets.length });
+    res.json({
+      markets,
+      simulasi: true,
+      total: markets.length,
+      timestamp: new Date().toISOString()
+    });
   } catch (e: any) {
-    res.status(500).json({ error: "internal", message: e.message });
+    console.error("Markets API error:", e);
+    res.status(500).json({
+      error: "internal",
+      message: e.message,
+      markets: [],
+      simulasi: true,
+      total: 0
+    });
   }
 });
 
