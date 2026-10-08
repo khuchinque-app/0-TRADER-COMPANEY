@@ -59,21 +59,4 @@ temp/
 *.bak
 
 # Autopilot (Local Agent)
-autopilot/
 files_extracted/
-autopilot.tar.gz
-autopilot_unpacked.py
-files.zip
-a2a_config.yaml
-engines.json
-tasks.json
-prompt.md
-local_verify.py
-vps-autopilot.py
-vps-check.sh
-vps-run.py
-setup-a2a-vps.sh
-A2A-GATEWAY-SETUP.md
-HANDOVER.md
-HANDOVER-HERMEKHU.md
-VPS-AGENT-CONNECT.md
