@@ -630,92 +630,77 @@ app.get("/api/fx/usdt-idr", async (req, res) => {
   }
 });
 
-// TICKER ENDPOINT (Binance/MEXC API)
+// TICKER ENDPOINT (Binance API)
 app.get("/api/ticker/:pair", async (req, res) => {
+  const pair = String(req.params.pair).toUpperCase();
   try {
-    const pair = String(req.params.pair).toUpperCase();
-    // Convert IDR pairs to USDT for API call, then convert price
-    let apiPair = pair.replace("IDR", "USDT");
-    if (!apiPair.endsWith("USDT") && !apiPair.endsWith("IDR")) {
-      apiPair = apiPair + "USDT";
+    // Binance has direct IDR pairs - use them directly
+    let apiPair = pair;
+    let isIdr = pair.endsWith("IDR");
+
+    // If IDR pair doesn't exist on Binance, try USDT and convert
+    if (isIdr) {
+      // Try Binance IDR pair first
+      const btcIdrRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=BTCIDR`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+      const hasIdrPairs = btcIdrRes?.ok;
+
+      if (!hasIdrPairs) {
+        // No IDR pairs on Binance, convert from USDT
+        apiPair = pair.replace("IDR", "USDT");
+        isIdr = false;
+      }
     }
 
-    // Try Binance first
     const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${apiPair}`;
     const timeout = setTimeout(() => {
       res.status(408).json({ error: "timeout", pair });
     }, 5000);
 
-    fetch(url, { signal: AbortSignal.timeout(5000) })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data: any) => {
-        clearTimeout(timeout);
-        const lastPrice = parseFloat(data.lastPrice || 0);
-        const changePercent = parseFloat(data.priceChangePercent || 0);
-        const high = parseFloat(data.highPrice || 0);
-        const low = parseFloat(data.lowPrice || 0);
-        const volume = parseFloat(data.quoteVolume || 0);
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    clearTimeout(timeout);
 
-        // Convert to IDR if original pair was IDR
-        if (pair.endsWith("IDR")) {
-          // Get current USD/IDR rate
-          return fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=idr")
-            .then(r => r.json())
-            .then((rateData: any) => {
-              const usdr = rateData?.bitcoin?.idr || 15850;
-              const usdPrice = lastPrice;
-              const idrPrice = usdPrice * usdr;
-              res.json({
-                symbol: pair,
-                base: pair.replace("IDR", ""),
-                quote: "IDR",
-                lastPrice: idrPrice,
-                changePercent,
-                high: high * usdr,
-                low: low * usdr,
-                volume: volume * usdr,
-                simulasi: true
-              });
-            });
-        } else {
-          res.json({
-            symbol: pair,
-            base: apiPair.replace("USDT", ""),
-            quote: "USDT",
-            lastPrice,
-            changePercent,
-            high,
-            low,
-            volume,
-            simulasi: true
-          });
-        }
-      })
-      .catch((err) => {
-        clearTimeout(timeout);
-        // Fallback to mock data
-        const mockPrices: Record<string, number> = {
-          BTC: 82000, ETH: 3500, SOL: 145, BNB: 580, XRP: 0.52, LINK: 18, AAVE: 280
-        };
-        const base = pair.replace("IDR", "").replace("USDT", "");
-        const mockPrice = mockPrices[base] || 100;
-        res.json({
-          symbol: pair,
-          base,
-          quote: pair.endsWith("IDR") ? "IDR" : "USDT",
-          lastPrice: pair.endsWith("IDR") ? mockPrice * 15850 : mockPrice,
-          changePercent: (Math.random() - 0.5) * 10,
-          high: mockPrice * 1.05,
-          low: mockPrice * 0.95,
-          volume: mockPrice * 1000000,
-          simulasi: true
-        });
-      });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data: any = await response.json();
+
+    const lastPrice = parseFloat(data.lastPrice || 0);
+    const changePercent = parseFloat(data.priceChangePercent || 0);
+    const high = parseFloat(data.highPrice || 0);
+    const low = parseFloat(data.lowPrice || 0);
+    const volume = parseFloat(data.quoteVolume || 0);
+
+    // For IDR pairs, Binance returns price in IDR directly
+    // For USDT pairs, we may need to convert if user wants IDR display
+    const base = pair.replace("IDR", "").replace("USDT", "");
+
+    res.json({
+      symbol: pair,
+      base,
+      quote: isIdr ? "IDR" : "USDT",
+      lastPrice,
+      changePercent,
+      high,
+      low,
+      volume,
+      simulasi: true
+    });
   } catch (e: any) {
-    res.status(500).json({ error: "internal", message: e.message });
+    // Fallback to mock data
+    const mockPrices: Record<string, number> = {
+      BTC: 82000, ETH: 3500, SOL: 145, BNB: 580, XRP: 0.52, LINK: 18, AAVE: 280
+    };
+    const fallbackBase = pair.replace("IDR", "").replace("USDT", "");
+    const mockPrice = mockPrices[fallbackBase] || 100;
+    res.json({
+      symbol: pair,
+      base: fallbackBase,
+      quote: pair.endsWith("IDR") ? "IDR" : "USDT",
+      lastPrice: pair.endsWith("IDR") ? mockPrice * 15850 : mockPrice,
+      changePercent: (Math.random() - 0.5) * 10,
+      high: mockPrice * 1.05,
+      low: mockPrice * 0.95,
+      volume: mockPrice * 1000000,
+      simulasi: true
+    });
   }
 });
 
