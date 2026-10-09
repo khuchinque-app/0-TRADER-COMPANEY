@@ -860,3 +860,42 @@ pm2 restart all
 *VPS: 187.127.178.20 | User: khuchinque | Port 22221 (new exchange app)*
 *Last updated: Oct 9, 2026*
 
+---
+
+## PART G: BUILD STATUS — VERIFIED ON VPS (Oct 10, 2026)
+
+### G1. Milestones M6–M10: ALL COMPLETE ✅
+
+| ID | Deliverable | Status | Evidence on VPS |
+|---|---|---|---|
+| M6 | `gen-routes.mjs` + `routes.json`; exchange app on 22221 | ✅ | `scripts/gen-routes.mjs`, `packages/indodax-routes/routes.json` (478 pairs, generatedAt 2026-10-09, stale=false); PM2 `exchange` online on :22221 |
+| M7 | `packages/mexc-client` + backend `/api/market/*` + cache + health | ✅ | `packages/mexc-client/src/{index,cache,config,errors}.ts`; `apps/backend/src/market.ts` mounted at `/api/market` (backend index.ts line ~955); health returns `mexcLatencyMs≈160` |
+| M8 | `/market` + `/market/{PAIR}` incl. NO_FEED + 404 states | ✅ | `/market` 200, `/market/BTCIDR` 200, `/market/FAKEXYZ` 404, NO_FEED pair → 200 |
+| M9 | depth_chart, chart pages, order form + wallet wired to backend | ✅ | `/market/depth_chart/BTCIDR` 200, `/chart/BTCIDR` 200; SL/TP fields + candle-chart price lines (2devtool/3devtool features) shipped in commit `df1ca4c` |
+| M10 | smoke script, PM2 save, RUNBOOK, log | ✅ | `scripts/smoke-exchange.sh` 13/13 PASS; `pm2 save` dump contains [backend, exchange]; `docs/RUNBOOK-exchange.md`; log at `GUDANG-DONOT-ENTER/LOG-exchange.md` |
+
+### G2. Acceptance Re-verification (external check from dev machine, Oct 10 2026)
+
+21/21 checks PASS against http://187.127.178.20:22221 and :11110:
+root/static routes 200 · pair pages 200 · FAKEXYZ 404 · robots.txt `Disallow: /` · SIMULASI banner + noindex · health ok+latency · depth bids/asks non-empty · tickers 361 rows · klines/trades OK · pairs manifest LIVE=361 / NO_FEED=117 · route parity sample 26 slugs → 0×5xx · no MEXC keys in repo (smoke).
+
+### G3. Deviations From Spec (accepted, documented)
+
+1. **Stack**: `apps/exchange` is a Vite+React SPA + Express mirror server (`server.mjs`), not Next.js (spec F3 default #2). Chosen for a single lightweight process serving raw-HTML status codes (200/404) + banner injection. Functionally equivalent for all B4/B7 requirements.
+2. **NO_FEED marker**: `data-state="no-feed"` is applied client-side after hydration (SPA shell is static HTML; server injects `window.__EXCHANGE_STATE__`). Server guarantees correct HTTP status; smoke checks status + noindex.
+3. **Extra extension** (beyond spec): full MEXC universe trading at `/trade` + `/trade/{COIN}` and backend `/api/market/universe` — user-requested "ALL markets" expansion; the Indodax mirror routes are unchanged.
+4. **PM2**: apps managed individually (`backend`, `exchange`) + `pm2 save`; root `ecosystem.config.js` still describes only `terminal` (legacy). To adopt: add an `exchange` entry there before any `pm2 start ecosystem.config.js`.
+5. **Log location**: `PLANNING/` does not exist on VPS; milestone log lives at `GUDANG-DONOT-ENTER/LOG-exchange.md`.
+6. **SSH port note**: SSH on this VPS listens on standard port **22** (works with khuchinque/admin1). Port **22221** serves the exchange app itself, not sshd.
+
+### G4. Ops State (as verified)
+
+- Cron weekly: `10 2 * * 1 … node scripts/gen-routes.mjs && pm2 restart exchange` ✅
+- Cron daily DB backup: `0 2 * * * sqlite3 .backup → ops/backup.log` ✅
+- `.env`: PORT_EXCHANGE=22221, EXCHANGE_COOKIE_NAME=sx_exchange_session, USDT_IDR_RATE=16250, MEXC_* TTLs, MEXC_BASE_URL (public only) ✅
+- Git branch `feat/market-trade`, synced with origin. ⚠️ SECURITY: remote URL embeds a GitHub PAT — rotate/revoke it and use SSH keys or `gh auth` instead (see ops/TOKEN-REVOKED-URGENT.md history).
+
+### G5. Remaining Work (unchanged from Part D)
+
+D1 terminal dashboard UI pages · D2 security hardening (bcrypt, auth middleware everywhere, rate limits) · D3 real integrations (WhatsApp OTP, live feeds, Duitku prod) · D4 CI/CD + backups + packaging. Phase-2 pass should also fold `exchange` into `ecosystem.config.js` and move the log path per spec.
+

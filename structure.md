@@ -1,6 +1,103 @@
 # Struktur Project 0-TRADER-COMPANEY
-**Tanggal pembuatan**: 3 Oktober 2026  
-**Tanggal update terakhir**: 4 Oktober 2026
+**Tanggal pembuatan**: 3 Oktober 2026
+**Tanggal update terakhir**: 10 Oktober 2026 — WHITELABEL PLATFORM (see new-prompt/structure.md)
+
+---
+
+## 0. WHITELABEL ARCHITECTURE (new-prompt/structure.md — CANONICAL for whitelabel)
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    WHITELABEL PLATFORM ARCHITECTURE                       ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+                            ┌─────────────────────────┐
+                            │   WHITELABEL BACKEND    │
+                            │      (Control Hub)      │
+                            │     port :11112         │
+                            └────────────┬────────────┘
+                                         │
+                    ┌────────────────────┴────────────────────┐
+                    ▼                                         ▼
+        ┌───────────────────────┐                 ┌───────────────────────┐
+        │      SUPERADMIN       │                 │        ADMIN          │
+        │   (Master Control)    │                 │   (Tenant Control)    │
+        ├───────────────────────┤                 ├───────────────────────┤
+        │ • Manage Whitelabels  │                 │ • Manage Content      │
+        │ • Global Config       │                 │ • Manage Users        │
+        │ • Billing / Plans     │                 │ • View Reports        │
+        │ • System Settings     │                 │ • Tenant Settings     │
+        │ • All Tenants Access  │                 │ • Scoped to Tenant    │
+        └───────────┬───────────┘                 └───────────┬───────────┘
+                    └────────────────────┬────────────────────┘
+                                         │  REST API / Auth Token
+                                         ▼
+                            ┌─────────────────────────┐
+                            │    FRONTEND (Client)    │
+                            │   (Admin Login Portal)  │
+                            │     port :22221         │
+                            └────────────┬────────────┘
+                                         ▼
+                            ┌─────────────────────────┐
+                            │      END USERS          │
+                            │  (Web / Mobile Browser) │
+                            └─────────────────────────┘
+```
+
+| Component | Port | Location on VPS | Purpose |
+|-----------|------|-----------------|---------|
+| Whitelabel Backend (Control Hub) | **11112** | `apps/whitelabel-backend` | Multi-tenant whitelabel management: superadmin + per-tenant admin, JWT auth, SQLite store |
+| Frontend (Admin Login Portal) | **22221** | `apps/exchange` (rebuilt) | Admin/Superadmin login portal + whitelabel-branded exchange UI served to end users |
+| Legacy Backend API | 11110 | `apps/backend` | Existing trading/auth API (unchanged, still running) |
+| Terminal | 22220 | `apps/terminal` | Existing Next.js frontend (unchanged) |
+| Engine | 3001 | `apps/engine` | Trading engine + ledger.db (unchanged) |
+
+### Roles & Capabilities
+- **SUPERADMIN** (master control): manage whitelabels (tenants), global config, billing/plans, system settings, access all tenants.
+- **ADMIN** (tenant control): manage content, manage users, view reports, tenant settings — strictly scoped to its own tenant.
+
+### Whitelabel Backend API (port 11112)
+```
+POST /api/auth/login                # Login (superadmin or tenant admin) -> { token, role, tenant }
+GET  /api/auth/me                   # Current identity (requires Bearer token)
+
+# Superadmin only
+GET    /api/whitelabels             # List tenants
+POST   /api/whitelabels             # Create tenant { slug, name, primaryColor, logoUrl, plan, adminUser, adminPass }
+GET    /api/whitelabels/:slug       # Tenant detail + branding
+PUT    /api/whitelabels/:slug       # Update tenant (branding, plan, active)
+DELETE /api/whitelabels/:slug       # Remove tenant
+GET    /api/config                  # Global config
+PUT    /api/config                  # Update global config
+GET    /api/tenants/:slug/users     # All-tenants user access
+GET    /api/reports                 # Cross-tenant report summary
+
+# Tenant-scoped (superadmin OR that tenant's admin; scope enforced by JWT)
+GET    /api/admin/content           # Tenant content items
+POST   /api/admin/content           # Create content
+PUT    /api/admin/content/:id       # Edit content
+DELETE /api/admin/content/:id       # Delete content
+GET    /api/admin/users             # Tenant users
+GET    /api/admin/reports           # Tenant-only report
+GET    /api/admin/settings          # Tenant settings (branding fields editable)
+PUT    /api/admin/settings          # Update tenant settings
+
+# Public branding (consumed by frontend)
+GET    /api/brand/:slug             # { name, primaryColor, logoUrl, theme } for login page theming
+```
+
+### Frontend Routes (port 22221)
+```
+GET  /login               # Admin Login Portal (branded via ?tenant=slug -> /api/brand/:slug)
+GET  /admin               # Tenant admin console (content/users/reports/settings)
+GET  /superadmin          # Master control console (whitelabels/global config/billing)
+GET  /*                   # Rest: existing whitelabel-branded exchange pages (unchanged)
+```
+
+### Deployment (VPS 187.127.178.20)
+```bash
+pm2 list   # whitelabel-backend (:11112), exchange (:22221), backend (:11110), terminal (:22220), engine (:3001)
+```
 
 ---
 

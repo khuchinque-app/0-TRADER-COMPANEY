@@ -562,6 +562,9 @@ function App() {
   if (path === '/akun/masuk') return <LoginPage />;
   if (path === '/akun/daftar' || path === '/daftar') return <RegisterPage />;
   if (path === '/akun/dompet') return <WalletPage />;
+  // ── WHITELABEL PORTAL (new-prompt/structure.md) ──
+  if (path === '/login') return <WhitelabelLoginPortal />;
+  if (path === '/superadmin') return <SuperadminConsole />;
   if (path === '/admin' || path === '/akun/admin') return <AdminConsole />;
   return <NotFound />;
 }
@@ -940,6 +943,14 @@ function AdminConsole() {
   const [admin, setAdmin] = useState(null);
   const [tab, setTab] = useState('dashboard');
 
+  // Whitelabel portal session (Control Hub :11112). If present, /admin?wl=1 renders the
+  // tenant console instead of the legacy system-admin console.
+  const [me, setMe] = useState(null);
+  useEffect(() => {
+    if (!wl.token) return;
+    wl.req('/api/auth/me').then(setMe).catch(() => { wl.token = ''; });
+  }, []);
+
   useEffect(() => {
     if (!token) { setAdmin(null); return; }
     let ok = true;
@@ -956,6 +967,20 @@ function AdminConsole() {
   };
 
   if (!token || !admin) return <AdminLoginScreen onToken={setToken} />;
+
+  // Whitelabel tenant console mode (structure.md): /admin?wl=1 → tenant-scoped hub UI
+  const wlMode = new URLSearchParams(location.search).get('wl') === '1' && !!wl.token;
+  if (wlMode) {
+    return (
+      <div className="wrap" style={{ maxWidth: 1040 }}>
+        <h1 className="crumb"><b>Tenant Console</b> <span className="muted">· whitelabel admin · {me?.tenant}</span>
+          <button className="btn ghost" style={{ float: 'right', padding: '4px 12px', fontSize: 12 }}
+            onClick={() => { wl.token = ''; location.href = '/login'; }}>Keluar</button></h1>
+        <WlTenantConsole me={me} />
+        <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>Simulasi · Control Hub :11112 via /wlapi</p>
+      </div>
+    );
+  }
 
   const TABS = [['dashboard', 'Dashboard'], ['members', 'Members'], ['brand', 'Brand'], ['audit', 'Audit']];
   return (
@@ -1033,6 +1058,284 @@ function WalletPage() {
         ) : <p className="muted">Belum masuk. <a href="/akun/masuk" style={{ color: 'var(--up)' }}>Login / Guest</a></p>}
         <p className="muted" style={{ fontSize: 12 }}>{t.simNote}</p>
       </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// WHITELABEL PORTAL (new-prompt/structure.md) — Admin Login Portal on :22221
+// Talks to the Whitelabel Backend (Control Hub :11112) through /wlapi/* proxy.
+//   /login       → branded login (?tenant=slug pulls /wlapi/api/brand/:slug)
+//   role=admin      → Tenant Console  (content / users / reports / settings)
+//   role=superadmin → /superadmin Master Control (whitelabels / config / billing)
+// ════════════════════════════════════════════════════════════════════════════
+const WL_TOKEN_KEY = 'sx_wl_token';
+const wl = {
+  get token() { return localStorage.getItem(WL_TOKEN_KEY) || ''; },
+  set token(v) { v ? localStorage.setItem(WL_TOKEN_KEY, v) : localStorage.removeItem(WL_TOKEN_KEY); },
+  req(pathname, opts = {}) {
+    return apiFetch('/wlapi' + pathname, { token: wl.token, ...opts });
+  },
+};
+
+function useBrand(slug) {
+  const [brand, setBrand] = useState({ name: 'Whitelabel Portal', primaryColor: '#00FF88', logoUrl: '', theme: 'dark' });
+  useEffect(() => {
+    if (!slug) return;
+    apiFetch('/wlapi/api/brand/' + encodeURIComponent(slug)).then(setBrand).catch(() => {});
+  }, [slug]);
+  return brand;
+}
+
+function WhitelabelLoginPortal() {
+  const params = new URLSearchParams(location.search);
+  const tenantSlug = params.get('tenant') || '';
+  const brand = useBrand(tenantSlug);
+  const [email, setEmail] = useState('');
+  const [pass, setPass] = useState('');
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  const style = { '--up': brand.primaryColor, background: brand.theme === 'light' ? '#f5f6f8' : undefined };
+  const submit = async (e) => {
+    e.preventDefault(); setBusy(true); setMsg('');
+    try {
+      const d = await apiFetch('/wlapi/api/auth/login', { method: 'POST', body: { email, password: pass } });
+      wl.token = d.token;
+      location.href = d.role === 'superadmin' ? '/superadmin' : '/admin?wl=1';
+    } catch (err) { setMsg(err.message); } finally { setBusy(false); }
+  };
+  return (
+    <div className="wrap" style={{ maxWidth: 440, ...style }}>
+      <h1 className="crumb">
+        {brand.logoUrl ? <img src={brand.logoUrl} alt="" style={{ height: 28, verticalAlign: 'middle', marginRight: 8 }} /> : null}
+        <b>{brand.name}</b> <span className="muted">· Admin Login Portal</span>
+      </h1>
+      <form className="panel form" onSubmit={submit}>
+        <div className="field"><span>Email</span><input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@tenant.local" autoComplete="username" /></div>
+        <div className="field"><span>Password</span><input value={pass} onChange={(e) => setPass(e.target.value)} type="password" autoComplete="current-password" /></div>
+        <button type="submit" className="btn" disabled={busy}>{busy ? 'Memeriksa…' : 'Masuk Portal'}</button>
+        {msg && <div className="down" style={{ fontSize: 12 }}>{msg}</div>}
+        <div className="muted" style={{ fontSize: 12 }}>
+          Ganti merek lewat <code>?tenant=slug</code> · member biasa masuk di <a href="/akun/masuk" style={{ color: 'var(--up)' }}>/akun/masuk</a>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ---- tenant console (role=admin view inside /admin?wl=1) ----
+function WlTenantConsole({ me }) {
+  const [tab, setTab] = useState('content');
+  const TABS = [['content', 'Content'], ['users', 'Users'], ['reports', 'Reports'], ['settings', 'Settings']];
+  return (
+    <>
+      <div className="row" style={{ gap: 6, marginBottom: 14 }}>
+        {TABS.map(([id, label]) => (
+          <button key={id} className="btn ghost" onClick={() => setTab(id)}
+            style={tab === id ? { borderColor: 'var(--up)', color: 'var(--up)' } : null}>{label}</button>
+        ))}
+      </div>
+      {tab === 'content' && <WlContentTab />}
+      {tab === 'users' && <WlUsersTab />}
+      {tab === 'reports' && <WlReportsTab />}
+      {tab === 'settings' && <WlSettingsTab me={me} />}
+    </>
+  );
+}
+function WlContentTab() {
+  const [items, setItems] = useState([]);
+  const [title, setTitle] = useState(''); const [body, setBody] = useState('');
+  const load = () => wl.req('/api/admin/content').then((d) => setItems(d.content || [])).catch(() => {});
+  useEffect(load, []);
+  const add = async (e) => { e.preventDefault(); if (!title.trim()) return;
+    await wl.req('/api/admin/content', { method: 'POST', body: { title, body } }); setTitle(''); setBody(''); load(); };
+  const del = async (id) => { await wl.req('/api/admin/content/' + id, { method: 'DELETE' }); load(); };
+  return (
+    <div className="panel" style={{ padding: 16 }}>
+      <form onSubmit={add} className="form">
+        <div className="field"><span>Judul</span><input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+        <div className="field"><span>Isi</span><textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} style={{ width: '100%' }} /></div>
+        <button className="btn" type="submit">Tambah Konten</button>
+      </form>
+      <table><tbody>
+        {items.map((c) => (
+          <tr key={c.id}><td><b>{c.title}</b><div className="muted" style={{ fontSize: 12 }}>{c.kind}</div></td>
+            <td style={{ textAlign: 'right' }}><button className="btn ghost" onClick={() => del(c.id)}>Hapus</button></td></tr>
+        ))}
+      </tbody></table>
+    </div>
+  );
+}
+function WlUsersTab() {
+  const [users, setUsers] = useState([]);
+  const [username, setUsername] = useState('');
+  const load = () => wl.req('/api/admin/users').then((d) => setUsers(d.users || [])).catch(() => {});
+  useEffect(load, []);
+  const add = async (e) => { e.preventDefault(); if (!username.trim()) return;
+    await wl.req('/api/admin/users', { method: 'POST', body: { username } }); setUsername(''); load(); };
+  const toggle = async (u) => { await wl.req('/api/admin/users/' + u.id, { method: 'PUT', body: { status: u.status === 'active' ? 'suspended' : 'active' } }); load(); };
+  return (
+    <div className="panel" style={{ padding: 16 }}>
+      <form onSubmit={add} className="row" style={{ gap: 8 }}>
+        <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username baru" />
+        <button className="btn" type="submit">Tambah User</button>
+      </form>
+      <table><tbody>
+        {users.map((u) => (
+          <tr key={u.id}><td>{u.username}</td><td className="muted">{u.email || '—'}</td>
+            <td><span className={u.status === 'active' ? 'up' : 'down'}>{u.status}</span></td>
+            <td style={{ textAlign: 'right' }}><button className="btn ghost" onClick={() => toggle(u)}>{u.status === 'active' ? 'Suspensi' : 'Aktifkan'}</button></td></tr>
+        ))}
+      </tbody></table>
+    </div>
+  );
+}
+function WlReportsTab() {
+  const [rep, setRep] = useState(null);
+  useEffect(() => { wl.req('/api/admin/reports').then(setRep).catch(() => {}); }, []);
+  if (!rep) return <p className="muted">Memuat laporan…</p>;
+  return (
+    <div className="panel" style={{ padding: 16 }}>
+      <h3>{rep.name} <span className="muted">({rep.tenant} · plan {rep.plan})</span></h3>
+      <table><tbody>
+        <tr><td>Users</td><td style={{ textAlign: 'right' }}>{rep.users}</td></tr>
+        <tr><td>Suspended</td><td style={{ textAlign: 'right' }}>{rep.suspendedUsers}</td></tr>
+        <tr><td>Content items</td><td style={{ textAlign: 'right' }}>{rep.contentItems}</td></tr>
+        <tr><td>Plan limits</td><td style={{ textAlign: 'right' }}>{JSON.stringify(rep.limits)}</td></tr>
+      </tbody></table>
+    </div>
+  );
+}
+function WlSettingsTab({ me }) {
+  const [s, setS] = useState(null);
+  const [saved, setSaved] = useState('');
+  useEffect(() => { wl.req('/api/admin/settings').then((d) => setS(d.settings)).catch(() => {}); }, []);
+  if (!s) return <p className="muted">Memuat pengaturan…</p>;
+  const put = async (patch) => {
+    try { const d = await wl.req('/api/admin/settings', { method: 'PUT', body: patch }); setS(d.settings); setSaved('✓ tersimpan'); setTimeout(() => setSaved(''), 2000); }
+    catch (e) { setSaved('✗ ' + e.message); }
+  };
+  return (
+    <div className="panel" style={{ padding: 16 }}>
+      <div className="field"><span>Nama merek</span>
+        <input defaultValue={s.name} onBlur={(e) => e.target.value !== s.name && put({ name: e.target.value })} /></div>
+      <div className="field"><span>Warna utama (#rrggbb)</span>
+        <input defaultValue={s.primaryColor} onBlur={(e) => e.target.value !== s.primaryColor && put({ primaryColor: e.target.value })} /></div>
+      <div className="field"><span>Logo URL</span>
+        <input defaultValue={s.logoUrl} onBlur={(e) => e.target.value !== s.logoUrl && put({ logoUrl: e.target.value })} /></div>
+      <div className="field"><span>Theme</span>
+        <select value={s.theme} onChange={(e) => put({ theme: e.target.value })}>
+          <option value="dark">dark</option><option value="light">light</option>
+        </select></div>
+      {me?.role === 'admin' && <p className="muted" style={{ fontSize: 12 }}>Plan/billing ({s.plan}) dikelola superadmin.</p>}
+      {saved && <p style={{ color: 'var(--up)' }}>{saved}</p>}
+    </div>
+  );
+}
+
+// ---- superadmin master control (/superadmin) ----
+function SuperadminConsole() {
+  const [me, setMe] = useState(null);
+  const [tab, setTab] = useState('whitelabels');
+  useEffect(() => {
+    if (!wl.token) return;
+    wl.req('/api/auth/me').then(setMe).catch(() => { wl.token = ''; });
+  }, []);
+  if (!wl.token) return <WhitelabelLoginPortal />;
+  if (!me) return <p className="muted wrap">Memverifikasi sesi…</p>;
+  if (me.role !== 'superadmin') { location.href = '/admin?wl=1'; return null; }
+  const logout = () => { wl.token = ''; location.href = '/login'; };
+  const TABS = [['whitelabels', 'Whitelabels'], ['config', 'Global Config'], ['billing', 'Billing / Plans']];
+  return (
+    <div className="wrap" style={{ maxWidth: 1040 }}>
+      <h1 className="crumb"><b>Master Control</b> <span className="muted">· {me.email} · superadmin</span>
+        <button className="btn ghost" style={{ float: 'right', padding: '4px 12px', fontSize: 12 }} onClick={logout}>Keluar</button></h1>
+      <div className="row" style={{ gap: 6, marginBottom: 14 }}>
+        {TABS.map(([id, label]) => (
+          <button key={id} className="btn ghost" onClick={() => setTab(id)}
+            style={tab === id ? { borderColor: 'var(--up)', color: 'var(--up)' } : null}>{label}</button>
+        ))}
+      </div>
+      {tab === 'whitelabels' && <WlManageTab />}
+      {tab === 'config' && <WlConfigTab />}
+      {tab === 'billing' && <WlBillingTab />}
+      <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>Simulasi · Whitelabel Control Hub :11112 via /wlapi</p>
+    </div>
+  );
+}
+function WlManageTab() {
+  const [list, setList] = useState([]);
+  const [f, setF] = useState({ slug: '', name: '', primaryColor: '#00FF88', plan: 'free', adminEmail: '', adminPass: '' });
+  const load = () => wl.req('/api/whitelabels').then((d) => setList(d.whitelabels || [])).catch(() => {});
+  useEffect(load, []);
+  const create = async (e) => { e.preventDefault(); if (!f.slug || !f.name) return;
+    await wl.req('/api/whitelabels', { method: 'POST', body: f }); load(); };
+  const rm = async (slug) => { if (!confirm('Hapus whitelabel ' + slug + '?')) return; await wl.req('/api/whitelabels/' + slug, { method: 'DELETE' }); load(); };
+  const toggleActive = async (w) => { await wl.req('/api/whitelabels/' + w.slug, { method: 'PUT', body: { active: !w.active } }); load(); };
+  const inp = (k, label) => (
+    <div className="field"><span>{label}</span>
+      <input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></div>);
+  return (
+    <div className="panel" style={{ padding: 16 }}>
+      <form onSubmit={create} className="form">
+        {inp('slug', 'Slug')}{inp('name', 'Nama')}
+        {inp('primaryColor', 'Warna utama #rrggbb')}{inp('plan', 'Plan (free/pro/enterprise)')}
+        {inp('adminEmail', 'Email admin tenant')}{inp('adminPass', 'Password admin tenant')}
+        <button className="btn" type="submit">Buat Whitelabel</button>
+      </form>
+      <table><thead><tr><th>Slug</th><th>Nama</th><th>Warna</th><th>Plan</th><th>Status</th><th></th></tr></thead><tbody>
+        {list.map((w) => (
+          <tr key={w.slug}>
+            <td><code>{w.slug}</code></td><td>{w.name}</td>
+            <td><span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 3, background: w.primaryColor, verticalAlign: 'middle' }} /> {w.primaryColor}</td>
+            <td>{w.plan}</td>
+            <td><span className={w.active ? 'up' : 'down'}>{w.active ? 'aktif' : 'nonaktif'}</span></td>
+            <td style={{ textAlign: 'right' }}>
+              <button className="btn ghost" onClick={() => toggleActive(w)}>{w.active ? 'Nonaktifkan' : 'Aktifkan'}</button>{' '}
+              <button className="btn ghost" onClick={() => rm(w.slug)}>Hapus</button>{' '}
+              <a className="btn ghost" href={`/login?tenant=${w.slug}`}>Portal</a>
+            </td>
+          </tr>
+        ))}
+      </tbody></table>
+    </div>
+  );
+}
+function WlConfigTab() {
+  const [cfg, setCfg] = useState(null);
+  const [platformName, setPlatformName] = useState('');
+  const [saved, setSaved] = useState('');
+  useEffect(() => { wl.req('/api/config').then((d) => { setCfg(d.config); setPlatformName(d.config.platformName || ''); }).catch(() => {}); }, []);
+  if (!cfg) return <p className="muted">Memuat konfigurasi…</p>;
+  const save = async (e) => { e.preventDefault();
+    await wl.req('/api/config', { method: 'PUT', body: { platformName } }); setSaved('✓ tersimpan'); setTimeout(() => setSaved(''), 2000); };
+  return (
+    <div className="panel" style={{ padding: 16 }}>
+      <form onSubmit={save} className="row" style={{ gap: 8 }}>
+        <input value={platformName} onChange={(e) => setPlatformName(e.target.value)} placeholder="platformName" />
+        <button className="btn" type="submit">Simpan Global Config</button>
+      </form>
+      {saved && <p style={{ color: 'var(--up)' }}>{saved}</p>}
+      <pre className="muted" style={{ fontSize: 12, whiteSpace: 'pre-wrap' }}>{JSON.stringify(cfg, null, 2)}</pre>
+    </div>
+  );
+}
+function WlBillingTab() {
+  const [rep, setRep] = useState([]);
+  useEffect(() => { wl.req('/api/reports').then((d) => setRep(d.reports || [])).catch(() => {}); }, []);
+  const total = rep.reduce((a, r) => a + (r.monthlyFee || 0), 0);
+  const changePlan = async (r, plan) => { await wl.req('/api/whitelabels/' + r.tenant, { method: 'PUT', body: { plan } }); wl.req('/api/reports').then((d) => setRep(d.reports || [])); };
+  return (
+    <div className="panel" style={{ padding: 16 }}>
+      <h3>Billing <span className="muted">· total ${total}/bulan</span></h3>
+      <table><thead><tr><th>Tenant</th><th>Users</th><th>Konten</th><th>Plan</th><th>Fee/bln</th></tr></thead><tbody>
+        {rep.map((r) => (
+          <tr key={r.tenant}><td>{r.name} <code className="muted">({r.tenant})</code></td><td>{r.users}</td><td>{r.contentItems}</td>
+            <td><select value={r.plan} onChange={(e) => changePlan(r, e.target.value)}>
+              <option>free</option><option>pro</option><option>enterprise</option></select></td>
+            <td>${r.monthlyFee}</td></tr>
+        ))}
+      </tbody></table>
     </div>
   );
 }

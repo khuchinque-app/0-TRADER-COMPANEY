@@ -38,6 +38,33 @@ app.get('/robots.txt', (_req, res) => {
   res.type('text/plain').send('User-agent: *\nDisallow: /\n');
 });
 
+// Whitelabel Control Hub proxy (new-prompt/structure.md): browser talks only to :22221,
+// the hub lives on :11112. /wlapi/* -> whitelabel-backend, /api/* -> legacy backend :11110.
+const WHITELABEL = process.env.WHITELABEL_URL || 'http://localhost:11112';
+async function proxyTo(target, req, res) {
+  try {
+    const r = await fetch(`${target}${req.originalUrl.replace(/^\/wlapi/, '')}`, {
+      method: req.method,
+      headers: {
+        accept: 'application/json',
+        ...(req.headers.authorization ? { authorization: req.headers.authorization } : {}),
+        ...(req.method !== 'GET' && req.headers['content-type'] ? { 'content-type': req.headers['content-type'] } : {}),
+      },
+      ...(req.method !== 'GET' ? { body: await new Promise((resolve) => {
+        const chunks = [];
+        req.on('data', (c) => chunks.push(c));
+        req.on('end', () => resolve(Buffer.concat(chunks)));
+      }) } : {}),
+      signal: AbortSignal.timeout(10000),
+    });
+    res.status(r.status).type(r.headers.get('content-type') || 'application/json');
+    res.send(Buffer.from(await r.arrayBuffer()));
+  } catch (e) {
+    res.status(502).json({ error: 'upstream_unreachable', message: String(e.message), simulasi: true });
+  }
+}
+app.use('/wlapi', (req, res) => proxyTo(WHITELABEL, req, res));
+
 // small proxy for frontend-only needs (keeps browser -> exchange -> backend 11110)
 app.use('/api', async (req, res) => {
   try {
