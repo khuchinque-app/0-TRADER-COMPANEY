@@ -91,7 +91,14 @@ function routeState(p) {
   return { code: 200, state: 'app' };
 }
 
-// serve SPA with correct status codes
+// vite build output — MUST be served before the SPA catch-all, with real MIME
+// types; otherwise the browser gets html for the module script and never mounts
+// the React app (symptom: only the server banner is visible).
+app.use(express.static(DIST, { index: false, maxAge: '1h' }));
+
+// serve SPA with correct status codes. The SIMULASI banner is INSERTED BEFORE the
+// React mount point — never replace <div id="root"> (devtool.md finding: missing
+// mounting point => SPA renders nothing).
 app.get('*', (req, res) => {
   const p = req.path;
   const { code, state, slug } = routeState(p);
@@ -100,7 +107,7 @@ app.get('*', (req, res) => {
     if (existsSync(indexPath)) {
       const html = readFileSync(indexPath, 'utf8')
         .replace('__STATE__', JSON.stringify({ state: 'not-found', path: p }))
-        .replace('<div id="root"></div>', SERVER_BANNER_HTML);
+        .replace('<div id="root"></div>', SERVER_BANNER_HTML + '<div id="root"></div>');
       return res.status(404).type('html').send(html);
     }
     return res.status(404).type('html').send('<h1>404</h1><a href="/">Beranda</a>');
@@ -108,7 +115,7 @@ app.get('*', (req, res) => {
   if (existsSync(indexPath)) {
     const html = readFileSync(indexPath, 'utf8')
       .replace('__STATE__', JSON.stringify({ state, path: p, slug: slug || null }))
-      .replace('<div id="root"></div>', SERVER_BANNER_HTML);
+      .replace('<div id="root"></div>', SERVER_BANNER_HTML + '<div id="root"></div>');
     return res.status(code).type('html').send(html);
   }
   res.status(503).send('exchange: build missing (run: npm run build -w apps/exchange)');

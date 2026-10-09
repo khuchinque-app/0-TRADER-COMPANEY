@@ -15,9 +15,13 @@
     </script>
     <script>window.__EXCHANGE_STATE__ = "__STATE__";</script>
     <style>
-      :root, [data-theme="dark"] { --up:#0ecb81; --down:#f6465d; --bg:#0b0e11; --panel:#12171d; --panel2:#181d24; --line:#232a33; --text:#eaecef; --muted:#848e9c; }
+      :root, [data-theme="dark"] {
+        /* dark tokens = ChinQue terminal (apps/terminal/globals.css): vice ocean-night */
+        --up:#00FF88; --down:#FF3366; --bg:#0B0F2B; --panel:#101533; --panel2:#151B3D; --line:#232A55; --text:#EAF0FF; --muted:#8A93C7;
+      }
       [data-theme="light"] {
-        --up:#039e63; --down:#e5394f; --bg:#ffffff; --panel:#f5f6f8; --panel2:#eceef1; --line:#d7dbe0; --text:#111418; --muted:#5c6672;
+        /* light tokens = exact --stx-* light values from apps/terminal/globals.css */
+        --up:#0f7b4f; --down:#c2352b; --bg:#fbfbfa; --panel:#ffffff; --panel2:#f4f4f2; --line:rgba(0,0,0,0.08); --text:#14140f; --muted:rgba(0,0,0,0.38);
       }
       * { box-sizing:border-box; }
       body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 Inter,system-ui,-apple-system,sans-serif; }
