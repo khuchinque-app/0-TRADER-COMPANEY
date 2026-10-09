@@ -10,7 +10,7 @@ import { agentRouter } from "./routes/agent";
 import { priceFeed } from "./pricefeed/service";
 import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
 import { tapeService, TAPE_LEN, TapeTrade } from "./pricefeed/tape";
-import { createMarketRouter, startMarketResolution, setMarketDb, fillMarketOrder } from "./market";
+import { createMarketRouter, startMarketResolution, setMarketDb, fillMarketOrder, placeLimitOrder, startLimitMatcher } from "./market";
 
 // Resolve .env from repo root (works from both src/ and dist/)
 const repoRoot = path.resolve(__dirname, "../../..");
@@ -21,6 +21,7 @@ const app = express();
 const PORT = process.env.PORT_BACKEND || 11110;
 
 import { rateLimit } from './middleware/rate-limit';
+import { onLimitCancelled } from './market';
 
 app.use(rateLimit({ windowMs: 60000, maxRequests: 100 }));
 app.use(cors({ origin: "*", credentials: true }));
@@ -575,13 +576,42 @@ app.post("/api/market/orders", async (req, res) => {
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: "unauthenticated" });
   try {
-    const { slug, side, quantity } = req.body ?? {};
+    const { slug, side, quantity, type, price } = req.body ?? {};
     if (!slug || !(side === "buy" || side === "sell")) {
       return res.status(400).json({ error: "invalid_params", message: "slug and side (buy|sell) required" });
+    }
+    if (type === "limit") {
+      const result = await placeLimitOrder({ userId, slug: String(slug), side, price: Number(price), quantity: Number(quantity), db });
+      if (!result.ok) return res.status(result.status).json({ error: result.error, message: result.message, simulasi: true });
+      return res.status(result.status).json(result.body);
     }
     const result = await fillMarketOrder({ userId, slug: String(slug), side, quantity: Number(quantity) });
     if (!result.ok) return res.status(result.status).json({ error: result.error, message: result.message, simulasi: true });
     res.status(result.status).json(result.body);
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message, simulasi: true });
+  }
+});
+
+// cancel a resting limit order (unlock reserved funds)
+app.delete("/api/market/orders/:id", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  try {
+    const o = db.prepare("SELECT * FROM orders WHERE id = ? AND user_id = ? AND type = 'limit'").get(req.params.id, userId) as any;
+    if (!o) return res.status(404).json({ error: "not_found", simulasi: true });
+    if (o.status !== "open" && o.status !== "partially_filled") return res.status(400).json({ error: "not_open", simulasi: true });
+    const now = Math.floor(Date.now() / 1000);
+    db.transaction(() => {
+      db.prepare("UPDATE orders SET status = 'cancelled', updated_at = ? WHERE id = ?").run(now, o.id);
+      const base = o.pair.replace(/USDT$/, "");
+      const reserveAsset = o.side === "sell" ? base : "USDT";
+      const reserveAmount = o.side === "sell" ? o.quantity : o.price * o.quantity * 1.001;
+      const rrow = db.prepare("SELECT b.id FROM balances b JOIN accounts a ON a.id = b.account_id WHERE a.user_id = ? AND b.asset = ?").get(userId, reserveAsset) as { id: number } | undefined;
+      if (rrow) db.prepare("UPDATE balances SET locked = MAX(locked - ?, 0), available = available + ? WHERE id = ?").run(reserveAmount, reserveAmount, rrow.id);
+    })();
+    onLimitCancelled(o.id);
+    res.json({ ok: true, orderId: o.id, simulasi: true });
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message, simulasi: true });
   }
@@ -1167,6 +1197,8 @@ app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
   // M7: resolve indodax slug -> MEXC symbol states (LIVE/NO_FEED)
   startMarketResolution();
+  // limit-order matcher pass every 5s
+  startLimitMatcher();
   // T04: start the reference price feed poller (immediate first poll, then every few seconds)
   priceFeed.start();
   // T07: start the synthetic market-trades tape (appends a tick per symbol every few seconds)

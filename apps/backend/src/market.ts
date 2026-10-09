@@ -7,6 +7,7 @@ import express, { Request, Response } from "express";
 import { randomBytes } from "crypto";
 import Database from "better-sqlite3";
 import { mexc } from "@trading/mexc-client";
+import type { MexcBookTicker } from "@trading/mexc-client";
 import routesJson from "@trading/indodax-routes/routes.json";
 
 // ---------- types ----------
@@ -409,6 +410,144 @@ let _db: DbLike | null = null;
 export function setMarketDb(db: DbLike): void { _db = db; }
 
 const FEE_BPS = parseFloat(process.env.FEE_BPS || "10");
+
+// ---------- limit orders: resting book + periodic matcher ----------
+interface RestingOrder {
+  id: string; user_id: string; pair: string; slug: string; side: "buy" | "sell";
+  price: number; quantity: number; filled_quantity: number; created_at: number;
+}
+const restingBySymbol = new Map<string, RestingOrder[]>();
+const LIMIT_MATCH_INTERVAL_MS = parseInt(process.env.LIMIT_MATCH_INTERVAL_MS || "5000");
+const LIMIT_CAP_PER_USER_PER_PAIR = parseFloat(process.env.LIMIT_CAP_USDT || "500000");
+
+/** Place a limit order: validates, persists to orders table as 'open', adds to in-memory book. */
+export async function placeLimitOrder(expr: {
+  userId: string; slug: string; side: "buy" | "sell"; price: number; quantity: number;
+  db: DbLike;
+}): Promise<{ ok: boolean; status: number; body?: Record<string, unknown>; error?: string; message?: string }> {
+  const p = await resolveFlexible(expr.slug);
+  if (!p) return { ok: false, status: 404, error: "not_in_manifest", message: `Unknown pair: ${expr.slug}` };
+  if (!p.mexcSymbol) return { ok: false, status: 409, error: "no_feed", message: "no live feed for this pair" };
+  if (!(expr.price > 0) || !(expr.quantity > 0)) return { ok: false, status: 400, error: "invalid_params", message: "price and quantity must be > 0" };
+  if (expr.price * expr.quantity > LIMIT_CAP_PER_USER_PER_PAIR) {
+    return { ok: false, status: 400, error: "too_large", message: `order notional > simulation cap ${LIMIT_CAP_PER_USER_PER_PAIR} USDT` };
+  }
+  // funds check: reserve via locked balance (sell needs BASE, buy needs USDT incl. fee)
+  const db = expr.db;
+  const needAsset = expr.side === "sell" ? p.base : "USDT";
+  const needAmount = expr.side === "sell" ? expr.quantity : expr.price * expr.quantity * (1 + FEE_BPS / 10_000);
+  const now = Math.floor(Date.now() / 1000);
+  const orderId = `lmt_${Date.now()}_${randomBytes(4).toString("hex")}`;
+  try {
+    db.transaction(() => {
+      let acct = db.prepare("SELECT id FROM accounts WHERE user_id = ?").get(expr.userId) as { id: string } | undefined;
+      if (!acct) {
+        const acctId = `acct_${randomBytes(8).toString("hex")}`;
+        db.prepare("INSERT INTO accounts (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)").run(acctId, expr.userId, "Simulasi", now, now);
+        acct = { id: acctId };
+      }
+      const row = db.prepare("SELECT id, available FROM balances WHERE account_id = ? AND asset = ?").get(acct.id, needAsset) as { id: number; available: number } | undefined;
+      if (!row || row.available < needAmount) {
+        throw Object.assign(new Error(`Not enough ${needAsset} for limit order`), { code: "insufficient_balance" });
+      }
+      db.prepare("UPDATE balances SET available = available - ?, locked = locked + ? WHERE id = ?").run(needAmount, needAmount, row.id);
+      db.prepare("INSERT INTO orders (id, user_id, pair, side, type, price, quantity, filled_quantity, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'limit', ?, ?, 0, 'open', ?, ?)")
+        .run(orderId, expr.userId, `${p.base}USDT`, expr.side, expr.price, expr.quantity, now, now);
+    })();
+  } catch (e: any) {
+    if (e?.code === "insufficient_balance") return { ok: false, status: 409, error: "insufficient_balance", message: e.message };
+    return { ok: false, status: 500, error: "place_failed", message: e.message };
+  }
+  const entry: RestingOrder = { id: orderId, user_id: expr.userId, pair: `${p.base}USDT`, slug: p.slug, side: expr.side, price: expr.price, quantity: expr.quantity, filled_quantity: 0, created_at: now * 1000 };
+  const arr = restingBySymbol.get(p.mexcSymbol) || [];
+  arr.push(entry);
+  restingBySymbol.set(p.mexcSymbol, arr);
+  return { ok: true, status: 201, body: { ok: true, orderId, status: "open", pair: entry.pair, side: expr.side, price: expr.price, quantity: expr.quantity, simulasi: true } };
+}
+
+/** One matcher pass: best bid/ask per restless symbol; fill crossing orders. */
+async function matchPass(): Promise<void> {
+  if (restingBySymbol.size === 0) return;
+  for (const [mexcSymbol, orders] of restingBySymbol) {
+    if (!orders.length) { restingBySymbol.delete(mexcSymbol); continue; }
+    const bt = await mexc.bookTicker(mexcSymbol);
+    if (!bt.ok || Array.isArray(bt.data) || !bt.data) continue;
+    const bid = parseFloat((bt.data as MexcBookTicker).bidPrice);
+    const ask = parseFloat((bt.data as MexcBookTicker).askPrice);
+    const still: RestingOrder[] = [];
+    for (const o of orders) {
+      const crossed = (o.side === "buy" && ask > 0 && o.price >= ask) || (o.side === "sell" && bid > 0 && o.price <= bid);
+      if (!crossed) { still.push(o); continue; }
+      // fill at crossing price (conservative: buy at ask, sell at bid)
+      const fillPx = o.side === "buy" ? ask : bid;
+      const okFill = await settleLimitFill(o, fillPx);
+      if (!okFill) still.push(o); // ledger refused (funds gone etc.) — keep resting
+    }
+    if (still.length) restingBySymbol.set(mexcSymbol, still);
+    else restingBySymbol.delete(mexcSymbol);
+  }
+}
+
+/** Settle a crossed limit order into ledger (unlock reserved funds, do the swap). */
+async function settleLimitFill(o: RestingOrder, fillPx: number): Promise<boolean> {
+  const db = _db;
+  if (!db) return false;
+  const base = o.pair.replace(/USDT$/, "");
+  const fee = fillPx * o.quantity * (FEE_BPS / 10_000);
+  const now = Math.floor(Date.now() / 1000);
+  const fillId = `flm_${randomBytes(12).toString("hex")}`;
+  try {
+    db.transaction(() => {
+      // unlock reserved
+      const upd = (): void => {
+        db.prepare("UPDATE orders SET status='filled', price=?, filled_quantity=quantity, updated_at=? WHERE id=?").run(fillPx, now, o.id);
+        db.prepare("INSERT INTO fills (id, order_id, user_id, pair, side, price, quantity, fee, fee_asset, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'USDT', ?)")
+          .run(fillId, o.id, o.user_id, o.pair, o.side, fillPx, o.quantity, fee, now);
+      };
+      const reserveAsset = o.side === "sell" ? base : "USDT";
+      const reserveAmount = o.side === "sell" ? o.quantity : o.price * o.quantity * (1 + FEE_BPS / 10_000);
+      const rrow = db.prepare("SELECT b.id, b.available, b.locked, a.id AS account_id FROM balances b JOIN accounts a ON a.id = b.account_id WHERE a.user_id = ? AND b.asset = ?").get(o.user_id, reserveAsset) as { id: number; available: number; locked: number; account_id: string } | undefined;
+      if (!rrow || rrow.locked < reserveAmount - 1e-9) throw Object.assign(new Error("reservation missing"), { code: "reserve_missing" });
+      db.prepare("UPDATE balances SET locked = locked - ? WHERE id = ?").run(reserveAmount, rrow.id);
+      upd();
+      const creds = [
+        { asset: "USDT", amount: o.side === "buy" ? -(fillPx * o.quantity + fee) : fillPx * o.quantity - fee },
+        { asset: base, amount: o.side === "buy" ? o.quantity : -o.quantity },
+      ];
+      for (const c of creds) {
+        if (c.amount === 0) continue;
+        const row = db.prepare("SELECT id, available FROM balances WHERE account_id = ? AND asset = ?").get(rrow.account_id, c.asset) as { id: number; available: number } | undefined;
+        if (row) {
+          if (row.available + c.amount < 0) throw Object.assign(new Error(`balance short on ${c.asset}`), { code: "insufficient_balance" });
+          db.prepare("UPDATE balances SET available = available + ? WHERE id = ?").run(c.amount, row.id);
+        } else {
+          db.prepare("INSERT INTO balances (account_id, asset, available, locked) VALUES (?, ?, ?, 0)").run(rrow.account_id, c.asset, c.amount);
+        }
+        const jid = `fill_${fillId}_${c.asset}`;
+        db.prepare("INSERT INTO journal (id, timestamp, description, created_at) VALUES (?, ?, ?, ?)").run(jid, now, `limit ${o.side} ${o.quantity} ${base} @ ${fillPx}`, now);
+        db.prepare("INSERT INTO journal_lines (journal_id, account_id, asset, amount, entry_type) VALUES (?, ?, ?, ?, ?)").run(
+          jid, rrow.account_id, c.asset, Math.abs(c.amount), c.amount >= 0 ? "debit" : "credit"
+        );
+      }
+    })();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Drop an order from the in-memory resting book (on cancel). */
+export function onLimitCancelled(orderId: string): void {
+  for (const [sym, arr] of restingBySymbol) {
+    const next = arr.filter((o) => o.id !== orderId);
+    if (next.length) restingBySymbol.set(sym, next); else restingBySymbol.delete(sym);
+  }
+}
+
+/** Start the matcher loop (safe to call once at boot). */
+export function startLimitMatcher(): void {
+  setInterval(() => { void matchPass().catch(() => {}); }, LIMIT_MATCH_INTERVAL_MS);
+}
 
 export async function fillMarketOrder(expr: {
   userId: string; slug: string; side: "buy" | "sell"; quantity: number;

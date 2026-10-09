@@ -52,6 +52,7 @@ function Banner() {
       <header className="nav">
         <a className="logo" href="/">ChinQue<span>Exchange</span></a>
         <a className="item" href="/market">{t.nav.market}</a>
+        <a className="item" href="/trade">Universe</a>
         <a className="item" href="/trade_api">{t.nav.tradeApi}</a>
         <a className="item" href="/affiliate">{t.nav.affiliate}</a>
         <a className="item" href="/privacy-policy">{t.nav.privacy}</a>
@@ -251,7 +252,7 @@ function PairPage({ slug, trade = false }) {
       const resp = await fetch('/api/market/orders', {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
-        body: JSON.stringify({ slug, side: bs, quantity: parseFloat(amount) }),
+        body: JSON.stringify({ slug, side: bs, type: ot, price: ot === 'limit' ? parseFloat(price) : undefined, quantity: parseFloat(amount) }),
       });
       if (resp.status === 401) { setToast(t.pair.needLogin); setTimeout(() => setToast(null), 3000); location.href = '/akun/masuk'; return; }
       const d = await resp.json();
@@ -355,23 +356,26 @@ function PairPage({ slug, trade = false }) {
 }
 
 function OrdersPanel({ slug }) {
+  const [token] = useState(() => localStorage.getItem('sx_jwt') || '');
   const [orders, setOrders] = useState(null);
-  useEffect(() => {
-    fetch('/api/orders', { headers: { accept: 'application/json' } })
-      .then((r) => (r.status === 401 ? null : r.json()))
-      .then((d) => setOrders(d))
-      .catch(() => setOrders(null));
-  }, []);
+  const load = () => fetch(`/api/market/myorders/${slug}`, { headers: { authorization: 'Bearer ' + token, accept: 'application/json' } })
+    .then((r) => (r.ok ? r.json() : null)).then(setOrders).catch(() => setOrders(null));
+  useEffect(() => { load(); const iv = setInterval(load, 4000); return () => clearInterval(iv); }, [slug, token]);
   if (!orders) return <div className="muted" style={{ fontSize: 12 }}>—</div>;
-  const mine = (orders.orders || []).filter((o) => !slug || o.pair === slug).slice(0, 6);
-  if (!mine.length) return <div className="muted" style={{ fontSize: 12 }}>0 order</div>;
+  const open = (orders.open || []).slice(0, 6);
+  if (!open.length) return <div className="muted" style={{ fontSize: 12 }}>0 order terbuka</div>;
+  const cancel = async (id) => {
+    const r = await fetch(`/api/market/orders/${id}`, { method: 'DELETE', headers: { authorization: 'Bearer ' + token } });
+    if (r.ok) load();
+  };
   return (
     <table style={{ fontSize: 12 }}>
       <tbody>
-        {mine.map((o) => (
+        {open.map((o) => (
           <tr key={o.id}><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side === 'buy' ? 'B' : 'S'}</td>
             <td>{o.type}</td><td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
-            <td className="muted">{o.status}</td></tr>
+            <td className="muted">{o.status}</td>
+            <td><button className="btn ghost" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => cancel(o.id)}>✕</button></td></tr>
         ))}
       </tbody>
     </table>
@@ -462,6 +466,7 @@ function App() {
   let m;
   if (path === '/' || path === '') return <HomePage />;
   if (path === '/market') return <MarketPage />;
+  if (path === '/trade') return <UniversePage />;
   if ((m = path.match(/^\/trade\/([A-Za-z0-9]+)$/))) return <PairPage slug={m[1].toUpperCase()} trade />;
   if ((m = path.match(/^\/market\/depth_chart\/([A-Z0-9]+)$/))) return <DepthChartPage slug={m[1]} />;
   if ((m = path.match(/^\/chart\/([A-Z0-9]+)$/))) return <ChartOnlyPage slug={m[1]} />;
@@ -489,6 +494,50 @@ function App() {
   if (path === '/akun/daftar') return <SimplePage title="Daftar"><p>Gunakan <a href="/akun/masuk" style={{ color: 'var(--up)' }}>/akun/masuk</a> → tombol Guest Demo untuk saldo instan (tanpa KYC).</p></SimplePage>;
   if (path === '/akun/dompet') return <WalletPage />;
   return <NotFound />;
+}
+
+function UniversePage() {
+  const t = useLang();
+  const [pairs, setPairs] = useState([]);
+  const [tickers, setTickers] = useState(new Map());
+  const [q, setQ] = useState('');
+  useEffect(() => {
+    let ok = true;
+    jget('/api/market/universe').then((d) => { if (ok) setPairs(d.pairs || []); }).catch(() => {});
+    const load = () => jget('/api/market/tickers').then((d) => {
+      if (!ok) return;
+      setTickers(new Map((d.tickers || []).filter((x) => x.quote === 'USDT').map((x) => [x.mexcSymbol, x])));
+    }).catch(() => {});
+    load(); const iv = setInterval(load, 5000);
+    return () => { ok = false; clearInterval(iv); };
+  }, []);
+  const rows = q ? pairs.filter((p) => p.base.toLowerCase().includes(q.toLowerCase())) : pairs;
+  return (
+    <div className="wrap">
+      <h1 className="crumb"><b>MEXC Universe</b> <span className="muted">· {pairs.length} koin · Simulasi</span></h1>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <input className="ghost" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.market.search}
+          style={{ flex: 1, background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 6, padding: '9px 12px', color: 'var(--text)', outline: 'none' }} />
+      </div>
+      <table>
+        <thead><tr><th>{t.market.name}</th><th style={{ textAlign: 'right' }}>{t.market.last}</th><th style={{ textAlign: 'right' }}>{t.market.chg}</th><th style={{ textAlign: 'right' }}>{t.market.vol}</th></tr></thead>
+        <tbody>
+          {rows.slice(0, 400).map((p) => {
+            const tk = tickers.get(p.mexcSymbol);
+            return (
+              <tr key={p.slug}>
+                <td><a href={`/trade/${p.base}`}><b>{p.base}</b>/{p.quote}</a></td>
+                <td style={{ textAlign: 'right' }}>{tk ? fmtNum(tk.lastPrice) : '—'}</td>
+                <td style={{ textAlign: 'right' }} className={tk ? (tk.priceChangePercent >= 0 ? 'up' : 'down') : 'muted'}>{tk ? tk.priceChangePercent?.toFixed(2) + '%' : '—'}</td>
+                <td style={{ textAlign: 'right' }} className="muted">{tk ? fmtNum(tk.quoteVolume) : '—'}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {rows.length > 400 && <p className="muted" style={{ textAlign: 'center' }}>… {rows.length - 400} lebih — gunakan pencarian</p>}
+    </div>
+  );
 }
 
 function MyOrdersPage() {
