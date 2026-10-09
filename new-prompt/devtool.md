@@ -1,83 +1,38 @@
-# devtool.md — Page Content & Market Data Troubleshooting Log
-
-*Last updated: 9 Okt 2026 — both findings below were live-verified and RESOLVED.
-Superseded observations kept at the bottom for reference.*
-
----
-
-## ✅ Finding #2: /market showed count "· 0" with empty table — RESOLVED (478 rows)
+## Status Analysis: "NO FEED" Indicator
 
 **Context**
-Analysis of the "All Markets" page showed the market count displaying `· 0` and
-no pair rows in the data table (`span.muted` inside `h1.crumb` + empty `<tbody>`).
+Analysis of a trading terminal interface where a specific asset ("ACSIDR") displays a "NO FEED" status within a `span.down` element. The objective was to determine why specific market data is missing for this row.
 
-**Root cause**
-Timing + stale snapshot, not a code bug. The `/market` page performs two chained
-network fetches on mount (`/api/market/pairs` then `/api/market/tickers`, both
-going 22221 → backend 11110 → MEXC public API). The DevTools snapshot was taken
-before those fetches resolved (or from a headless render whose JS was served
-incorrectly — see Finding #1). Server-side data sources were healthy the whole
-time.
+**Diagnostics**
+The investigation into the element styles and DOM state revealed the following:
 
-**Verification after fix (raw Chrome via CDP `Runtime.evaluate`):**
-```
-URL: http://127.0.0.1:22221/market
-document.querySelectorAll('tbody tr').length  → 478
-h1.crumb textContent                          → "Semua Pasar · 478"
-API: /api/market/pairs  → count: 478
-API: /api/market/tickers → count: 363 LIVE rows (MEXC-backed)
-```
+| Attribute | Value |
+| :--- | :--- |
+| **Target Element** | `span.down` |
+| **Computed Color** | `rgb(255, 51, 102)` (Defined by `--down` variable) |
+| **Text Content** | "NO FEED" |
+| **Row Data** | `["ACSIDR", "—", "—", "—", "NO FEED"]` |
+| **Network Status** | Online |
+| **Environment** | Private IP Host (`187.127.178.20:22221`) |
 
-**Why rows ≠ ALL pairs:** 363 of 478 manifest pairs resolve to a real MEXC
-USDT market (`state: LIVE`); the rest intentionally render greyed-out
-`NO_FEED` rows (greyed, still clickable, shows "no live feed in simulation").
-This matches the spec: live rows come from the cached bulk `ticker24hr`;
-NO_FEED rows never get ticker entries, but still render.
+**Actionable Findings**
+*   **Data Consistency:** All numeric columns for the "ACSIDR" row contain placeholders (`—`), indicating a total absence of data for this ticker rather than a rendering error.
+*   **Application State:** The application initializes via `window.__EXCHANGE_STATE__` set to "live", but the specific asset lacks a data stream.
+*   **Connectivity:** The client browser is online and supports WebSockets, suggesting the failure originates at the data provider or backend service level.
 
-**Code notes (for future edits)**
-- Count header uses filtered `rows.length`, which is correct behavior (search/
-  filter aware). Do not hardwire it to the raw dataset.
-- If a future snapshot again shows `· 0`: first check
-  `curl http://127.0.0.1:22221/api/market/tickers` — a `502
-  mec_unavailable/stale` response means the MEXC fetch is failing (network or
-  circuit breaker open), not a frontend bug. The UI already renders empty with
-  no crash in that case.
+**Actionable Recommendations**
+The following diagnostic steps and potential fixes are identified to resolve the missing data feed:
 
----
+*   **Network Inspection:** Monitor the **Network** tab in DevTools, specifically filtering for `WS` (WebSockets) or `Fetch/XHR`. Identify if requests for "ACSIDR" are returning `404 Not Found` or `500 Internal Server Error`.
+*   **State Reset:** If the application has cached a stale connection state, clearing local storage may trigger a clean handshake:
+    ```javascript
+    localStorage.clear(); 
+    location.reload();
+    ```
+*   **Backend Verification:** For developers, verify that the symbol "ACSIDR" is correctly mapped in the price engine configuration and that the upstream data provider (e.g., exchange API) supports this specific pair.
+*   **Socket Context:** Check the console for WebSocket "onClose" or "onError" events that might signal a dropped stream specifically for the market data subscription.
 
-## ✅ Finding #1 (archival): page rendered only the top banner — RESOLVED
+*Note: The code fixes and findings above were identified on a live page in DevTools. When applying them to your codebase, please adapt them to your project's specific technical stack (e.g., Tailwind CSS classes, CSS modules, framework components) rather than applying them as literal CSS overrides.*
 
-**Context (superseded observations, kept for reference)**
-An earlier snapshot showed an apparently-empty page where only the top banner
-was visible despite extensive CSS plus a JS bundle:
-`html/body height 48.25 px`, `13 total elements`, `body children = 1
-(div.banner)`, no `#root` children. No mounting point was present in the DOM.
 
-**Root cause (found in code, not DevTools guessing):**
-`apps/exchange/server.mjs` (the SPA route server on :22221) injected the
-server-rendered SIMULASI banner with
-`.replace('<div id="root"></div>', SERVER_BANNER_HTML)` — it REPLACED the
-React mount point instead of inserting before it. Additionally the catch-all
-SPA route shadowed built assets, so `/assets/index-*.js` was served as
-`text/html` and the module script silently failed to execute.
-
-**Fix (commit 7b2a44d, branch feat/market-trade + master):**
-1. Banner is now INSERTED BEFORE the mount point:
-   `.replace('<div id="root">', SERVER_BANNER_HTML + '<div id="root">')`.
-2. `express.static(DIST)` added before the SPA catch-all so `assets/*.js`
-   return real JS with `application/javascript` MIME.
-
-**Verification after fix (raw Chrome, CDP `Runtime.evaluate`):**
-```
-URL: /market/BTCIDR → root.innerHTML.length = 32955 chars,
-   header.nav present, market data <td> present,
-   body background rgb(11,15,43) (ChinQue ocean-night dark token)
-URL: /trade      → root 81161 chars, 1600 universe rows
-URL: / , /market , /akun/masuk → all mount (root 1.1–1.3KB+)
-```
-
----
-
-*Reference: this file is a DevTools-style troubleshooting log for the
-:22221 exchange. Each entry: context → diagnostics table → root cause →
-fix → evidence. Update it (append, don't delete) when new render issues appear.*
+for the design of trade/(name-coin) i want you to use agent-reach or anysearch-mcp. go tho this site https://6b3bbhptcfblg.ok.kimi.link/, take all the css and js in there. make sure you make the same design in this site
