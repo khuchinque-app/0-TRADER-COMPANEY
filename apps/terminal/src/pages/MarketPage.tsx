@@ -1,9 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Market } from '../data/marketsFull';
 
-// IDR conversion rate (approximate)
-const IDR_RATE = 15850;
-
 export default function MarketPage() {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [search, setSearch] = useState('');
