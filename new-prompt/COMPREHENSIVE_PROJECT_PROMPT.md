@@ -1,565 +1,862 @@
 --- COMPREHENSIVE_PROJECT_PROMPT.md (原始)
+# COMPREHENSIVE PROJECT PROMPT: 0-TRADER-COMPANEY
+# Indonesian Paper-Trading Crypto Exchange Platform
+
+## PROJECT IDENTITY
+- **Name:** 0-TRADER-COMPANEY (Trading-Crypto-Company)
+- **Type:** Paper-trading crypto venue (simulation, no real money)
+- **Visual Reference:** Bitget spot-trading terminal
+- **Language:** Indonesian flavor (Bahasa Indonesia UI)
+- **GitHub:** https://github.com/khuchinque-app/0-TRADER-COMPANEY
+- **VPS:** 187.127.178.20 (user: khuchinque)
+- **Team:** 2 developers (founder + co-developer)
+- **Status:** Phase 1 COMPLETE - Production Ready (Paper Trading)
+
+---
+
+## CURRENT ARCHITECTURE (as of Oct 4, 2026)
+
+### Running Services (PM2 managed)
+| Service | Port | Status | Description |
+|---------|------|--------|-------------|
+| Backend API | 11110 | ✅ Running | Express + Auth + Admin + FX Rate |
+| Terminal Frontend | 22220 | ✅ Running | Next.js dashboard (customer-facing) |
+| Trading Engine | 3001 | ✅ Running | WebSocket + matching engine |
+| Static Files | 2217 | ✅ Running | ChinQue-Cripto design system |
+
+### Monorepo Structure
+```
+0-TRADER-COMPANEY/
+├── apps/
+│   ├── backend/              # Express API (port 11110)
+│   │   └── src/routes/       # auth.ts, admin.ts, fx-rate.ts
+│   ├── engine/               # Trading engine (port 3001)
+│   │   ├── src/server/       # auth.ts + 11 route files
+│   │   │   ├── recurring.ts
+│   │   │   ├── addresses.ts
+│   │   │   ├── history.ts
+│   │   │   ├── referral.ts
+│   │   │   ├── security.ts
+│   │   │   ├── two-fa.ts
+│   │   │   ├── api-keys.ts
+│   │   │   ├── education.ts
+│   │   │   ├── support.ts
+│   │   │   ├── mobile-app.ts
+│   │   │   └── payment.ts
+│   │   └── data/ledger.db    # SQLite (21 tables, WAL mode)
+│   └── terminal/             # Next.js frontend (port 22220)
+│       ├── app/              # Pages (login, signup, dashboard, admin)
+│       ├── components/       # account, book, chart, orderform, shell, tabs, topbar
+│       └── lib/              # api-client.ts, ws-client.ts, format.ts
+├── packages/shared/          # Shared types (domain.ts, api.ts, config.ts)
+├── docs/                     # ADR, design system, runbook, research
+├── PLANNING/                 # 20+ planning documents
+├── scripts/                  # deploy.sh, smoke.sh, smoke-test.py
+├── ops/                      # OPS-LOG.md
+├── ecosystem.config.js       # PM2 configuration
+├── docker-compose.yml        # Docker setup
+└── package.json              # npm workspaces root
+```
+
+---
+
+## DATABASE SCHEMA (SQLite: apps/engine/data/ledger.db)
+```sql
+-- Core tables (21 total)
+users (id, username, email, password_hash, otp_secret, is_admin,
+       two_fa_enabled, created_at)
+
+wallets (id, user_id, asset, balance, frozen_balance)
+
+orders (id, user_id, pair, side, type, price, quantity, status, created_at)
+
+journal (id, transaction_id, account_id, asset, debit, credit, created_at)
+  -- DOUBLE-ENTRY LEDGER: every transaction has matching debit/credit
+
+audit_log (id, user_id, action, entity, entity_id, ip_address, created_at)
+
+-- Enterprise tables (added in Phase 1 upgrade)
+recurring_plans    -- DCA (Dollar Cost Averaging) plans
+deposit_addresses  -- Crypto deposit address management
+withdrawal_whitelist -- Approved withdrawal addresses
+referrals          -- Referral system
+support_tickets    -- Customer support
+api_keys           -- Trading API key management
+payment_invoices   -- Duitku payment gateway
+education_content  -- Learning modules
+
+-- Stats: 20 users, 409 balances, 12 orders
+-- Mode: WAL (Write-Ahead Logging)
+-- Integrity: All FK constraints satisfied
+```
+
+---
+
+## API ENDPOINTS
+
+### Backend (Port 11110)
+```
+POST /api/auth/login          → JWT token
+POST /api/auth/register       → Create user
+POST /api/auth/signup         → 201 Created
+GET  /api/auth/me             → User data
+POST /api/auth/otp/verify     → OTP verification
+POST /api/auth/logout         → Clear session
+GET  /api/admin/stats         → {users:21, orders:14, simulasi:true}
+GET  /api/admin/users         → User list
+POST /api/admin/users         → Create user
+PUT  /api/admin/users/:id     → Update user
+DELETE /api/admin/users/:id   → Delete user
+POST /api/admin/users/:id/adjust → Balance adjustment
+GET  /api/admin/audit         → Audit log
+GET  /health                  → Health check
+GET  /api/status              → System overview
+GET  /api/fx-rate             → Indodax USDT/IDR rate
+```
+
+### Engine (Port 3001)
+```
+WS   /ws                      → WebSocket (live prices, orders)
+GET  /api/tickers             → Market tickers
+GET  /api/market/:pair        → Market details
+POST /api/orders              → Place order
+GET  /api/orders              → Get orders
+DELETE /api/orders/:id        → Cancel order
+GET  /api/wallet/:userId      → Wallet balance
+GET  /api/portfolio           → Positions + PnL
+POST /api/wallet/deposit      → Create deposit
+GET  /api/wallet/faucet       → Free 1000 USDT
+GET  /api/recurring/*         → DCA plans
+GET  /api/addresses/*         → Deposit addresses
+GET  /api/history/*           → Transaction history
+GET  /api/referral/*          → Referral system
+GET  /api/security/*          → Security settings
+GET  /api/2fa/*               → 2FA management
+GET  /api/api-keys/*          → API key management
+GET  /api/education/*         → Learning content
+GET  /api/support/*           → Help center
+POST /api/payment/*           → Duitku payment (sandbox)
+```
+
+### Terminal (Port 22220) - Next.js Pages
+```
+GET  /                        → Landing page (Indonesian hero)
+GET  /login                   → Login page
+GET  /signup                  → Registration page
+GET  /dashboard               → Trading dashboard (307 → auth if not logged in)
+GET  /dashboard/trade         → Trade section
+GET  /dashboard/wallet        → Wallet section
+GET  /dashboard/ai            → AI Vault investment
+GET  /dashboard/recurring     → DCA plans
+GET  /dashboard/staking       → Staking positions
+GET  /dashboard/history       → Transaction history
+GET  /dashboard/referral      → Referral program
+GET  /dashboard/security      → Security settings
+GET  /dashboard/authenticator → 2FA setup
+GET  /dashboard/education     → Learning resources
+GET  /dashboard/support       → Help center
+GET  /dashboard/mobile-app    → Mobile download
+GET  /dashboard/addresses     → Address management
+GET  /dashboard/trade-api     → API key management
+GET  /admin/login             → Admin login
+GET  /admin                   → Admin dashboard
+GET  /admin/users             → User management
+```
+
+---
+
+## INDODAX REFERENCE DATA
+- **Total sitemap URLs:** 1,438 (7 homepage + 477×3 mirror pages)
+- **Unique trading pairs:** 477 (465 IDR + 12 USDT)
+- **Purpose:** Reference prices for paper trading simulation
+- **IDR display toggle:** Uses Indodax USDT/IDR ticker
+- **Internal quote:** USDT (IDR is display-only)
+- **Shortlist assets:** BTC, ETH, SOL, BNB, XRP, LINK, AAVE (all have IDR pairs)
+- **Markets config:** BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT
+- **Price source:** sim (simulated)
+- **FX Rate:** Indodax /api/ticker/usdtidr
+
+---
+
+## CONFIGURATION (.env)
+```bash
+PORT_BACKEND=11110
+PORT_TERMINAL=22220
+DB_PATH=/home/khuchinque/0-TRADER-COMPANEY/apps/engine/data/ledger.db
+JWT_SECRET=your-secret-key-here
+JWT_TTL=43200000
+CORS_ORIGINS=http://localhost:22220
+API_INTERNAL_URL=http://localhost:11110
+ENGINE_REWRITE_URL=http://localhost:11110
+
+# Auth
+REQUIRE_PHONE_VERIFY=false
+AUTO_ACTIVATE=true
+ALLOW_ADMIN_ON_CUSTOMER_LOGIN=true
+
+# Seed
+SEED_ADMIN_EMAIL=chinque@dev.local
+SEED_ADMIN_PASSWORD=TestTrader2026!
+SEED_CUSTOMER_EMAIL=customer@dev.local
+SEED_CUSTOMER_PASSWORD=Customer2026!
+
+# Trading
+STARTING_BALANCE_USDT=10000
+FAUCET_AMOUNT=1000
+FAUCET_COOLDOWN_HOURS=24
+MARKETS=BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT
+PRICE_SOURCE=sim
+FEE_BPS=10
+SPREAD_BPS=5
+
+# Indodax FX
+INDODAX_BASE_URL=https://indodax.com
+FX_SOURCE=indodax
+FX_TTL_MS=60000
+FX_STALE_MAX_MS=300000
+
+# Payment (Duitku - Sandbox)
+DUITKU_MERCHANT_CODE=D0000
+DUITKU_MERCHANT_KEY=your_key_here
+DUITKU_SANDBOX=1
+```
+
+---
+
+## ADMIN CREDENTIALS
+- URL: http://187.127.178.20:22220/admin/login
+- Username: chinque
+- Password: admin1
+- Dev Login: chinque@dev.local / TestTrader2026!
+
+---
+
+## COMPLETED MILESTONES
+- [x] M0: System diagnostic & setup
+- [x] M1: Auth routes (login/signup/me)
+- [x] M2: Wallet operations (balance/deposit/history/faucet)
+- [x] M3: Order management (create/list/cancel/portfolio)
+- [x] M4: Admin API (stats/users/audit/balance adjustment)
+- [x] M5: Final integration, docs, hardening guide
+- [x] Enterprise Upgrade Phase 1: 11 new backend routes + 6 new DB tables
+- [x] Indodax FX rate endpoint
+- [x] Design system integration (port 2217 tokens)
+- [x] 183/183 vitest tests passing
+- [x] 5/5 smoke tests passing
+
+---
+
+## WHAT STILL NEEDS TO BE BUILT (from PLAN-TO-DO.md)
+
+### Frontend Pages (NOT YET IMPLEMENTED in UI)
+- [ ] Recurring invest page (/dashboard/recurring) - API exists
+- [ ] Authenticator app page (/dashboard/authenticator) - API exists
+- [ ] Help support page (/dashboard/support) - API exists
+- [ ] Learn blog page (/dashboard/education) - API exists
+- [ ] Mobile app page (/dashboard/mobile-app) - API exists
+- [ ] Security page (full management) - API exists
+- [ ] Address management page - API exists
+- [ ] Trade API page (key management) - API exists
+- [ ] History page (full export) - API exists
+- [ ] Referral page (earnings display) - API exists
+
+### Security Hardening (Phase 2)
+- [ ] Auth middleware guards ALL /api routes (except public ones)
+- [ ] 2FA step-up on sensitive actions
+- [ ] Audit log with ray ID across all events
+- [ ] Google OAuth signup flow
+- [ ] Replace SHA-256 with bcrypt for passwords
+- [ ] Rate limiting on payment endpoints
+- [ ] Idempotency keys on all POST/PATCH money routes
+
+### External Integrations (Phase 3)
+- [ ] WhatsApp Business API (real OTP delivery, E.164 normalized)
+- [ ] Live market data feeds (replace simulated prices)
+- [ ] AI module integration (OpenRouter / HuggingFace / Novita)
+- [ ] Duitku production mode (real Indonesian payments)
+- [ ] Real crypto deposit address generation
+
+### Production Deployment (Phase 4)
+- [ ] GitHub Actions CI/CD pipeline
+- [ ] Production cloud deployment (Alibaba Cloud / Railway / Fly.io)
+- [ ] Automated database backups
+- [ ] Mobile app packaging (Median studio)
+- [ ] Public demo launch (~3 weeks target)
+- [ ] Vulnerability scanning (ProjectDiscovery, WPScan)
+
+---
+
+## TECH STACK
+- **Frontend:** Next.js 14 + TypeScript + Tailwind CSS
+- **Backend:** Express.js + TypeScript
+- **Engine:** Node.js + WebSocket + SQLite
+- **Charts:** lightweight-charts (TradingView)
+- **Auth:** JWT + OTP (WhatsApp simulated)
+- **Payment:** Duitku (Indonesian gateway, sandbox)
+- **Process Manager:** PM2
+- **Database:** SQLite (WAL mode, double-entry ledger)
+- **Design System:** Custom tokens from port 2217 (Inter + JetBrains Mono)
+- **Testing:** Vitest (183 tests)
+- **Deployment:** Docker + PM2 on VPS
+
+---
+
+## KEY DECISIONS (from CONTEXT.md)
+1. Paper-trading ONLY - no real money, custody, or execution
+2. Internal quote = USDT; IDR is a labeled display toggle
+3. MVP order types = market + limit only (stop/OCO deferred)
+4. Guest demo accounts with stable browser ID → demo funds
+5. Visual reference = Bitget spot terminal (3-pane layout)
+6. Color convention = configurable (green-up Western vs Indonesian red-up)
+7. Reference data from public Binance/Bybit feeds (labeled as reference)
+8. Flat maker/taker fee model
+9. Synthetic order book seeded from reference mid-price
+
+---
+
+## DEPLOYMENT COMMANDS
+```bash
+# SSH into VPS
+ssh khuchinque@187.127.178.20
+
+# Navigate to project
+cd /home/khuchinque/0-TRADER-COMPANEY
+
+# Start all services
+pm2 start ecosystem.config.js
+
+# Or individually
+pm2 start apps/backend/dist/index.js --name backend
+pm2 start "next start -p 22220" --name terminal --cwd apps/terminal
+
+# Smoke test
+bash scripts/smoke.sh
+
+# View logs
+pm2 logs
+
+# Restart all
+pm2 restart all
+
+# Deploy from git
+git pull origin master
+npm run build -w packages/shared
+npm run build --workspaces
+pm2 restart all
+```
+
+---
+
+## IMPORTANT NOTES FOR DEVELOPMENT
+1. This is a MONOREPO with npm workspaces (packages/* and apps/*)
+2. Always build shared package first: `npm run build -w packages/shared`
+3. The engine has 183 vitest tests - keep them green
+4. Double-entry ledger must always balance (journal table)
+5. All money-touching responses must include "simulasi: true" badge
+6. IDR is DISPLAY ONLY - internal calculations always in USDT
+7. The design system uses CSS custom properties (--stx-*, --color-*)
+8. WebSocket connections handle live price updates
+9. Guest mode is behind a flag (REQUIRE_PHONE_VERIFY=false for dev)
+10. The project targets Indonesian market (Bahasa Indonesia UI)
+
+---
+
+## NEXT IMMEDIATE PRIORITIES
+1. Build missing frontend pages (recurring, authenticator, support, etc.)
+2. Implement auth middleware on all protected routes
+3. Replace SHA-256 with bcrypt for passwords
+4. Connect real market data feeds
+5. Set up CI/CD pipeline
+6. Prepare for public demo (~3 weeks target)
+
+---
+
+*Generated from GitHub repo: https://github.com/khuchinque-app/0-TRADER-COMPANEY*
+*Last updated: Oct 4, 2026*
+*VPS: 187.127.178.20 | User: khuchinque*
 
 
 +++ COMPREHENSIVE_PROJECT_PROMPT.md (修改后)
-# COMPREHENSIVE PROJECT PROMPT: Indodax Clone (0-TRADER-COMPANEY)
+# MASTER PROMPT — 0-TRADER-COMPANEY: Full Project Context + Route-Mirror Exchange Build
+# Indonesian Paper-Trading Crypto Exchange | VPS: 187.127.178.20 | Port 22221 (new app)
 
-## PROJECT OVERVIEW
-
-Build a complete cryptocurrency exchange platform that is a full clone of **indodax.com** (Indonesian Digital Asset Exchange). The project is hosted on a VPS named **0-TRADER-COMPANEY** and serves at:
-
-**Base URL:** `http://187.127.178.20:22221`
-
-The application must replicate ALL pages, routes, and functionality of indodax.com exactly, with the following URL mapping:
-
-| Indodax URL | Your Server URL |
-|---|---|
-| `https://indodax.com` | `http://187.127.178.20:22221` |
-| `https://indodax.com/market` | `http://187.127.178.20:22221/market` |
-| `https://indodax.com/market/BTCIDR` | `http://187.127.178.20:22221/market/BTCIDR` |
-| `https://indodax.com/market/depth_chart/BTCIDR` | `http://187.127.178.20:22221/market/depth_chart/BTCIDR` |
-| `https://indodax.com/chart/BTCIDR` | `http://187.127.178.20:22221/chart/BTCIDR` |
-| `https://indodax.com/privacy-policy` | `http://187.127.178.20:22221/privacy-policy` |
-| `https://indodax.com/trade_api` | `http://187.127.178.20:22221/trade_api` |
-| `https://indodax.com/affiliate` | `http://187.127.178.20:22221/affiliate` |
+**Paste this into BOTH Hermes agents (VPS + local). Lane split is in section 15.**
+**Project root:** `/home/khuchinque/0-TRADER-COMPANEY/`
 
 ---
 
-## SERVER & DEPLOYMENT CONFIGURATION
+## PART A: PROJECT CONTEXT (What Already Exists)
 
-- **VPS Name:** 0-TRADER-COMPANEY
-- **Server IP:** 187.127.178.20
-- **Port:** 22221
-- **Protocol:** HTTP
-- **Full Address:** `http://187.127.178.20:22221`
+### A1. Project Identity
+- **Name:** 0-TRADER-COMPANEY (Trading-Crypto-Company)
+- **Type:** Paper-trading crypto venue (simulation, no real money)
+- **Visual Reference:** Bitget spot-trading terminal (cues, not pixel-clone)
+- **Language:** Indonesian flavor (Bahasa Indonesia UI)
+- **GitHub:** https://github.com/khuchinque-app/0-TRADER-COMPANEY
+- **VPS:** 187.127.178.20 (user: khuchinque)
+- **Team:** 2 developers (founder + co-developer)
+- **Status:** Phase 1 COMPLETE — Production Ready (Paper Trading)
 
----
+### A2. Running Services (PM2 managed)
+| Service | Port | Status | Description |
+|---------|------|--------|-------------|
+| Backend API | 11110 | ✅ Running | Express + Auth + Admin + FX Rate |
+| Terminal Frontend | 22220 | ✅ Running | Next.js dashboard (customer-facing) |
+| Trading Engine | 3001 | ✅ Running | WebSocket + matching engine |
+| Static Files | 2217 | ✅ Running | ChinQue-Cripto design system |
+| **NEW: Exchange** | **22221** | **🔨 TO BUILD** | **Indodax route-mirror site** |
 
-## API INTEGRATION: MEXC API SDK
-
-The project uses the **MEXC Official Market and Trade API SDK** for all market data and trading operations.
-
-**SDK Repository:** https://github.com/mexcdevelop/mexc-api-sdk
-
-### SDK Installation (JavaScript/Node.js)
-```javascript
-import * as Mexc from 'mexc-sdk';
-const apiKey = 'YOUR_API_KEY';
-const apiSecret = 'YOUR_API_SECRET';
-const client = new Mexc.Spot(apiKey, apiSecret);
+### A3. Monorepo Structure
+```
+0-TRADER-COMPANEY/
+├── apps/
+│   ├── backend/              # Express API (port 11110)
+│   │   └── src/routes/       # auth.ts, admin.ts, fx-rate.ts
+│   ├── engine/               # Trading engine (port 3001)
+│   │   ├── src/server/       # auth.ts + 11 route files
+│   │   │   ├── recurring.ts, addresses.ts, history.ts
+│   │   │   ├── referral.ts, security.ts, two-fa.ts
+│   │   │   ├── api-keys.ts, education.ts, support.ts
+│   │   │   ├── mobile-app.ts, payment.ts
+│   │   └── data/ledger.db    # SQLite (21 tables, WAL mode, double-entry)
+│   ├── terminal/             # Next.js frontend (port 22220)
+│   │   ├── app/              # Pages (login, signup, dashboard, admin)
+│   │   ├── components/       # account, book, chart, orderform, shell, tabs, topbar
+│   │   └── lib/              # api-client.ts, ws-client.ts, format.ts
+│   └── exchange/             # 🆕 NEW APP (port 22221) — TO BUILD
+│       └── (Indodax route-mirror with MEXC data)
+├── packages/
+│   ├── shared/               # Shared types (domain.ts, api.ts, config.ts)
+│   ├── mexc-client/          # 🆕 NEW — MEXC public market data wrapper
+│   └── indodax-routes/       # 🆕 NEW — Generated route manifest
+├── docs/                     # ADR, design system, runbook, research
+├── PLANNING/                 # 20+ planning documents
+├── scripts/                  # deploy.sh, smoke.sh, gen-routes.mjs (new)
+├── ops/                      # OPS-LOG.md
+├── ecosystem.config.js       # PM2 configuration
+├── docker-compose.yml        # Docker setup
+└── package.json              # npm workspaces root
 ```
 
-### Available Market API Endpoints:
+### A4. Database Schema (SQLite: apps/engine/data/ledger.db)
+```sql
+-- Core tables (21 total)
+users (id, username, email, password_hash, otp_secret, is_admin, two_fa_enabled, created_at)
+wallets (id, user_id, asset, balance, frozen_balance)
+orders (id, user_id, pair, side, type, price, quantity, status, created_at)
+journal (id, transaction_id, account_id, asset, debit, credit, created_at)  -- DOUBLE-ENTRY
+audit_log (id, user_id, action, entity, entity_id, ip_address, created_at)
 
-| Method | Function | Description |
-|---|---|---|
-| Ping | `client.ping()` | Test connectivity |
-| Server Time | `client.time()` | Check server time |
-| Exchange Info | `client.exchangeInfo(options)` | Get exchange information |
-| Recent Trades | `client.trades(symbol, options)` | Recent trades list |
-| Order Book | `client.depth(symbol, options)` | Order book depth |
-| Historical Trades | `client.historicalTrades(symbol, options)` | Old trade lookup |
-| Aggregate Trades | `client.aggTrades(symbol, options)` | Aggregate trades list |
-| Kline/Candlestick | `client.klines(symbol, interval, options)` | Candlestick data |
-| Average Price | `client.avgPrice(symbol)` | Current average price |
-| 24hr Ticker | `client.ticker24hr(symbol)` | 24hr price change stats |
-| Price Ticker | `client.tickerPrice(symbol)` | Symbol price |
-| Book Ticker | `client.bookTicker(symbol)` | Order book ticker |
+-- Enterprise tables
+recurring_plans, deposit_addresses, withdrawal_whitelist,
+referrals, support_tickets, api_keys, payment_invoices, education_content
 
-### Available Trade API Endpoints:
-
-| Method | Function | Description |
-|---|---|---|
-| Test Order | `client.newOrderTest(symbol, side, orderType, options)` | Test new order |
-| New Order | `client.newOrder(symbol, side, orderType, options)` | Place new order |
-| Cancel Order | `client.cancelOrder(symbol, options)` | Cancel an order |
-| Cancel All | `client.cancelOpenOrders(symbol)` | Cancel all open orders |
-| Query Order | `client.queryOrder(symbol, options)` | Query specific order |
-| Open Orders | `client.openOrders(symbol)` | Current open orders |
-| All Orders | `client.allOrders(symbol, options)` | All orders |
-| Account Info | `client.accountInfo()` | Account information |
-| Trade List | `client.accountTradeList(symbol, options)` | Account trade history |
-
-### Order Types:
-- LIMIT
-- MARKET
-- STOP_LOSS
-- STOP_LOSS_LIMIT
-- TAKE_PROFIT
-- TAKE_PROFIT_LIMIT
-- LIMIT_MAKER
-
-### Order Sides:
-- BUY
-- SELL
-
----
-
-## COMPLETE URL STRUCTURE (FROM SITEMAP)
-
-### 1. HOMEPAGE & STATIC PAGES
-```
-/                           → Homepage (main landing page)
-/market                     → Market overview (all trading pairs list)
-/privacy-policy             → Privacy Policy page
-/trade_api                  → Trade API documentation page
-/affiliate                  → Affiliate program page
+-- Stats: 20 users, 409 balances, 12 orders | WAL mode | All FK constraints satisfied
 ```
 
-### 2. MARKET PAGES (Trading Pair Detail Pages)
-Each trading pair has its own market page at `/market/{PAIR}`:
+### A5. Existing API Endpoints
 
-**IDR Pairs (Indonesian Rupiah):**
+**Backend (Port 11110):**
 ```
-/market/BTCIDR          /market/ETHIDR          /market/DOGEIDR
-/market/1INCHIDR        /market/AAVEIDR         /market/AAPLXIDR
-/market/ABIDR           /market/ACEIDR          /market/ACHIDR
-/market/ACNIDR          /market/ACSIDR          /market/ACTIDR
-/market/ADAIDR          /market/AEROIDR         /market/AEVOIDR
-/market/AGIIDR          /market/AIIDR           /market/AIHIDR
-/market/AIOZIDR         /market/AIXBTIDR        /market/ALEIDR
-/market/ALICEIDR        /market/ALGOIDR         /market/ALLOIDR
-/market/ALTIDR          /market/AMZNXIDR        /market/AMPIDR
-/market/ANIMEIDR        /market/ANKRIDR         /market/ANOAIDR
-/market/APEIDR          /market/APEXIDR         /market/API3IDR
-/market/APUIDR          /market/ARBIDR          /market/ARCIDR
-/market/ARKMIDR         /market/ASETQUIDR       /market/ASTERIDR
-/market/ATHIDR          /market/ATOMIDR         /market/AUCTIONIDR
-/market/AUDIOIDR        /market/AURAIDR         /market/AUSDIDR
-/market/AVAIDR          /market/AVNTIDR         /market/AVAXIDR
-/market/AXLIDR          /market/AXSIDR          /market/AZTECIDR
-/market/BANANAS31IDR    /market/BIDR            /market/B2IDR
-/market/BALIDR          /market/BANIDR          /market/BANANAIDR
-/market/BANDIDR         /market/BANKIDR         /market/BATIDR
-/market/BCHIDR          /market/BEAMIDR         /market/BEATIDR
-/market/BGBIDR          /market/BICOIDR         /market/BIOIDR
-/market/BIRBIDR         /market/BLURIDR         /market/BMTIDR
-/market/BNBIDR          /market/BNKRIDR         /market/FORMIDR
-/market/BOMEIDR         /market/BONEIDR         /market/BONKIDR
-/market/BPIDR           /market/BRIDR           /market/BRETTIDR
-/market/BSVIDR          /market/CAKEIDR         /market/CASTIDR
-/market/CATIDR          /market/CATIIDR         /market/CELOIDR
-/market/CELRIDR         /market/CGPTIDR         /market/CHEEMSIDR
-/market/CHILLGUYIDR     /market/CHRIDR          /market/CHTIDR
-/market/CHZIDR          /market/CJLIDR          /market/CKBIDR
-/market/CNGIDR          /market/COINXIDR        /market/COLLATIDR
-/market/C98IDR          /market/COLIDR          /market/COMPIDR
-/market/CONXIDR         /market/COWIDR          /market/CRCLXIDR
-/market/CREAMIDR        /market/CROIDR          /market/CROAKIDR
-/market/CRVIDR          /market/CSTIDR          /market/CTCIDR
-/market/CTKIDR          /market/CTSIIDR         /market/CVCIDR
-/market/CVXIDR          /market/CYBERIDR        /market/DIDR
-/market/DEGENIDR        /market/DEPIDR          /market/DEXEIDR
-/market/DFGIDR          /market/DGBIDR          /market/DLCIDR
-/market/DODOIDR         /market/DOGEIDR         /market/DOGE2IDR
-/market/DOGSIDR         /market/DOTIDR          /market/DRXIDR
-/market/DUPEIDR         /market/DUSKIDR         /market/EDENIDR
-/market/EDENAIDR        /market/EGLDIDR         /market/EIGENIDR
-/market/ENAIDR          /market/ENJIDR          /market/ENSIDR
-/market/EPICIDR         /market/ETCIDR          /market/ESPIDR
-/market/ETHFIIDR        /market/FANCIDR         /market/FARTCOINIDR
-/market/FETIDR          /market/FFIDR           /market/FILIDR
-/market/FLOKIIDR        /market/FLRIDR          /market/FLUXIDR
-/market/FUELIDR         /market/FUNIDR          /market/GALAIDR
-/market/GAMEIDR         /market/GENIUSIDR       /market/GLIDRIDR
-/market/GOIDRIDR        /market/GIGAIDR         /market/GIGGLEIDR
-/market/GLMIDR          /market/GMTIDR          /market/GMXIDR
-/market/GNOIDR          /market/GOATIDR         /market/GOOGLXIDR
-/market/GPSIDR          /market/GRASSIDR        /market/GIDR
-/market/GRIFFAINIDR     /market/GRTIDR          /market/GTCIDR
-/market/GWEIIDR         /market/HIDR            /market/H2OIDR
-/market/HAEDALIDR       /market/HARTIDR         /market/HBARIDR
-/market/HFTIDR          /market/HIGHIDR         /market/HIVEIDR
-/market/HMSTRIDR        /market/HNTIDR          /market/HOMEIDR
-/market/HONEYIDR        /market/HOTIDR          /market/HUMAIDR
-/market/HYPEIDR         /market/HYPERIDR        /market/MYROIDR
-/market/MYXIDR          /market/IDIDR           /market/ICNTIDR
-/market/ICPIDR          /market/IDRXIDR         /market/IDRTIDR
-/market/ILVIDR          /market/IMXIDR          /market/INDRIDR
-/market/INJIDR          /market/IOIDR           /market/IOSTIDR
-/market/IOTAIDR         /market/IOTXIDR         /market/IQIDR
-/market/ISLMIDR         /market/JASMYIDR        /market/JELLYJELLYIDR
-/market/JOEIDR          /market/JUPIDR          /market/JSTIDR
-/market/JTOIDR          /market/KAIAIDR         /market/KAITOIDR
-/market/KDAGIDR         /market/KERNELIDR       /market/KMNOIDR
-/market/KNCIDR          /market/KOMAIDR         /market/KRDIDR
-/market/KSMIDR          /market/KTAIDR          /market/LDOIDR
-/market/LEOIDR          /market/LITIDR          /market/LINEAIDR
-/market/LINKIDR         /market/LISTAIDR        /market/L3IDR
-/market/LADYSIDR        /market/LSKIDR          /market/LPTIDR
-/market/LQTYIDR         /market/LRCIDR          /market/LTCIDR
-/market/LUNAIDR         /market/LUNCIDR         /market/LYFEIDR
-/market/MAGICIDR        /market/MANAIDR         /market/MANTAIDR
-/market/MARSCOINIDR     /market/MASKIDR         /market/MAVIDR
-/market/MAVIAIDR        /market/MCTIDR          /market/MEIDR
-/market/MELANIAIDR      /market/MEMEIDR         /market/METIDR
-/market/METAIDR         /market/METISIDR        /market/MEWIDR
-/market/MITOIDR         /market/MNTIDR          /market/MOCAIDR
-/market/MOGIDR          /market/MOLTIDR         /market/MONIDR
-/market/MOODENGIDR      /market/MOONPIGIDR      /market/MORPHOIDR
-/market/MOVEIDR         /market/MPROIDR         /market/MRSIDR
-/market/MSHDIDR         /market/MTCIDR          /market/MUBARAKIDR
-/market/NBTIDR          /market/NEARIDR         /market/NEIROIDR
-/market/NEOIDR          /market/NEOIDRIDR       /market/NEONIDR
-/market/NEWTIDR         /market/NEXOIDR         /market/NIGHTIDR
-/market/NMDIDR          /market/NMRIDR          /market/NOMIDR
-/market/NOVAIDR         /market/NPCIDR          /market/NRGIDR
-/market/NUSAIDR         /market/NVDAXIDR        /market/NXAIDR
-/market/OGNIDR          /market/OKBIDR          /market/OKUSDIDR
-/market/ONDOIDR         /market/ONLIDR          /market/ONTIDR
-/market/OPIDR           /market/ORBSIDR         /market/ORCAIDR
-/market/ORDERIDR        /market/PAXGIDR         /market/PAYAIIDR
-/market/PENDLEIDR       /market/PENGUIDR        /market/PEOPLEIDR
-/market/PEPEIDR         /market/PERPIDR         /market/PLPAIDR
-/market/PLUMEIDR        /market/GNSIDR          /market/PHAIDR
-/market/PIEVERSEIDR     /market/PIPPINIDR       /market/PIXELIDR
-/market/PMIDR           /market/PNUTIDR         /market/POLSIDR
-/market/POLIDR          /market/POLYIDR         /market/PONDIDR
-/market/PONKEIDR        /market/PORTALIDR       /market/POPCATIDR
-/market/POWRIDR         /market/PRIMEIDR        /market/PROMIDR
-/market/PROVEIDR        /market/PUFFERIDR       /market/PUMPIDR
-/market/PYTHIDR         /market/QNTIDR          /market/RADIDR
-/market/RAREIDR         /market/RAYIDR          /market/REDIDR
-/market/REPIDR          /market/REQIDR          /market/REZIDR
-/market/RFCIDR          /market/RIVERIDR        /market/RLCIDR
-/market/RENDERIDR       /market/RPLIDR          /market/RSRIDR
-/market/RVNIDR          /market/SANDIDR         /market/SAFEIDR
-/market/SAHARAIDR       /market/SAPIENIDR       /market/SENTIDR
-/market/SFIIDR          /market/SFPIDR          /market/SHIBIDR
-/market/SHELLIDR        /market/SHREDIDR        /market/SIGNIDR
-/market/SHOWIDR         /market/SKLIDR          /market/SKRIDR
-/market/SKYIDR          /market/SKYAIDR         /market/SKYAIIDR
-/market/SLPIDR          /market/SNIDR           /market/SNTIDR
-/market/SNXIDR          /market/SOLIDR          /market/SOLAYERIDR
-/market/SOLVIDR         /market/SOMIIDR         /market/SIDR
-/market/SOONIDR         /market/SPELLIDR        /market/SPKIDR
-/market/SPXIDR          /market/SQDIDR          /market/SSVIDR
-/market/STGIDR          /market/STIKIDR         /market/STOIDR
-/market/STRKIDR         /market/STREAMIDR       /market/STRMIDR
-/market/SUIIDR          /market/SUNIDR          /market/SUNDOGIDR
-/market/SUPERIDR        /market/SUSHIIDR        /market/SXTIDR
-/market/SYRUPIDR        /market/TAGIDR          /market/TAIKOIDR
-/market/TELIDR          /market/TENIDR          /market/TFUELIDR
-/market/THETAIDR        /market/TIDR            /market/TIAIDR
-/market/TLMIDR          /market/TMGIDR          /market/TNSRIDR
-/market/TOKENIDR        /market/TONIDR          /market/TOSHIIDR
-/market/TRACIDR         /market/TRBIDR          /market/TRIAIDR
-/market/TROLLSOLIDR     /market/TRUMPIDR        /market/TRXIDR
-/market/TSLAXIDR        /market/TURBOIDR        /market/TURTLEIDR
-/market/TUSDIDR         /market/UBIDR           /market/UAIIDR
-/market/UCJLIDR         /market/UMAIDR          /market/UNIIDR
-/market/UNMDIDR         /market/USDCIDR         /market/USATIDR
-/market/USDTIDR         /market/USDTOTCIDR      /market/USDTOTCRCIDR
-/market/USELESSIDR      /market/VANRYIDR        /market/VBGIDR
-/market/VCGIDR          /market/VELOIDR         /market/VELOFINIDR
-/market/VELVETIDR       /market/VETIDR          /market/VEXIDR
-/market/VINEIDR         /market/VIRTUALIDR      /market/VOXELIDR
-/market/VRAIDR          /market/VVVIDR          /market/W3FIDR
-/market/W3SIDR          /market/WAVESIDR        /market/WBTCIDR
-/market/WCTIDR          /market/WEALTHIDR       /market/WIFIDR
-/market/WLDIDR          /market/WLFIIDR         /market/WOOIDR
-/market/WIDR            /market/XAUTIDR         /market/XCNIDR
-/market/XDCIDR          /market/XPLIDR          /market/XLMIDR
-/market/WEMIXIDR        /market/XRIDR           /market/XRPIDR
-/market/XTZIDR          /market/XVSIDR          /market/YFIIDR
-/market/YFIIIDR         /market/YGGIDR          /market/ZAMAIDR
-/market/ZBCNIDR         /market/ZENIDR          /market/ZEREBROIDR
-/market/ZETAIDR         /market/ZILIDR          /market/ZKCIDR
-/market/ZKJIDR          /market/ZORAIDR         /market/ZROIDR
-/market/ZRXIDR          /market/KITEIDR
+POST /api/auth/login|register|signup|otp/verify|logout
+GET  /api/auth/me
+GET  /api/admin/stats|users|audit
+POST/PUT/DELETE /api/admin/users[/:id]
+POST /api/admin/users/:id/adjust
+GET  /health | /api/status | /api/fx-rate
 ```
 
-**USDT Pairs:**
+**Engine (Port 3001):**
 ```
-/market/BTCUSDT         /market/ETHUSDT         /market/BONKUSDT
-/market/BTTUSDT         /market/FLOKIUSDT       /market/IDRXUSDT
-/market/LUNCUSDT        /market/PEPEUSDT        /market/PUNDIXUSDT
-/market/SHIBUSDT        /market/XECUSDT         /market/VCGUSDT
-```
-
-### 3. DEPTH CHART PAGES
-Each trading pair has a depth chart at `/market/depth_chart/{PAIR}`:
-```
-/market/depth_chart/BTCIDR
-/market/depth_chart/ETHIDR
-/market/depth_chart/DOGEIDR
-... (same pairs as market pages above)
-/market/depth_chart/BTCUSDT
-/market/depth_chart/ETHUSDT
-... (same USDT pairs)
+WS   /ws (live prices, orders)
+GET  /api/tickers | /api/market/:pair | /api/orders | /api/wallet/:userId
+GET  /api/portfolio | /api/wallet/faucet
+POST /api/wallet/deposit | DELETE /api/orders/:id
+GET  /api/recurring/* | /api/addresses/* | /api/history/*
+GET  /api/referral/* | /api/security/* | /api/2fa/*
+GET  /api/api-keys/* | /api/education/* | /api/support/*
+POST /api/payment/* (Duitku sandbox)
 ```
 
-### 4. CHART PAGES
-Each trading pair has a chart page at `/chart/{PAIR}`:
+**Terminal (Port 22220) — Next.js Pages:**
 ```
-/chart/BTCIDR
-/chart/ETHIDR
-/chart/DOGEIDR
-... (same pairs as market pages above)
-/chart/BTCUSDT
-/chart/ETHUSDT
-... (same USDT pairs)
+/ | /login | /signup | /dashboard/* (trade, wallet, ai, recurring, staking,
+history, referral, security, authenticator, education, support, mobile-app,
+addresses, trade-api) | /admin/* (login, dashboard, users)
 ```
 
----
+### A6. Configuration (.env)
+```bash
+PORT_BACKEND=11110
+PORT_TERMINAL=22220
+PORT_EXCHANGE=22221  # 🆕 NEW
+DB_PATH=/home/khuchinque/0-TRADER-COMPANEY/apps/engine/data/ledger.db
+JWT_SECRET=your-secret-key-here
+JWT_TTL=43200000
+CORS_ORIGINS=http://localhost:22220,http://localhost:22221
+API_INTERNAL_URL=http://localhost:11110
+ENGINE_REWRITE_URL=http://localhost:11110
 
-## TOTAL PAGE COUNT SUMMARY
+# Auth
+REQUIRE_PHONE_VERIFY=false
+AUTO_ACTIVATE=true
+ALLOW_ADMIN_ON_CUSTOMER_LOGIN=true
 
-| Section | Count |
-|---|---|
-| Homepage + Static Pages | 6 |
-| Market Pages (IDR pairs) | ~380 |
-| Market Pages (USDT pairs) | ~13 |
-| Depth Chart Pages | ~393 |
-| Chart Pages | ~393 |
-| **TOTAL** | **~1,185 pages** |
+# Seed
+SEED_ADMIN_EMAIL=chinque@dev.local
+SEED_ADMIN_PASSWORD=TestTrader2026!
 
----
+# Trading
+STARTING_BALANCE_USDT=10000
+FAUCET_AMOUNT=1000
+FAUCET_COOLDOWN_HOURS=24
+MARKETS=BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT
+PRICE_SOURCE=sim
+FEE_BPS=10
+SPREAD_BPS=5
 
-## COMPLETE TRADING PAIRS LIST (ALL SYMBOLS)
+# Indodax FX
+INDODAX_BASE_URL=https://indodax.com
+FX_SOURCE=indodax
+FX_TTL_MS=60000
 
-```
-BTCIDR, 1INCHIDR, AAVEIDR, AAPLXIDR, ABIDR, ACEIDR, ACHIDR, ACNIDR, ACSIDR, ACTIDR,
-ADAIDR, AEROIDR, AEVOIDR, AGIIDR, AIIDR, AIHIDR, AIOZIDR, AIXBTIDR, ALEIDR, ALICEIDR,
-ALGOIDR, ALLOIDR, ALTIDR, AMZNXIDR, AMPIDR, ANIMEIDR, ANKRIDR, ANOAIDR, APEIDR, APEXIDR,
-API3IDR, APUIDR, ARBIDR, ARCIDR, ARKMIDR, ASETQUIDR, ASTERIDR, ATHIDR, ATOMIDR, AUCTIONIDR,
-AUDIOIDR, AURAIDR, AUSDIDR, AVAIDR, AVNTIDR, AVAXIDR, AXLIDR, AXSIDR, AZTECIDR, BANANAS31IDR,
-BIDR, B2IDR, BALIDR, BANIDR, BANANAIDR, BANDIDR, BANKIDR, BATIDR, BCHIDR, BEAMIDR,
-BEATIDR, BGBIDR, BICOIDR, BIOIDR, BIRBIDR, BLURIDR, BMTIDR, BNBIDR, BNKRIDR, FORMIDR,
-BOMEIDR, BONEIDR, BONKIDR, BPIDR, BRIDR, BRETTIDR, BSVIDR, CAKEIDR, CASTIDR, CATIDR,
-CATIIDR, CELOIDR, CELRIDR, CGPTIDR, CHEEMSIDR, CHILLGUYIDR, CHRIDR, CHTIDR, CHZIDR, CJLIDR,
-CKBIDR, CNGIDR, COINXIDR, COLLATIDR, C98IDR, COLIDR, COMPIDR, CONXIDR, COWIDR, CRCLXIDR,
-CREAMIDR, CROIDR, CROAKIDR, CRVIDR, CSTIDR, CTCIDR, CTKIDR, CTSIIDR, CVCIDR, CVXIDR,
-CYBERIDR, DIDR, DEGENIDR, DEPIDR, DEXEIDR, DFGIDR, DGBIDR, DLCIDR, DODOIDR, DOGEIDR,
-DOGE2IDR, DOGSIDR, DOTIDR, DRXIDR, DUPEIDR, DUSKIDR, EDENIDR, EDENAIDR, EGLDIDR, EIGENIDR,
-ENAIDR, ENJIDR, ENSIDR, EPICIDR, ETCIDR, ESPIDR, ETHIDR, ETHFIIDR, FANCIDR, FARTCOINIDR,
-FETIDR, FFIDR, FILIDR, FLOKIIDR, FLRIDR, FLUXIDR, FUELIDR, FUNIDR, GALAIDR, GAMEIDR,
-GENIUSIDR, GLIDRIDR, GOIDRIDR, GIGAIDR, GIGGLEIDR, GLMIDR, GMTIDR, GMXIDR, GNOIDR, GOATIDR,
-GOOGLXIDR, GPSIDR, GRASSIDR, GIDR, GRIFFAINIDR, GRTIDR, GTCIDR, GWEIIDR, HIDR, H2OIDR,
-HAEDALIDR, HARTIDR, HBARIDR, HFTIDR, HIGHIDR, HIVEIDR, HMSTRIDR, HNTIDR, HOMEIDR, HONEYIDR,
-HOTIDR, HUMAIDR, HYPEIDR, HYPERIDR, MYROIDR, MYXIDR, IDIDR, ICNTIDR, ICPIDR, IDRXIDR,
-IDRTIDR, ILVIDR, IMXIDR, INDRIDR, INJIDR, IOIDR, IOSTIDR, IOTAIDR, IOTXIDR, IQIDR,
-ISLMIDR, JASMYIDR, JELLYJELLYIDR, JOEIDR, JUPIDR, JSTIDR, JTOIDR, KAIAIDR, KAITOIDR, KDAGIDR,
-KERNELIDR, KMNOIDR, KNCIDR, KOMAIDR, KRDIDR, KSMIDR, KTAIDR, LDOIDR, LEOIDR, LITIDR,
-LINEAIDR, LINKIDR, LISTAIDR, L3IDR, LADYSIDR, LSKIDR, LPTIDR, LQTYIDR, LRCIDR, LTCIDR,
-LUNAIDR, LUNCIDR, LYFEIDR, MAGICIDR, MANAIDR, MANTAIDR, MARSCOINIDR, MASKIDR, MAVIDR, MAVIAIDR,
-MCTIDR, MEIDR, MELANIAIDR, MEMEIDR, METIDR, METAIDR, METISIDR, MEWIDR, MITOIDR, MNTIDR,
-MOCAIDR, MOGIDR, MOLTIDR, MONIDR, MOODENGIDR, MOONPIGIDR, MORPHOIDR, MOVEIDR, MPROIDR, MRSIDR,
-MSHDIDR, MTCIDR, MUBARAKIDR, NBTIDR, NEARIDR, NEIROIDR, NEOIDR, NEOIDRIDR, NEONIDR, NEWTIDR,
-NEXOIDR, NIGHTIDR, NMDIDR, NMRIDR, NOMIDR, NOVAIDR, NPCIDR, NRGIDR, NUSAIDR, NVDAXIDR,
-NXAIDR, OGNIDR, OKBIDR, OKUSDIDR, ONDOIDR, ONLIDR, ONTIDR, OPIDR, ORBSIDR, ORCAIDR,
-ORDERIDR, PAXGIDR, PAYAIIDR, PENDLEIDR, PENGUIDR, PEOPLEIDR, PEPEIDR, PERPIDR, PLPAIDR, PLUMEIDR,
-GNSIDR, PHAIDR, PIEVERSEIDR, PIPPINIDR, PIXELIDR, PMIDR, PNUTIDR, POLSIDR, POLIDR, POLYIDR,
-PONDIDR, PONKEIDR, PORTALIDR, POPCATIDR, POWRIDR, PRIMEIDR, PROMIDR, PROVEIDR, PUFFERIDR, PUMPIDR,
-PYTHIDR, QNTIDR, RADIDR, RAREIDR, RAYIDR, REDIDR, REPIDR, REQIDR, REZIDR, RFCIDR,
-RIVERIDR, RLCIDR, RENDERIDR, RPLIDR, RSRIDR, RVNIDR, SANDIDR, SAFEIDR, SAHARAIDR, SAPIENIDR,
-SENTIDR, SFIIDR, SFPIDR, SHIBIDR, SHELLIDR, SHREDIDR, SIGNIDR, SHOWIDR, SKLIDR, SKRIDR,
-SKYIDR, SKYAIDR, SKYAIIDR, SLPIDR, SNIDR, SNTIDR, SNXIDR, SOLIDR, SOLAYERIDR, SOLVIDR,
-SOMIIDR, SIDR, SOONIDR, SPELLIDR, SPKIDR, SPXIDR, SQDIDR, SSVIDR, STGIDR, STIKIDR,
-STOIDR, STRKIDR, STREAMIDR, STRMIDR, SUIIDR, SUNIDR, SUNDOGIDR, SUPERIDR, SUSHIIDR, SXTIDR,
-SYRUPIDR, TAGIDR, TAIKOIDR, TELIDR, TENIDR, TFUELIDR, THETAIDR, TIDR, TIAIDR, TLMIDR,
-TMGIDR, TNSRIDR, TOKENIDR, TONIDR, TOSHIIDR, TRACIDR, TRBIDR, TRIAIDR, TROLLSOLIDR, TRUMPIDR,
-TRXIDR, TSLAXIDR, TURBOIDR, TURTLEIDR, TUSDIDR, UBIDR, UAIIDR, UCJLIDR, UMAIDR, UNIIDR,
-UNMDIDR, USDCIDR, USATIDR, USDTIDR, USDTOTCIDR, USDTOTCRCIDR, USELESSIDR, VANRYIDR, VBGIDR, VCGIDR,
-VELOIDR, VELOFINIDR, VELVETIDR, VETIDR, VEXIDR, VINEIDR, VIRTUALIDR, VOXELIDR, VRAIDR, VVVIDR,
-W3FIDR, W3SIDR, WAVESIDR, WBTCIDR, WCTIDR, WEALTHIDR, WIFIDR, WLDIDR, WLFIIDR, WOOIDR,
-WIDR, XAUTIDR, XCNIDR, XDCIDR, XPLIDR, XLMIDR, WEMIXIDR, XRIDR, XRPIDR, XTZIDR,
-XVSIDR, YFIIDR, YFIIIDR, YGGIDR, ZAMAIDR, ZBCNIDR, ZENIDR, ZEREBROIDR, ZETAIDR, ZILIDR,
-ZKCIDR, ZKJIDR, ZORAIDR, ZROIDR, ZRXIDR, KITEIDR,
-BTCUSDT, BONKUSDT, BTTUSDT, ETHUSDT, FLOKIUSDT, IDRXUSDT, LUNCUSDT, PEPEUSDT, PUNDIXUSDT,
-SHIBUSDT, XECUSDT, VCGUSDT
+# 🆕 MEXC Data (PUBLIC ONLY — no keys)
+MEXC_BASE_URL=https://api.mexc.com/api/v3
+MEXC_TICKER_TTL_MS=2500
+MEXC_DEPTH_TTL_MS=1000
+MEXC_KLINES_TTL_MS=5000
+
+# Payment (Duitku Sandbox)
+DUITKU_SANDBOX=1
+
+# 🆕 Exchange App
+USDT_IDR_RATE=16250  # indicative default
+EXCHANGE_COOKIE_NAME=sx_exchange_session
 ```
 
----
+### A7. Admin Credentials
+- URL: http://187.127.178.20:22220/admin/login
+- Username: chinque / Password: admin1
+- Dev Login: chinque@dev.local / TestTrader2026!
 
-## PAGE FUNCTIONALITY REQUIREMENTS
+### A8. Completed Milestones (M0–M5)
+- [x] M0: System diagnostic & setup
+- [x] M1: Auth routes (login/signup/me)
+- [x] M2: Wallet operations (balance/deposit/history/faucet)
+- [x] M3: Order management (create/list/cancel/portfolio)
+- [x] M4: Admin API (stats/users/audit/balance adjustment)
+- [x] M5: Final integration, docs, hardening guide
+- [x] Enterprise Upgrade Phase 1: 11 new backend routes + 6 new DB tables
+- [x] Indodax FX rate endpoint
+- [x] Design system integration (port 2217 tokens)
+- [x] 183/183 vitest tests passing
+- [x] 5/5 smoke tests passing
 
-### Homepage (`/`)
-- Hero banner with exchange branding
-- Live market ticker showing top coins (BTC, ETH, etc.)
-- Featured trading pairs with 24h change
-- Quick trade widget
-- News/announcements section
-- Download app section
-- Footer with links
+### A9. Key Locked Decisions
+1. Paper-trading ONLY — no real money, custody, or execution
+2. Internal quote = USDT; IDR is a labeled display toggle
+3. MVP order types = market + limit only (stop/OCO deferred)
+4. Guest demo accounts with stable browser ID → demo funds
+5. Visual reference = Bitget spot terminal (3-pane layout)
+6. Color convention = configurable (green-up default, one theme token)
+7. Reference data from public Binance/Bybit feeds (labeled as reference)
+8. Flat maker/taker fee model (10 bps fee, 5 bps spread)
+9. Synthetic order book seeded from reference mid-price
+10. Indonesian market target (Bahasa Indonesia UI)
 
-### Market Overview (`/market`)
-- Searchable list of all trading pairs
-- Sortable table: Pair name, Last Price, 24h Change %, 24h High, 24h Low, 24h Volume
-- Filter by: IDR pairs, USDT pairs, Favorites
-- Real-time price updates via WebSocket or polling
-
-### Market Detail Page (`/market/{PAIR}`)
-- Live price display with 24h stats
-- Buy/Sell order form (Limit/Market orders)
-- Order book (bids/asks)
-- Recent trades list
-- Price chart (mini)
-- Pair information
-
-### Depth Chart Page (`/market/depth_chart/{PAIR}`)
-- Visual depth chart showing bid/ask walls
-- Cumulative volume visualization
-- Spread indicator
-- Order book data
-
-### Chart Page (`/chart/{PAIR}`)
-- Full candlestick chart (TradingView-style)
-- Time intervals: 1m, 5m, 15m, 1h, 4h, 1d, 1w, 1M
-- Technical indicators overlay
-- Volume bars
-- Drawing tools
-- Full-screen mode
-
-### Trade API Page (`/trade_api`)
-- API documentation
-- Authentication guide
-- Endpoint reference
-- Code examples
-
-### Affiliate Page (`/affiliate`)
-- Referral program info
-- Commission structure
-- Sign-up form
-- Stats dashboard
-
-### Privacy Policy (`/privacy-policy`)
-- Legal privacy policy text
-
----
-
-## DATA MAPPING: Indodax → MEXC API
-
-| Indodax Feature | MEXC API Method |
-|---|---|
-| Market list | `client.exchangeInfo()` |
-| Current prices | `client.ticker24hr(symbol)` |
-| Order book | `client.depth(symbol, {limit: 100})` |
-| Recent trades | `client.trades(symbol, {limit: 500})` |
-| Candlestick data | `client.klines(symbol, interval, options)` |
-| Average price | `client.avgPrice(symbol)` |
-| Place order | `client.newOrder(symbol, side, orderType, options)` |
-| Cancel order | `client.cancelOrder(symbol, options)` |
-| Open orders | `client.openOrders(symbol)` |
-| Account info | `client.accountInfo()` |
-
-### Symbol Mapping Note:
-- Indodax uses format: `BTCIDR` (e.g., BTC/IDR)
-- MEXC uses format: `BTCUSDT` or `BTCIDR`
-- Map IDR pairs to corresponding MEXC symbols
-- For pairs not on MEXC, use alternative data sources or mark as unavailable
-
----
-
-## TECH STACK RECOMMENDATION
-
-### Frontend:
-- **Framework:** React.js / Next.js
-- **Styling:** Tailwind CSS
-- **Charts:** TradingView Lightweight Charts / Recharts
-- **State Management:** Redux / Zustand
-- **WebSocket:** Socket.io-client (for real-time data)
-
-### Backend:
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **API SDK:** mexc-sdk (from https://github.com/mexcdevelop/mexc-api-sdk)
-- **WebSocket:** Socket.io
-- **Database:** PostgreSQL / MongoDB (for user data, orders)
-- **Cache:** Redis (for market data caching)
-
-### Deployment:
-- **Server:** VPS (0-TRADER-COMPANEY)
-- **IP:** 187.127.178.20
-- **Port:** 22221
+### A10. Tech Stack
+- **Frontend:** Next.js 14 + TypeScript + Tailwind CSS
+- **Backend:** Express.js + TypeScript
+- **Engine:** Node.js + WebSocket + SQLite
+- **Charts:** lightweight-charts (TradingView)
+- **Auth:** JWT + OTP (WhatsApp simulated)
+- **Payment:** Duitku (Indonesian gateway, sandbox)
 - **Process Manager:** PM2
-- **Reverse Proxy:** Nginx (optional)
+- **Database:** SQLite (WAL mode, double-entry ledger)
+- **Design System:** Custom tokens from port 2217 (Inter + JetBrains Mono)
+- **Testing:** Vitest (183 tests)
+- **Deployment:** Docker + PM2 on VPS
 
 ---
 
-## ROUTING CONFIGURATION EXAMPLE (Express.js)
+## PART B: NEW BUILD — Route-Mirror Exchange on :22221
 
-```javascript
-const express = require('express');
-const app = express();
-const PORT = 22221;
+### B1. Mission
 
-// Homepage
-app.get('/', (req, res) => { /* render homepage */ });
+Add a new app `apps/exchange` that serves `http://187.127.178.20:22221` as a public market site whose **URL paths mirror indodax.com 1:1**:
 
-// Market overview
-app.get('/market', (req, res) => { /* render market list */ });
+```
+187.127.178.20:22221/                 <->  indodax.com/
+187.127.178.20:22221/market           <->  indodax.com/market
+187.127.178.20:22221/market/BTCIDR    <->  indodax.com/market/BTCIDR
+187.127.178.20:22221/market/depth_chart/BTCIDR <-> indodax.com/market/depth_chart/BTCIDR
+187.127.178.20:22221/chart/BTCIDR     <->  indodax.com/chart/BTCIDR
+...and so on for every path in the sitemap
+```
 
-// Market detail for specific pair
-app.get('/market/:pair', (req, res) => { /* render market detail */ });
+- Market data (prices, order book, trades, candles) comes from the **MEXC public spot API** (README: github.com/mexcdevelop/mexc-api-sdk).
+- Auth, wallet, orders and the double-entry ledger stay in the **existing backend (port 11110)**. Do not build a second ledger.
+- It is a **simulation**: virtual funds only, finish the whole thing runnable first, dev credentials / open ports / http stay as-is until the hardening pass.
 
-// Depth chart for specific pair
-app.get('/market/depth_chart/:pair', (req, res) => { /* render depth chart */ });
+### B2. Hard Rules (READ BEFORE TOUCHING ANYTHING)
 
-// Chart page for specific pair
-app.get('/chart/:pair', (req, res) => { /* render chart */ });
+1. **MEXC = public market-data endpoints only.** Allowed: ping, time, exchangeInfo, depth, trades, historicalTrades, aggTrades, klines, avgPrice, ticker24hr, tickerPrice, bookTicker. **Forbidden:** newOrder, newOrderTest, cancelOrder, cancelOpenOrders, queryOrder, openOrders, allOrders, accountInfo, accountTradeList. No MEXC API key or secret anywhere (repo, `.env`, logs, PM2 env). Orders are matched by OUR engine against `ledger.db`.
 
-// Static pages
-app.get('/privacy-policy', (req, res) => { /* render privacy policy */ });
-app.get('/trade_api', (req, res) => { /* render trade API docs */ });
-app.get('/affiliate', (req, res) => { /* render affiliate page */ });
+2. **Mirror the paths, not the identity.** Do not copy Indodax's logo, name, brand colors as a brand, page copy, legal text, help articles, images or fonts-as-assets, and never hotlink their assets. Write original copy. Brand = "Simulasi Exchange".
 
-// API endpoints for frontend
-app.get('/api/ticker/:pair', async (req, res) => {
-    const data = await client.ticker24hr(req.params.pair);
-    res.json(data);
-});
+3. **Persistent banner on every page:** "SIMULASI — dana virtual, bukan Indodax, bukan bursa sungguhan" (EN toggle: "SIMULATION — virtual funds, not Indodax, not a real exchange"). Serve `robots.txt` with `Disallow: /` and `<meta name="robots" content="noindex,nofollow">` on every page. A public http IP that mirrors a real exchange's paths must never be mistakable for it.
 
-app.get('/api/depth/:pair', async (req, res) => {
-    const data = await client.depth(req.params.pair, { limit: 100 });
-    res.json(data);
-});
+4. **Flat layout only:** new app at `apps/exchange`, shared code in `packages/`. Never create nested project folders. Do not change the behavior of 11110 (backend) or 22220 (terminal).
 
-app.get('/api/klines/:pair/:interval', async (req, res) => {
-    const data = await client.klines(req.params.pair, req.params.interval);
-    res.json(data);
-});
+5. **The browser never calls MEXC.** Everything goes browser -> `apps/exchange` -> backend `/api/market/*` -> cache -> MEXC.
 
-app.get('/api/trades/:pair', async (req, res) => {
-    const data = await client.trades(req.params.pair, { limit: 500 });
-    res.json(data);
-});
+6. Keep logs short (section B15). Do not stop and ask; use the defaults in section B16 and note them.
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running at http://187.127.178.20:${PORT}`);
-});
+### B3. Source of Truth: The Indodax Sitemap (fetched 2026-10-09)
+
+`https://indodax.com/sitemap.xml` is a sitemap index with 4 children:
+
+| Child sitemap | Contents |
+|---|---|
+| `/sitemap/homepage.xml` | 7 URLs (see route map below) |
+| `/sitemap/market.xml` | `/market/{PAIR}` per pair |
+| `/sitemap/depth_chart.xml` | `/market/depth_chart/{PAIR}` per pair |
+| `/chart.xml` | `/chart/{PAIR}` per pair |
+
+Pair slug = `BASE` + `QUOTE`, uppercase, no separator (e.g. `BTCIDR`, `BTCUSDT`). Almost all are IDR-quoted. The USDT-quoted ones: `BTCUSDT, ETHUSDT, BONKUSDT, BTTUSDT, FLOKIUSDT, IDRXUSDT, LUNCUSDT, PEPEUSDT, PUNDIXUSDT, SHIBUSDT, XECUSDT, VCGUSDT`. Total ~477 pairs.
+
+Known diff: `SFIIDR` appears in `depth_chart.xml` and `chart.xml` but not in `market.xml`. The manifest is the **union**, with per-sitemap flags.
+
+**Do NOT hardcode the pair list.** Generate it:
+
+- Script `scripts/gen-routes.mjs` (repo root `scripts/`): fetch the 4 sitemaps, parse every `<loc>`, write `packages/indodax-routes/routes.json`:
+  ```json
+  { "generatedAt": "...", "static": ["/", "/market", ...],
+    "pairs": [{ "slug": "BTCIDR", "base": "BTC", "quote": "IDR",
+                "inMarket": true, "inDepth": true, "inChart": true }] }
+  ```
+- If the network fetch fails, fall back to `/home/khuchinque/0-TRADER-COMPANEY/indodax.sitemap.xml.txt` and mark `generatedAt` as stale.
+- Print only a summary (counts per sitemap, union count, diffs). Re-run weekly via cron.
+
+### B4. Route Map (local path = same path)
+
+| Indodax path | Local (:22221) | Notes |
+|---|---|---|
+| `/` | `/` | landing + live movers |
+| `/market` | `/market` | all-pairs table |
+| `/market/{PAIR}` | `/market/{PAIR}` | the trading page for a pair |
+| `/market/depth_chart/{PAIR}` | `/market/depth_chart/{PAIR}` | depth chart page |
+| `/chart/{PAIR}` | `/chart/{PAIR}` | full-screen candle chart |
+| `/trade_api` | `/trade_api` | original docs for OUR read-only API |
+| `/affiliate` | `/affiliate` | original placeholder page |
+| `/privacy-policy` | `/privacy-policy` | original simulation privacy notice |
+| help.indodax.com "new user" article | `/help/pengguna-baru` | original short guide |
+| help.indodax.com "terms" article | `/help/ketentuan` | original simulation terms |
+
+Anything not in the sitemap (login, register, wallet, orders) is NOT part of the mirror. Put it under neutral paths: `/akun/masuk`, `/akun/daftar`, `/akun/dompet`, `/akun/order`.
+
+Route behavior:
+- Pair in manifest + resolvable on MEXC -> `LIVE` (200).
+- Pair in manifest but no MEXC feed -> `NO_FEED` (**200**, page renders "no live feed in simulation" state, `data-state="no-feed"`, trading disabled).
+- Slug not in manifest -> real **404**.
+
+### B5. Pair Resolution (Indodax slug -> MEXC symbol)
+
+1. Split slug: if it ends with `USDT` -> quote `USDT`; else if it ends with `IDR` -> quote `IDR`. Strip the suffix **once, from the end** (edge cases: `IDRXIDR`, `IDRTIDR`, `NEOIDRIDR`, `GOIDRIDR`, `GLIDRIDR`, `INDRIDR`, `USDTIDR`, `IDRXUSDT`).
+2. MEXC symbol = `BASE + "USDT"`. Verify against cached `exchangeInfo` (refresh every ~10 min). Many Indodax listings (IDR-pegged coins, tokenized stocks like `AAPLX/TSLAX/NVDAX`, gold tokens, local tokens) may have no MEXC market. Resolve via `exchangeInfo`, never assume.
+3. **Quote handling: internal quote = USDT; IDR is a labeled display toggle.** For IDR slugs, displayed price = USDT price × `USDT_IDR_RATE`, labeled "indikatif". The rate comes from config (`USDT_IDR_RATE` env as default, optional refresh from public FX source).
+4. **Tradable set:** all manifest pairs are routable and viewable, but only the locked shortlist (BTC, ETH, SOL, BNB, XRP, LINK; AAVE fallback) is tradable until expanded. Others show chart/depth/tape read-only.
+
+### B6. MEXC Data Layer
+
+Package: `packages/mexc-client`. The SDK init is `new Mexc.Spot(apiKey, apiSecret)` but we only need unauthenticated market calls. Install per README **or** call REST directly (`https://api.mexc.com/api/v3/...`). Verify base URL against SDK source. Implement thin wrapper with one interface so either backend works, never pass a key.
+
+| UI need | SDK method | REST path |
+|---|---|---|
+| health | `ping()`, `time()` | `/ping`, `/time` |
+| pair universe | `exchangeInfo({symbols})` | `/exchangeInfo` |
+| market table, ticker header | `ticker24hr(symbol?)` | `/ticker/24hr` |
+| last price | `tickerPrice(symbol?)` | `/ticker/price` |
+| best bid/ask | `bookTicker(symbol?)` | `/ticker/bookTicker` |
+| order book | `depth(symbol, {limit})` | `/depth` |
+| trade tape | `trades(symbol, {limit<=1000})` | `/trades` |
+| history | `aggTrades`, `historicalTrades` | `/aggTrades`, `/historicalTrades` |
+| candles | `klines(symbol, interval, {limit<=1000})` | `/klines` |
+
+Backend module in `apps/backend` (port 11110), all GET:
+```
+/api/market/health
+/api/market/pairs               # manifest + state (LIVE | NO_FEED) + mexcSymbol
+/api/market/tickers             # bulk, all pairs, cached
+/api/market/ticker/:slug
+/api/market/depth/:slug?limit=
+/api/market/trades/:slug?limit=
+/api/market/klines/:slug?interval=&limit=
+```
+
+Caching and rate-limit hygiene:
+- Bulk `ticker24hr()` once per refresh, TTL ~2-3 s, shared by all viewers. Never one call per pair.
+- `depth` / `trades` only polled for symbols with active viewers, TTL ~1 s, single in-flight request per key.
+- `klines`: TTL by interval (short for 1m, longer for 1h/1d).
+- On 429/418 or errors: exponential backoff + circuit breaker, serve last-good data with `stale: true` and `staleSince` timestamp.
+
+### B7. Page Specs (functional blocks; all copy original)
+
+- **`/`** : hero (original), live top movers/gainers/volume from `/api/market/tickers`, featured pairs, CTA to `/market`.
+- **`/market`** : virtualized table of ALL manifest pairs (~477 rows). Search, quote filter (IDR/USDT), sort by volume/change/name, favorites (local), 24h change, optional sparkline. Poll every 3-5 s. NO_FEED rows greyed out.
+- **`/market/{PAIR}`** : header ticker (last, 24h change/high/low/volume), candle chart (lightweight-charts) with interval selector, order book (bids/asks with depth bars), trade tape, order form (market + limit, buy/sell, percentage slider, balances from wallet), tabs for open orders/order history/trade history, pair switcher. Honor LIVE/NO_FEED/404 states.
+- **`/market/depth_chart/{PAIR}`** : cumulative depth chart from `depth` (limit 500), mid-price marker, spread, auto refresh, link back to pair page.
+- **`/chart/{PAIR}`** : near-chromeless full-screen candle chart + interval selector, embeddable.
+- **`/trade_api`** : original documentation of OUR read-only `/api/market/*` endpoints; state that data is sourced from MEXC public market data and is simulated.
+- **`/affiliate`, `/privacy-policy`, `/help/pengguna-baru`, `/help/ketentuan`** : original short pages. Indonesian default, EN toggle.
+
+Design: use existing design system; structure (pair list left/right, chart center, book + tape, form) follows usual spot-exchange layout. `COLOR_CONVENTION` default green-up/red-down, implemented as ONE theme token.
+
+### B8. Backend Integration
+
+- Auth, wallet, orders, admin stay in backend 11110. `apps/exchange` talks to it server-side only (Next route handlers or rewrites), so no CORS and no secrets in the browser.
+- **Cookie collision warning:** cookies are shared across ports on the same host. Use distinct cookie name `sx_exchange_session` so 22220 and 22221 sessions never overwrite each other.
+- Fill model: market orders walk current MEXC depth snapshot for fill price; limit orders rest in our book and fill when MEXC best bid/ask crosses. All fills post to `ledger.db` through existing engine.
+- Login must work end-to-end with seeded dev user (fix seed if "Invalid email or password" persists).
+
+---
+
+## PART C: MILESTONES & ACCEPTANCE (M6–M10)
+
+### C1. Milestones
+
+| ID | Deliverable |
+|---|---|
+| M6 | `gen-routes.mjs` + `routes.json`; `apps/exchange` skeleton on 22221 with every static route returning 200 |
+| M7 | `packages/mexc-client` + backend `/api/market/*` + cache + health |
+| M8 | `/market` and `/market/{PAIR}` (chart, book, tape, ticker) incl. NO_FEED and 404 states |
+| M9 | `/market/depth_chart/{PAIR}`, `/chart/{PAIR}`, order form + wallet panel wired to backend |
+| M10 | smoke script, PM2 save, RUNBOOK + handoff.md updated, `PLANNING/LOG-exchange.md` complete |
+
+### C2. Acceptance Criteria (`scripts/smoke-exchange.sh`)
+
+```bash
+curl -sI http://187.127.178.20:22221/                          -> 200
+each static route in routes.json                               -> 200
+/market/BTCIDR  /market/depth_chart/BTCIDR  /chart/BTCIDR      -> 200
+/market/FAKEXYZ                                                -> 404
+a manifest pair with no MEXC market                            -> 200 + data-state="no-feed"
+/api/market/health                                             -> ok + mexc latency
+/api/market/depth/BTCIDR?limit=20                              -> bids[] + asks[] non-empty
+/api/market/tickers                                            -> >0 rows, no 5xx
+route parity: GET every route in routes.json                   -> 0 x 5xx
+grep -rEn "MEXC_API_(KEY|SECRET)|mexc.*secret" repo            -> no matches
+robots.txt                                                     -> Disallow: /
 ```
 
 ---
 
-## IMPORTANT NOTES
+## PART D: REMAINING TODO FROM ORIGINAL BUILD
 
-1. **All routes must mirror indodax.com exactly** - same URL structure, same page layouts
-2. **Real-time data** must come from MEXC API via the mexc-sdk
-3. **The server must listen on port 22221** and bind to 0.0.0.0
-4. **Indonesian language** - The UI should be in Indonesian (Bahasa Indonesia) matching indodax.com
-5. **IDR currency** - Most pairs are quoted in IDR (Indonesian Rupiah)
-6. **Responsive design** - Must work on mobile and desktop
-7. **WebSocket support** - For real-time price updates and order book changes
-8. **Authentication** - Login/registration system for trading (JWT-based)
-9. **Security** - HTTPS, rate limiting, input validation
-10. **SEO** - Meta tags, sitemap, structured data matching indodax.com
+### D1. Frontend Pages (API exists, UI not built in terminal)
+- [ ] Recurring invest page (/dashboard/recurring)
+- [ ] Authenticator app page (/dashboard/authenticator)
+- [ ] Help support page (/dashboard/support)
+- [ ] Learn blog page (/dashboard/education)
+- [ ] Mobile app page (/dashboard/mobile-app)
+- [ ] Security page (full management)
+- [ ] Address management page
+- [ ] Trade API page (key management)
+- [ ] History page (full export)
+- [ ] Referral page (earnings display)
+
+### D2. Security Hardening (Phase 2 — after M10)
+- [ ] Auth middleware guards ALL /api routes (except public ones)
+- [ ] 2FA step-up on sensitive actions
+- [ ] Audit log with ray ID across all events
+- [ ] Google OAuth signup flow
+- [ ] Replace SHA-256 with bcrypt for passwords
+- [ ] Rate limiting on payment endpoints
+
+### D3. External Integrations (Phase 3 — after M10)
+- [ ] WhatsApp Business API (real OTP delivery)
+- [ ] Live market data feeds (replace simulated)
+- [ ] AI module integration (OpenRouter/HuggingFace)
+- [ ] Duitku production mode (real payments)
+
+### D4. Production Deployment (Phase 4 — after M10)
+- [ ] GitHub Actions CI/CD pipeline
+- [ ] Production cloud deployment
+- [ ] Automated database backups
+- [ ] Mobile app packaging (Median studio)
+- [ ] Vulnerability scanning
 
 ---
 
-## VISUAL DESIGN REFERENCE
+## PART E: DEPLOYMENT & OPERATIONS
 
-The clone should match indodax.com's visual style:
-- Dark theme (dark blue/navy background)
-- Green for price increases, Red for price decreases
-- Clean, professional trading interface
-- Indodax logo and branding (replace with your own branding)
-- Indonesian language throughout
-- Mobile-responsive bottom navigation
-- Top navigation bar with: Market, Trade, Wallet, History, Settings
+### E1. Deployment Commands
+```bash
+# SSH into VPS
+ssh khuchinque@187.127.178.20
+
+# Navigate to project
+cd /home/khuchinque/0-TRADER-COMPANEY
+
+# Generate routes (VPS has network)
+node scripts/gen-routes.mjs
+
+# Build all workspaces
+npm run build -w packages/shared
+npm run build -w packages/mexc-client
+npm run build -w packages/indodax-routes
+npm run build --workspaces
+
+# Start exchange app
+pm2 start apps/exchange/.next/server.js --name exchange -p 22221
+pm2 save
+
+# Smoke test
+bash scripts/smoke-exchange.sh
+
+# View logs
+pm2 logs exchange
+
+# Full restart
+pm2 restart all
+```
+
+### E2. Important Development Notes
+1. This is a MONOREPO with npm workspaces (packages/* and apps/*)
+2. Always build shared package first: `npm run build -w packages/shared`
+3. The engine has 183 vitest tests — keep them green
+4. Double-entry ledger must always balance (journal table)
+5. All money-touching responses must include "simulasi: true" badge
+6. IDR is DISPLAY ONLY — internal calculations always in USDT
+7. The design system uses CSS custom properties (--stx-*, --color-*)
+8. WebSocket connections handle live price updates
+9. Guest mode is behind a flag (REQUIRE_PHONE_VERIFY=false for dev)
+10. The project targets Indonesian market (Bahasa Indonesia UI)
 
 ---
 
-*Generated from indodax.com sitemap.xml analysis*
-*API: MEXC SDK (https://github.com/mexcdevelop/mexc-api-sdk)*
-*Target: http://187.127.178.20:22221*
+## PART F: LANES, LOGS, TAKEOVER
+
+### F1. Agent Lanes
+- **VPS agent (@Herme_KhuChinQue_bot), ops/deploy only:** run `gen-routes.mjs` (the VPS has the network), PM2 `exchange` on 22221 (`pm2 save`), open-port check, run the smoke script, report results.
+- **Local agent (@Herme_ChinQue_bot), code only:** `apps/exchange`, `packages/mexc-client`, `packages/indodax-routes`, backend `/api/market/*`, docs.
+
+### F2. Logging Rules
+- Log to `PLANNING/LOG-exchange.md`: max 10 lines per milestone, format `Mx | DONE/BLOCKED | what changed | next`. No pasted tool output.
+- If one agent hits a rate limit, the other keeps working its own lane and picks up the queued items of the stalled lane from the log, then hands them back. Never idle; never stop before M10 acceptance passes.
+
+### F3. Defaults (do not block on these)
+1. New separate app `apps/exchange` (not folded into the 22220 terminal), because `/market` would collide with the terminal's own routes.
+2. Next.js + TypeScript, same stack as the terminal.
+3. IDR display via a configured `USDT_IDR_RATE`, labeled indicative; internal accounting stays USDT.
+4. Tradable = locked shortlist only; the rest is view-only.
+5. Green-up / red-down behind one theme token.
+6. All pages noindex; simulation banner non-dismissible.
+7. Unlisted-on-MEXC pairs render NO_FEED instead of 404 to keep the mirror 1:1 with the sitemap.
+
+---
+
+*Generated from: GitHub repo + indodax.com sitemap + MEXC API SDK docs*
+*VPS: 187.127.178.20 | User: khuchinque | Port 22221 (new exchange app)*
+*Last updated: Oct 9, 2026*
+

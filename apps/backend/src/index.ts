@@ -1067,7 +1067,21 @@ app.get("/health", (_req, res) => {
 
 // Alias for /api/health (used by verify scripts)
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", service: "trading-backend", port: PORT, timestamp: new Date().toISOString() });
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// MEXC API PROXY (bypasses CORS restrictions)
+app.get("/api/mexc/markets", async (_req, res) => {
+  try {
+    const response = await fetch("https://api.mexc.com/api/v3/ticker/24hr", {
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    res.json(data);
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message });
+  }
 });
 
 // CHAT ENDPOINT (for voice agent)

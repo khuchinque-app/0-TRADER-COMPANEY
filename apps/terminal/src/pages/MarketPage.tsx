@@ -13,12 +13,12 @@ export default function MarketPage() {
   const [showIDR, setShowIDR] = useState(true);
   const ITEMS_PER_PAGE = 50;
 
-  // Fetch from MEXC API (CORS-friendly!)
+  // Fetch from backend API (which proxies MEXC data)
   useEffect(() => {
     const fetchMarkets = async () => {
       setLoading(true);
       try {
-        const response = await fetch('https://api.mexc.com/api/v3/ticker/24hr');
+        const response = await fetch('/api/mexc/markets');
         const data = await response.json();
 
         // Filter only USDT pairs and convert to Market format
@@ -46,14 +46,13 @@ export default function MarketPage() {
             else if (layer1Coins.includes(base)) cat = 'layer1';
             else if (layer2Coins.includes(base)) cat = 'layer2';
 
-            // Use real IDR rate from backend instead of hardcoded
             return {
               symbol: `${base}/USDT`,
               base,
               quote: 'USDT',
               name: base,
               icon: base.charAt(0),
-              price: price * (showIDR ? 17944 : 1), // IDR_RATE from FX
+              price: price * (showIDR ? 17944 : 1),
               change24h: parseFloat(change.toFixed(2)),
               volume24h: volume * (showIDR ? 17944 : 1),
               high24h: high * (showIDR ? 17944 : 1),
@@ -61,7 +60,7 @@ export default function MarketPage() {
               category: cat,
             };
           })
-          .filter((m: Market) => m.volume24h > 1000) // Filter out dead markets
+          .filter((m: Market) => m.volume24h > 1000)
           .sort((a: Market, b: Market) => b.volume24h - a.volume24h);
 
         setMarkets(parsedMarkets);
@@ -77,7 +76,7 @@ export default function MarketPage() {
     fetchMarkets();
     const interval = setInterval(fetchMarkets, 30000);
     return () => clearInterval(interval);
-  }, [showIDR]); // Re-fetch when IDR toggle changes
+  }, [showIDR]);
 
   const filteredMarkets = useMemo(() => {
     let filtered = [...markets];
