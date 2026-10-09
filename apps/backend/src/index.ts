@@ -440,21 +440,24 @@ app.get("/api/admin/integrity", (req, res) => {
   }
 });
 
-// MARKETS - Live from Binance API
+// MARKETS - Live from Binance API (with USDT fallback for IDR pairs)
 app.get("/api/markets", async (_req, res) => {
   try {
     const IDR_SYMBOLS = ["BTCIDR", "ETHIDR", "SOLIDR", "BNBidr", "XRPIDR", "LINKIDR", "AAVEIDR"];
     const MARKETS: any[] = [];
     const fxData = await getUsdtIdrRate();
+    const usdrRate = fxData.rate;
 
     // Fetch all markets in parallel from Binance
     const fetchPromises = IDR_SYMBOLS.map(async (symbol) => {
       try {
-        const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`;
+        // Try uppercase first (Binance requires exact case)
+        const upperSymbol = symbol.toUpperCase();
+        const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${upperSymbol}`;
         const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
         if (!response.ok) return null;
         const data: any = await response.json();
-        return data;
+        return { symbol: upperSymbol, data };
       } catch (e) {
         return null;
       }
@@ -462,15 +465,15 @@ app.get("/api/markets", async (_req, res) => {
 
     const results = await Promise.all(fetchPromises);
 
-    results.forEach((data, i) => {
-      if (data && data.symbol) {
-        const symbol = data.symbol;
+    for (const result of results) {
+      if (result && result.data) {
+        const symbol = result.symbol;
         const base = symbol.replace("IDR", "");
-        const price = parseFloat(data.lastPrice || "0");
-        const change24h = parseFloat(data.priceChangePercent || "0");
-        const volume24h = parseFloat(data.quoteVolume || "0");
-        const high24h = parseFloat(data.highPrice || "0");
-        const low24h = parseFloat(data.lowPrice || "0");
+        const price = parseFloat(result.data.lastPrice || "0");
+        const change24h = parseFloat(result.data.priceChangePercent || "0");
+        const volume24h = parseFloat(result.data.quoteVolume || "0");
+        const high24h = parseFloat(result.data.highPrice || "0");
+        const low24h = parseFloat(result.data.lowPrice || "0");
 
         MARKETS.push({
           symbol,
@@ -487,8 +490,41 @@ app.get("/api/markets", async (_req, res) => {
           simulasi: true,
           flags: [],
         });
+      } else {
+        // Fallback: try USDT pair + convert
+        const upperSymbol = symbol.toUpperCase();
+        const usdtSymbol = upperSymbol.replace("IDR", "USDT");
+        try {
+          const usdtRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${usdtSymbol}`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+          if (usdtRes?.ok) {
+            const usdtData: any = await usdtRes.json();
+            const base = usdtSymbol.replace("USDT", "");
+            const usdPrice = parseFloat(usdtData.lastPrice || "0");
+            const idrPrice = usdPrice * usdrRate;
+            const change24h = parseFloat(usdtData.priceChangePercent || "0");
+            const volume24h = parseFloat(usdtData.quoteVolume || "0") * usdrRate;
+            const high24h = parseFloat(usdtData.highPrice || "0") * usdrRate;
+            const low24h = parseFloat(usdtData.lowPrice || "0") * usdrRate;
+
+            MARKETS.push({
+              symbol: upperSymbol,
+              baseAsset: base,
+              quoteAsset: "IDR",
+              status: "trading",
+              price: idrPrice.toString(),
+              change24h,
+              volume24h,
+              high24h,
+              low24h,
+              category: "IDR",
+              source: "binance-fallback",
+              simulasi: true,
+              flags: [],
+            });
+          }
+        } catch (e) {}
       }
-    });
+    }
 
     // Fallback to hardcoded if API fails
     if (MARKETS.length === 0) {
