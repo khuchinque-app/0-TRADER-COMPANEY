@@ -44,7 +44,18 @@ async function jget(url) {
 // ---------------- shell ----------------
 function Banner() {
   const [lang, setLang] = useState(() => localStorage.getItem('xlang') || 'id');
+  const [theme, setTheme] = useState(() => {
+    try { const t = localStorage.getItem('xs_theme'); if (t === 'light' || t === 'dark') return t; } catch {}
+    return 'dark';
+  });
   window.__setLang = (l) => { localStorage.setItem('xlang', l); renderApp(); };
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    try { localStorage.setItem('xs_theme', next); } catch {}
+    // update both html attr (paint) and any stray inline bg on body
+    document.documentElement.setAttribute('data-theme', next);
+  };
   const t = T[lang];
   return (
     <>
@@ -57,7 +68,10 @@ function Banner() {
         <a className="item" href="/affiliate">{t.nav.affiliate}</a>
         <a className="item" href="/privacy-policy">{t.nav.privacy}</a>
         <a className="item" href="/help/pengguna-baru">{t.nav.help}</a>
-        <span className="lang" onClick={() => window.__setLang(lang === 'id' ? 'en' : 'id')}>
+        <span className="lang" onClick={toggleTheme} title="Ganti tema / Toggle theme">
+          {theme === 'dark' ? '🌙' : '☀️'}
+        </span>
+        <span className="lang" style={{ marginLeft: 0 }} onClick={() => window.__setLang(lang === 'id' ? 'en' : 'id')}>
           {lang === 'id' ? '🇮🇩 ID' : '🇬🇧 EN'}
         </span>
       </header>
