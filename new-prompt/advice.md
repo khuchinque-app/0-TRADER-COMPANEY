@@ -1,3 +1,5 @@
+#use vendor for the backend whitelabel process
+
 0-TRADER-COMPANEY/
 ├── frontend/          # Next.js + shadcn/ui
 │   ├── app/
