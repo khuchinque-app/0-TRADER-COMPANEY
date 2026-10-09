@@ -492,7 +492,8 @@ app.get("/api/markets", async (_req, res) => {
         });
       } else {
         // Fallback: try USDT pair + convert
-        const upperSymbol = symbol.toUpperCase();
+        const origSymbol = IDR_SYMBOLS[results.indexOf(result)];
+        const upperSymbol = origSymbol.toUpperCase();
         const usdtSymbol = upperSymbol.replace("IDR", "USDT");
         try {
           const usdtRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${usdtSymbol}`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
