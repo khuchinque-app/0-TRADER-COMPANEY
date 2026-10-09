@@ -440,115 +440,75 @@ app.get("/api/admin/integrity", (req, res) => {
   }
 });
 
-// MARKETS - Returns 7 hardcoded major pairs for instant rendering
-app.get("/api/markets", (_req, res) => {
+// MARKETS - Live from Binance API
+app.get("/api/markets", async (_req, res) => {
   try {
-    const markets = [
-      {
-        symbol: "BTCIDR",
-        baseAsset: "BTC",
-        quoteAsset: "IDR",
-        status: "trading",
-        price: "1002450000",
-        change24h: 2.34,
-        volume24h: 1245678900,
-        marketCap: 15000000000000,
-        category: "IDR",
-        source: "chinque",
-        simulasi: true,
-        flags: []
-      },
-      {
-        symbol: "ETHIDR",
-        baseAsset: "ETH",
-        quoteAsset: "IDR",
-        status: "trading",
-        price: "54820000",
-        change24h: -1.23,
-        volume24h: 892345600,
-        marketCap: 6500000000000,
-        category: "IDR",
-        source: "chinque",
-        simulasi: true,
-        flags: []
-      },
-      {
-        symbol: "SOLIDR",
-        baseAsset: "SOL",
-        quoteAsset: "IDR",
-        status: "trading",
-        price: "2829000",
-        change24h: 5.67,
-        volume24h: 456789000,
-        marketCap: 1200000000000,
-        category: "LAYER1",
-        source: "chinque",
-        simulasi: true,
-        flags: []
-      },
-      {
-        symbol: "BNBidr",
-        baseAsset: "BNB",
-        quoteAsset: "IDR",
-        status: "trading",
-        price: "9706000",
-        change24h: 0.89,
-        volume24h: 234567800,
-        marketCap: 1500000000000,
-        category: "IDR",
-        source: "chinque",
-        simulasi: true,
-        flags: []
-      },
-      {
-        symbol: "XRPIDR",
-        baseAsset: "XRP",
-        quoteAsset: "IDR",
-        status: "trading",
-        price: "9248",
-        change24h: -0.45,
-        volume24h: 567890000,
-        marketCap: 480000000000,
-        category: "IDR",
-        source: "chinque",
-        simulasi: true,
-        flags: []
-      },
-      {
-        symbol: "LINKIDR",
-        baseAsset: "LINK",
-        quoteAsset: "IDR",
-        status: "trading",
-        price: "230800",
-        change24h: 3.21,
-        volume24h: 123456700,
-        marketCap: 270000000000,
-        category: "DEFI",
-        source: "chinque",
-        simulasi: true,
-        flags: []
-      },
-      {
-        symbol: "AAVEIDR",
-        baseAsset: "AAVE",
-        quoteAsset: "IDR",
-        status: "trading",
-        price: "1565000",
-        change24h: -2.10,
-        volume24h: 89012300,
-        marketCap: 230000000000,
-        category: "DEFI",
-        source: "chinque",
-        simulasi: true,
-        flags: []
+    const IDR_SYMBOLS = ["BTCIDR", "ETHIDR", "SOLIDR", "BNBidr", "XRPIDR", "LINKIDR", "AAVEIDR"];
+    const MARKETS: any[] = [];
+    const fxData = await getUsdtIdrRate();
+
+    // Fetch all markets in parallel from Binance
+    const fetchPromises = IDR_SYMBOLS.map(async (symbol) => {
+      try {
+        const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`;
+        const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
+        if (!response.ok) return null;
+        const data: any = await response.json();
+        return data;
+      } catch (e) {
+        return null;
       }
-    ];
+    });
+
+    const results = await Promise.all(fetchPromises);
+
+    results.forEach((data, i) => {
+      if (data && data.symbol) {
+        const symbol = data.symbol;
+        const base = symbol.replace("IDR", "");
+        const price = parseFloat(data.lastPrice || "0");
+        const change24h = parseFloat(data.priceChangePercent || "0");
+        const volume24h = parseFloat(data.quoteVolume || "0");
+        const high24h = parseFloat(data.highPrice || "0");
+        const low24h = parseFloat(data.lowPrice || "0");
+
+        MARKETS.push({
+          symbol,
+          baseAsset: base,
+          quoteAsset: "IDR",
+          status: "trading",
+          price: price.toString(),
+          change24h,
+          volume24h,
+          high24h,
+          low24h,
+          category: "IDR",
+          source: "binance",
+          simulasi: true,
+          flags: [],
+        });
+      }
+    });
+
+    // Fallback to hardcoded if API fails
+    if (MARKETS.length === 0) {
+      MARKETS.push(
+        { symbol: "BTCIDR", baseAsset: "BTC", quoteAsset: "IDR", status: "trading", price: "1002450000", change24h: 2.34, volume24h: 1245678900, category: "IDR", source: "chinque", simulasi: true, flags: [] },
+        { symbol: "ETHIDR", baseAsset: "ETH", quoteAsset: "IDR", status: "trading", price: "54820000", change24h: -1.23, volume24h: 892345600, category: "IDR", source: "chinque", simulasi: true, flags: [] },
+        { symbol: "SOLIDR", baseAsset: "SOL", quoteAsset: "IDR", status: "trading", price: "2829000", change24h: 5.67, volume24h: 456789000, category: "LAYER1", source: "chinque", simulasi: true, flags: [] },
+        { symbol: "BNBidr", baseAsset: "BNB", quoteAsset: "IDR", status: "trading", price: "9706000", change24h: 0.89, volume24h: 234567800, category: "IDR", source: "chinque", simulasi: true, flags: [] },
+        { symbol: "XRPIDR", baseAsset: "XRP", quoteAsset: "IDR", status: "trading", price: "9248", change24h: -0.45, volume24h: 567890000, category: "IDR", source: "chinque", simulasi: true, flags: [] },
+        { symbol: "LINKIDR", baseAsset: "LINK", quoteAsset: "IDR", status: "trading", price: "230800", change24h: 3.21, volume24h: 123456700, category: "DEFI", source: "chinque", simulasi: true, flags: [] },
+        { symbol: "AAVEIDR", baseAsset: "AAVE", quoteAsset: "IDR", status: "trading", price: "1565000", change24h: -2.10, volume24h: 89012300, category: "DEFI", source: "chinque", simulasi: true, flags: [] }
+      );
+    }
 
     res.json({
-      markets,
+      markets: MARKETS,
       simulasi: true,
-      total: markets.length,
-      timestamp: new Date().toISOString()
+      total: MARKETS.length,
+      timestamp: new Date().toISOString(),
+      usdrRate: fxData.rate,
     });
   } catch (e: any) {
     console.error("Markets API error:", e);
@@ -557,6 +517,9 @@ app.get("/api/markets", (_req, res) => {
       message: e.message,
       markets: [],
       simulasi: true,
+    });
+  }
+});
       total: 0
     });
   }
