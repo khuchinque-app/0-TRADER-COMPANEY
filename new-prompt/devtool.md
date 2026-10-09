@@ -1,39 +1,83 @@
-## Troubleshooting: Page Content Visibility
+# devtool.md — Page Content & Market Data Troubleshooting Log
+
+*Last updated: 9 Okt 2026 — both findings below were live-verified and RESOLVED.
+Superseded observations kept at the bottom for reference.*
+
+---
+
+## ✅ Finding #2: /market showed count "· 0" with empty table — RESOLVED (478 rows)
 
 **Context**
-Analysis of an apparently empty web page where only a top banner is visible, despite the presence of extensive CSS and a JavaScript application bundle.
+Analysis of the "All Markets" page showed the market count displaying `· 0` and
+no pair rows in the data table (`span.muted` inside `h1.crumb` + empty `<tbody>`).
 
-**Diagnostics**
-The investigation focused on element dimensions, DOM structure, and script execution.
+**Root cause**
+Timing + stale snapshot, not a code bug. The `/market` page performs two chained
+network fetches on mount (`/api/market/pairs` then `/api/market/tickers`, both
+going 22221 → backend 11110 → MEXC public API). The DevTools snapshot was taken
+before those fetches resolved (or from a headless render whose JS was served
+incorrectly — see Finding #1). Server-side data sources were healthy the whole
+time.
 
-| Metric / Property | Value |
-| :--- | :--- |
-| `html` & `body` height | 48.25 px |
-| Viewport Height | 571 px |
-| Total Element Count | 13 |
-| Body Children Count | 1 (`div.banner`) |
-| Background Color (`body`) | `rgb(11, 15, 43)` |
-| Primary Script | `/assets/index-5whIDNcY.js` (Module) |
+**Verification after fix (raw Chrome via CDP `Runtime.evaluate`):**
+```
+URL: http://127.0.0.1:22221/market
+document.querySelectorAll('tbody tr').length  → 478
+h1.crumb textContent                          → "Semua Pasar · 478"
+API: /api/market/pairs  → count: 478
+API: /api/market/tickers → count: 363 LIVE rows (MEXC-backed)
+```
 
-**Actionable Findings**
-*   **Missing Mounting Point:** The CSS contains definitions for `header.nav`, `.wrap`, `.grid`, and `.panel`, but these elements are absent from the DOM. The `body` lacks a standard mounting container (e.g., `<div id="root"></div>` or `<div id="app"></div>`).
-*   **Application Failure:** The JavaScript module responsible for rendering the UI has not successfully modified the DOM. The page height is limited strictly to the static `.banner` element.
-*   **Resource State:** A `window.__EXCHANGE_STATE__` object is present, confirming the page is intended to boot a Single Page Application (SPA), but the mounting phase has failed or not triggered.
+**Why rows ≠ ALL pairs:** 363 of 478 manifest pairs resolve to a real MEXC
+USDT market (`state: LIVE`); the rest intentionally render greyed-out
+`NO_FEED` rows (greyed, still clickable, shows "no live feed in simulation").
+This matches the spec: live rows come from the cached bulk `ticker24hr`;
+NO_FEED rows never get ticker entries, but still render.
 
-**Actionable Recommendations**
-The following architectural changes are identified as potential fixes for the source code:
+**Code notes (for future edits)**
+- Count header uses filtered `rows.length`, which is correct behavior (search/
+  filter aware). Do not hardwire it to the raw dataset.
+- If a future snapshot again shows `· 0`: first check
+  `curl http://127.0.0.1:22221/api/market/tickers` — a `502
+  mec_unavailable/stale` response means the MEXC fetch is failing (network or
+  circuit breaker open), not a frontend bug. The UI already renders empty with
+  no crash in that case.
 
-*   **Define Mounting Target:** Ensure the source HTML includes the specific ID or Class targeted by the application's entry point.
+---
 
-`````html
-<!-- Example: Add the expected root element to index.html -->
-<body>
-  <div class="banner">...</div>
-  <div id="root"></div> <!-- Or #app, depending on your framework config -->
-</body>
-`````
+## ✅ Finding #1 (archival): page rendered only the top banner — RESOLVED
 
-*   **Script Path Validation:** Confirm the module script `/assets/index-5whIDNcY.js` returns a `200 OK` status and that the `crossorigin` attribute is appropriate for the hosting environment.
-*   **Error Handling:** Check the DevTools Console for "Target container is not a DOM element" errors, which would confirm the framework cannot find where to inject the UI.
+**Context (superseded observations, kept for reference)**
+An earlier snapshot showed an apparently-empty page where only the top banner
+was visible despite extensive CSS plus a JS bundle:
+`html/body height 48.25 px`, `13 total elements`, `body children = 1
+(div.banner)`, no `#root` children. No mounting point was present in the DOM.
 
-*Note: The code fixes and findings above were identified on a live page in DevTools. When applying them to your codebase, please adapt them to your project's specific technical stack (e.g., Tailwind CSS classes, CSS modules, framework components) rather than applying them as literal CSS overrides.*
+**Root cause (found in code, not DevTools guessing):**
+`apps/exchange/server.mjs` (the SPA route server on :22221) injected the
+server-rendered SIMULASI banner with
+`.replace('<div id="root"></div>', SERVER_BANNER_HTML)` — it REPLACED the
+React mount point instead of inserting before it. Additionally the catch-all
+SPA route shadowed built assets, so `/assets/index-*.js` was served as
+`text/html` and the module script silently failed to execute.
+
+**Fix (commit 7b2a44d, branch feat/market-trade + master):**
+1. Banner is now INSERTED BEFORE the mount point:
+   `.replace('<div id="root">', SERVER_BANNER_HTML + '<div id="root">')`.
+2. `express.static(DIST)` added before the SPA catch-all so `assets/*.js`
+   return real JS with `application/javascript` MIME.
+
+**Verification after fix (raw Chrome, CDP `Runtime.evaluate`):**
+```
+URL: /market/BTCIDR → root.innerHTML.length = 32955 chars,
+   header.nav present, market data <td> present,
+   body background rgb(11,15,43) (ChinQue ocean-night dark token)
+URL: /trade      → root 81161 chars, 1600 universe rows
+URL: / , /market , /akun/masuk → all mount (root 1.1–1.3KB+)
+```
+
+---
+
+*Reference: this file is a DevTools-style troubleshooting log for the
+:22221 exchange. Each entry: context → diagnostics table → root cause →
+fix → evidence. Update it (append, don't delete) when new render issues appear.*
