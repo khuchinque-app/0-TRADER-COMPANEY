@@ -520,10 +520,6 @@ app.get("/api/markets", async (_req, res) => {
     });
   }
 });
-      total: 0
-    });
-  }
-});
 
 // ALIAS: /market -> /api/markets
 app.get("/market", (_req, res) => {
