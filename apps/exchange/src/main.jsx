@@ -56,12 +56,17 @@ function Banner() {
     // update both html attr (paint) and any stray inline bg on body
     document.documentElement.setAttribute('data-theme', next);
   };
+  const [brand, setBrand] = useState(null);
+  useEffect(() => { jget('/api/brand').then(setBrand).catch(() => {}); }, []);
+  useEffect(() => {
+    if (brand && brand.name) document.title = `${brand.name}${brand.tagline ? ' — ' + brand.tagline : ''}`;
+  }, [brand]);
   const t = T[lang];
   return (
     <>
-      <div className="banner">{t.banner} <small>· ChinQue Exchange · {t.simNote}</small></div>
+      <div className="banner">{t.banner} <small>· {(brand && brand.name) || 'ChinQue Exchange'} · {t.simNote}</small></div>
       <header className="nav">
-        <a className="logo" href="/">ChinQue<span>Exchange</span></a>
+        <a className="logo" href="/">{(brand && brand.logoText) || 'ChinQue'}<span>{(brand && brand.logoAccent) || 'Exchange'}</span></a>
         <a className="item" href="/market">{t.nav.market}</a>
         <a className="item" href="/trade">Universe</a>
         <a className="item" href="/trade_api">{t.nav.tradeApi}</a>
@@ -218,6 +223,7 @@ function CandleChart({ data, height = 320 }) {
 }
 
 function PairPage({ slug, trade = false }) {
+  const pairKey = slug?.replace('IDR', '').replace('USDT', '') || slug;
   const t = useLang();
   const [tick, setTick] = useState(null);
   const [err, setErr] = useState(null);
@@ -225,9 +231,10 @@ function PairPage({ slug, trade = false }) {
   const [tape, setTape] = useState(null);
   const [klines, setKlines] = useState(null);
   const [interval, setIntervalSel] = useState('15m');
-  const [bs, setBs] = useState('buy');
   const [ot, setOt] = useState('limit');
   const [price, setPrice] = useState('');
+  const [stopLoss, setStopLoss] = useState('');
+  const [takeProfit, setTakeProfit] = useState('');
   const [amount, setAmount] = useState('');
   const [toast, setToast] = useState(null);
   useEffect(() => {
@@ -327,11 +334,11 @@ function PairPage({ slug, trade = false }) {
               <div className="panel" style={{ marginTop: 12 }}>
                 <h3>{t.pair.tape}</h3>
                 <table><tbody>
-                  {(tape?.trades || []).slice(0, 15).map((tr, i) => (
-                    <tr key={i}><td className="muted">{new Date(tr.time).toLocaleTimeString('id-ID')}</td>
+                  {(tape?.trades || []).slice(0, 15).map((tr, i) => (                    <tr key={i}><td className="muted">{new Date(tr.time).toLocaleTimeString('id-ID')}</td>
                       <td className={tr.side === 'buy' ? 'up' : 'down'}>{fmtNum(tr.price)}</td><td style={{ textAlign: 'right' }}>{fmtNum(tr.qty)}</td></tr>
                   ))}
-                </tbody></table>
+                </tbody>
+              </table>
               </div>
             </div>
             <div className="panel">
@@ -349,12 +356,20 @@ function PairPage({ slug, trade = false }) {
                 <div className="field"><span>{t.pair.price}</span>
                   <input value={ot === 'market' ? (last == null ? '' : String(last)) : price}
                     onChange={(e) => setPrice(e.target.value)} readOnly={ot === 'market'} inputMode="decimal" /></div>
+                {ot === 'limit' && (
+                  <>
+                    <div className="field"><span>Stop Loss</span>
+                      <input value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} inputMode="decimal" placeholder="Trigger price" /></div>
+                    <div className="field"><span>Take Profit</span>
+                      <input value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} inputMode="decimal" placeholder="Target price" /></div>
+                  </>
+                )}
                 <div className="field"><span>{t.pair.amount}</span>
                   <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" /></div>
                 <div className="muted" style={{ fontSize: 12 }}>
                   {t.pair.balance}: <a href="/akun/dompet" style={{ color: 'var(--up)' }}>USB → dompet simulasi</a>
                 </div>
-                <button type="submit" className={'btn' + (bs === 'sell' ? ' sell' : '')}>{bs === 'buy' ? t.pair.buy : t.pair.sell} {slug?.replace('IDR', '').replace('USDT', '')}</button>
+                <button type="submit" className={'btn' + (bs === 'sell' ? ' sell' : '')}>{bs === 'buy' ? t.pair.buy : t.pair.sell} {pairKey}</button>
               </form>
               <div style={{ padding: 12, borderTop: '1px solid var(--line)' }}>
                 <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>{t.pair.open} / {t.pair.hist}</div>
@@ -389,6 +404,7 @@ function OrdersPanel({ slug }) {
           <tr key={o.id}><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side === 'buy' ? 'B' : 'S'}</td>
             <td>{o.type}</td><td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
             <td className="muted">{o.status}</td>
+            <td>{o.stop_loss != null || o.take_profit != null ? (fmtNum(o.stop_loss ?? '') + (o.take_profit != null ? ' → ' + fmtNum(o.take_profit ?? '') : '')) : ''}</td>
             <td><button className="btn ghost" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => cancel(o.id)}>✕</button></td></tr>
         ))}
       </tbody>
@@ -507,6 +523,7 @@ function App() {
   if (path === '/akun/masuk') return <LoginPage />;
   if (path === '/akun/daftar') return <SimplePage title="Daftar"><p>Gunakan <a href="/akun/masuk" style={{ color: 'var(--up)' }}>/akun/masuk</a> → tombol Guest Demo untuk saldo instan (tanpa KYC).</p></SimplePage>;
   if (path === '/akun/dompet') return <WalletPage />;
+  if (path === '/akun/admin') return <AdminPanelPage />;
   return <NotFound />;
 }
 
@@ -608,6 +625,94 @@ function MyOrdersPage() {
           <p className="muted">Ketik slug pair (mis. BTCIDR), atau <a href="/akun/dompet" style={{ color: 'var(--up)' }}>lihat dompet</a> · {t.simNote}</p>
         </div>
       )}
+    </div>
+  );
+}
+
+// ---------------- admin: whitelabel panel (/akun/admin, login-gated) ----------------
+const BRAND_FIELDS = ['name', 'tagline', 'logoText', 'logoAccent', 'supportEmail', 'supportUrl', 'colorUp', 'colorDown', 'theme', 'announcement'];
+
+function AdminPanelPage() {
+  const t = useLang();
+  const [token, setToken] = useState(() => localStorage.getItem('sx_jwt') || '');
+  const [email, setEmail] = useState('');
+  const [pass, setPass] = useState('');
+  const [brand, setBrand] = useState(null);
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!token) { setBrand(null); return; }
+    let ok = true;
+    fetch('/api/admin/whitelabel', { headers: { authorization: 'Bearer ' + token, accept: 'application/json' } })
+      .then(async (r) => {
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw Object.assign(new Error((d.error && d.error.message) || `HTTP ${r.status}`), { status: r.status });
+        return d;
+      })
+      .then((d) => { if (ok) { setBrand(d.brand || {}); setMsg(''); } })
+      .catch((e) => { if (ok) { setBrand(null); setMsg(e.status === 403 || e.status === 401 ? 'Perlu login sebagai system-admin.' : String(e.message)); } });
+    return () => { ok = false; };
+  }, [token]);
+
+  const login = async () => {
+    setBusy(true); setMsg('');
+    try {
+      const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { setMsg(d.message || 'login gagal'); return; }
+      localStorage.setItem('sx_jwt', d.token || '');
+      setToken(d.token || '');
+    } catch (e) { setMsg(String(e.message)); } finally { setBusy(false); }
+  };
+
+  const save = async () => {
+    setBusy(true); setMsg('');
+    try {
+      const patch = {}; for (const k of BRAND_FIELDS) patch[k] = brand[k];
+      const r = await fetch('/api/admin/whitelabel', {
+        method: 'PUT',
+        headers: { authorization: 'Bearer ' + token, accept: 'application/json', 'content-type': 'application/json' },
+        body: JSON.stringify({ brand: patch }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { setMsg((d.error && d.error.message) || d.message || `HTTP ${r.status}`); return; }
+      setBrand(d.brand || brand); setMsg('Tersimpan ✔ — brand live dibaca ulang dari GET /api/brand');
+    } catch (e) { setMsg(String(e.message)); } finally { setBusy(false); }
+  };
+
+  if (!token || !brand) {
+    return (
+      <div className="wrap" style={{ maxWidth: 420 }}>
+        <h1 className="crumb"><b>Admin — Whitelabel (Simulasi)</b></h1>
+        <div className="panel form">
+          <div className="field"><input placeholder="email admin" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div className="field"><input placeholder="password" type="password" value={pass} onChange={(e) => setPass(e.target.value)} /></div>
+          <button className="btn" disabled={busy} onClick={login}>Masuk sebagai admin</button>
+          {msg && <div className="muted" style={{ fontSize: 12 }}>{msg}</div>}
+          <div className="muted" style={{ fontSize: 12 }}>{t.simNote} · butuh role system-admin</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="wrap" style={{ maxWidth: 660 }}>
+      <h1 className="crumb"><b>Admin — Whitelabel &amp; Brand (Simulasi)</b></h1>
+      <div className="panel form">
+        {BRAND_FIELDS.map((k) => (
+          <div className="field" key={k}>
+            <span style={{ minWidth: 120, color: 'var(--muted)', fontSize: 12 }}>{k}</span>
+            <input value={brand[k] ?? ''} onChange={(e) => setBrand({ ...brand, [k]: e.target.value })} />
+          </div>
+        ))}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn" disabled={busy} onClick={save}>Simpan brand</button>
+          <button className="btn ghost" onClick={() => { localStorage.removeItem('sx_jwt'); setToken(''); }}>Keluar</button>
+        </div>
+        {msg && <div className="muted" style={{ fontSize: 12 }}>{msg}</div>}
+        <div className="muted" style={{ fontSize: 12 }}>{t.simNote}</div>
+      </div>
     </div>
   );
 }

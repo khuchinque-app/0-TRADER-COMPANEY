@@ -7,10 +7,10 @@ import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { createPriceRouter } from "./routes/price";
 import { paymentRouter } from "./routes/payment";
 import { agentRouter } from "./routes/agent";
-import { priceFeed } from "./pricefeed/service";
-import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
+import { priceFeed } from "./pricefeed/service";import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
 import { tapeService, TAPE_LEN, TapeTrade } from "./pricefeed/tape";
 import { createMarketRouter, startMarketResolution, setMarketDb, fillMarketOrder, placeLimitOrder, startLimitMatcher } from "./market";
+import { createSocialRouter } from "./social";
 
 // Resolve .env from repo root (works from both src/ and dist/)
 const repoRoot = path.resolve(__dirname, "../../..");
@@ -29,9 +29,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const dbPath = process.env.DB_PATH || path.resolve(repoRoot, "apps/engine/data/ledger.db");
-const db = new Database(dbPath);
-db.pragma("journal_mode=WAL");
+const db = new Database(dbPath);db.pragma("journal_mode=WAL");
 db.pragma("foreign_keys=ON");
+// Share the single ledger handle with modules that mount after initDb (e.g. social.ts).
+(globalThis as any).__backdb = db;
 
 // Dev credentials (not in .env per rule #5; defaults match existing autopilot/T01.sh)
 const DEV_EMAIL = process.env.DEV_EMAIL || "dev@example.com";
@@ -42,6 +43,9 @@ const GUEST_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
 // Guest rate limiting (in-memory, per IP)
 const guestRateMap: Map<string, number[]> = new Map();
+
+// Whitelabel(config table for exchange frontend branding/theming — admin editable)
+// created inside initDb() via CREATE TABLE IF NOT EXISTS.
 
 function initDb() {
   // Create tables if they don't exist
@@ -142,6 +146,11 @@ function initDb() {
       created_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_audit_ray ON audit_log(ray_id);
+    CREATE TABLE IF NOT EXISTS config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
   `);
 }
 
@@ -442,6 +451,90 @@ app.get("/api/admin/integrity", (req, res) => {
   }
 });
 
+// ── WHITELABEL / BRAND ────────────────────────────────────────────────────────
+// Brand config lives in the `config` table (key = 'brand.<field>', JSON value).
+// Defaults are merged UNDER any stored values so a fresh install still renders a
+// complete brand. Only allow-listed keys are accepted on write.
+const BRAND_DEFAULTS = {
+  name: "ChinQue Exchange",
+  tagline: "Simulasi Trading Kripto Indonesia",
+  logoText: "ChinQue",
+  logoAccent: "Exchange",
+  supportEmail: "support@chinque.local",
+  supportUrl: "/bantuan",
+  colorUp: "#00FF88",
+  colorDown: "#FF3366",
+  theme: "dark",
+  announcement: "",
+};
+
+function readBrand(): Record<string, unknown> {
+  const stored: Record<string, unknown> = {};
+  try {
+    const rows = db.prepare("SELECT key, value FROM config WHERE key LIKE 'brand.%'").all() as Array<{ key: string; value: string }>;
+    for (const r of rows) {
+      try { stored[r.key.slice("brand.".length)] = JSON.parse(r.value); } catch { /* skip malformed row */ }
+    }
+  } catch { /* config table not ready — fall back to defaults */ }
+  return { ...BRAND_DEFAULTS, ...stored };
+}
+
+function isSystemAdmin(req: any): boolean {
+  const userId = getUserId(req);
+  if (!userId) return false;
+  try {
+    const row = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role?: string } | undefined;
+    return row?.role === "system-admin";
+  } catch {
+    return false;
+  }
+}
+
+// Public: the exchange SPA reads this on boot to render the live brand.
+app.get("/api/brand", (_req, res) => {
+  res.json({ ...readBrand(), simulasi: true });
+});
+
+// Admin: read the full editable whitelabel config.
+app.get("/api/admin/whitelabel", (req, res) => {
+  if (!isSystemAdmin(req)) {
+    return res.status(403).json({ error: { code: "forbidden", message: "system-admin required" }, simulasi: true });
+  }
+  res.json({ brand: readBrand(), simulasi: true });
+});
+
+// Admin: update brand config. Only allow-listed keys are written.
+app.put("/api/admin/whitelabel", (req, res) => {
+  if (!isSystemAdmin(req)) {
+    return res.status(403).json({ error: { code: "forbidden", message: "system-admin required" }, simulasi: true });
+  }
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const patch = (body.brand && typeof body.brand === "object") ? (body.brand as Record<string, unknown>) : body;
+  const allowed = Object.keys(BRAND_DEFAULTS);
+  const clean: Record<string, unknown> = {};
+  for (const k of allowed) {
+    if (!(k in patch)) continue;
+    const v = patch[k];
+    if (k === "theme") {
+      if (v !== "dark" && v !== "light") {
+        return res.status(400).json({ error: { code: "invalid_params", message: "theme must be 'dark' or 'light'" }, simulasi: true });
+      }
+    } else if (typeof v !== "string" || v.length > 200) {
+      return res.status(400).json({ error: { code: "invalid_params", message: `${k} must be a string <= 200 chars` }, simulasi: true });
+    }
+    clean[k] = v;
+  }
+  if (Object.keys(clean).length === 0) {
+    return res.status(400).json({ error: { code: "invalid_params", message: `no editable fields; allowed: ${allowed.join(", ")}` }, simulasi: true });
+  }
+  const now = Math.floor(Date.now() / 1000);
+  const upsert = db.prepare("INSERT INTO config (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at");
+  db.transaction(() => {
+    for (const [k, v] of Object.entries(clean)) upsert.run(`brand.${k}`, JSON.stringify(v), now);
+  })();
+  res.json({ ok: true, brand: readBrand(), simulasi: true });
+});
+
 // MARKETS - Live from Binance API (with USDT fallback for IDR pairs)
 app.get("/api/markets", async (_req, res) => {
   try {
@@ -637,6 +730,8 @@ app.get("/api/market/myorders/:slug", (req, res) => {
 // T04: Reference price feed routes (mounted before the generic /api/ticker/:pair route)
 app.use(createPriceRouter());
 app.use("/api/payment", paymentRouter);
+// Google/Telegram manager login stubs + manager lookup (uses globalThis.__backdb).
+app.use("/api/social", createSocialRouter());
 
 // T07: Market trades tape — the 50 most recent trades per symbol. Synthetic ticks
 // derived from the price feed (tapeService rolling buffer) merged with real user
