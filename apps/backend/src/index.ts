@@ -465,7 +465,9 @@ app.get("/api/markets", async (_req, res) => {
 
     const results = await Promise.all(fetchPromises);
 
-    for (const result of results) {
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const origSymbol = IDR_SYMBOLS[i];
       if (result && result.data) {
         const symbol = result.symbol;
         const base = symbol.replace("IDR", "");
@@ -492,7 +494,6 @@ app.get("/api/markets", async (_req, res) => {
         });
       } else {
         // Fallback: try USDT pair + convert
-        const origSymbol = IDR_SYMBOLS[results.indexOf(result)];
         const upperSymbol = origSymbol.toUpperCase();
         const usdtSymbol = upperSymbol.replace("IDR", "USDT");
         try {
