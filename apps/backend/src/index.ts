@@ -44,6 +44,44 @@ const GUEST_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 // Guest rate limiting (in-memory, per IP)
 const guestRateMap: Map<string, number[]> = new Map();
 
+// ── MEMBER ACCOUNTS ───────────────────────────────────────────────────────────
+// Members self-register with email + password and receive the same simulated
+// starting funds guests get, so registration is immediately tradeable.
+const MEMBER_START_USDT = parseFloat(process.env.MEMBER_START_USDT || String(GUEST_START_USDT));
+const MEMBER_MIN_PASSWORD = parseInt(process.env.MEMBER_MIN_PASSWORD || "8");
+const MEMBER_SESSION_TTL_MS = parseInt(process.env.MEMBER_SESSION_TTL_MS || String(30 * 24 * 60 * 60 * 1000));
+const MEMBER_LOGIN_MAX_ATTEMPTS = parseInt(process.env.MEMBER_LOGIN_MAX_ATTEMPTS || "10");
+const MEMBER_LOGIN_WINDOW_MS = parseInt(process.env.MEMBER_LOGIN_WINDOW_MS || "900000"); // 15 min
+
+// ── ADMIN CONSOLE ─────────────────────────────────────────────────────────────
+// /admin is gated by a single operator password (ADMIN_PASSWORD). On success we mint a
+// short-lived session for the system-admin identity, so every existing /api/admin/*
+// route guard keeps working unchanged. Override ADMIN_EMAIL/ADMIN_PASSWORD in production —
+// the boot log warns until the default is changed.
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@chinque.local";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1";
+const ADMIN_SESSION_TTL_MS = parseInt(process.env.ADMIN_SESSION_TTL_MS || String(12 * 60 * 60 * 1000));
+const ADMIN_LOGIN_MAX_ATTEMPTS = parseInt(process.env.ADMIN_LOGIN_MAX_ATTEMPTS || "8");
+const ADMIN_LOGIN_WINDOW_MS = parseInt(process.env.ADMIN_LOGIN_WINDOW_MS || "900000"); // 15 min
+
+// Failed-login throttles (in-memory, per IP). Deliberately separate maps so a member
+// cannot exhaust the admin budget and vice versa.
+const adminLoginAttempts: Map<string, number[]> = new Map();
+const memberLoginAttempts: Map<string, number[]> = new Map();
+
+function throttleCheck(map: Map<string, number[]>, key: string, max: number, windowMs: number): boolean {
+  const now = Date.now();
+  const recent = (map.get(key) || []).filter((t) => t > now - windowMs);
+  map.set(key, recent);
+  return recent.length >= max;
+}
+
+function throttleNote(map: Map<string, number[]>, key: string): void {
+  const arr = map.get(key) || [];
+  arr.push(Date.now());
+  map.set(key, arr);
+}
+
 // Whitelabel(config table for exchange frontend branding/theming — admin editable)
 // created inside initDb() via CREATE TABLE IF NOT EXISTS.
 
@@ -85,6 +123,44 @@ function initDb() {
   const cols = db.prepare("PRAGMA table_info(users)").all() as Array<{ name: string }>;
   if (!cols.some(c => c.name === "role")) {
     db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'customer'");
+  }
+
+  // Repair the users.status CHECK constraint. The original table only allowed
+  // ('pending','active'), but PUT /api/admin/users/:id/status accepts 'suspended' —
+  // so suspending a member from the admin console failed with a constraint error.
+  // SQLite cannot ALTER a CHECK, so rebuild the table inside a transaction and refuse
+  // to continue unless the row count is preserved exactly.
+  const usersSql = (db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").get() as { sql?: string } | undefined)?.sql || "";
+  if (usersSql && !usersSql.includes("'suspended'")) {
+    const before = (db.prepare("SELECT COUNT(*) c FROM users").get() as { c: number }).c;
+    db.pragma("foreign_keys=OFF");
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE users_new (
+          id TEXT PRIMARY KEY,
+          email TEXT NOT NULL UNIQUE,
+          phone TEXT,
+          phone_verified INTEGER NOT NULL DEFAULT 0,
+          password_hash TEXT,
+          status TEXT NOT NULL CHECK(status IN ('pending','active','suspended')) DEFAULT 'pending',
+          ray_id TEXT,
+          role TEXT NOT NULL DEFAULT 'customer',
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        );
+        INSERT INTO users_new (id, email, phone, phone_verified, password_hash, status, ray_id, role, created_at, updated_at)
+          SELECT id, email, phone, phone_verified, password_hash, status, ray_id, role, created_at, updated_at FROM users;
+        DROP TABLE users;
+        ALTER TABLE users_new RENAME TO users;
+        CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+      `);
+    })();
+    db.pragma("foreign_keys=ON");
+    const after = (db.prepare("SELECT COUNT(*) c FROM users").get() as { c: number }).c;
+    if (after !== before) {
+      throw new Error(`users.status migration changed row count: ${before} -> ${after}`);
+    }
+    console.log(`[db] users.status CHECK widened to allow 'suspended' (${after} rows preserved)`);
   }
 
   // Create other tables needed by admin/integrity routes
@@ -288,55 +364,171 @@ function getUserId(req: any): string | null {
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
   if (!token) return null;
   const who = verifyJWT(token, JWT_SECRET);
-  return who ? who.sub : null;
+  if (!who) return null;
+  // Sessions may carry an expiry (member + admin sessions do). Enforce it here so every
+  // existing route that resolves the caller through this helper gets expiry for free.
+  if (typeof who.exp === "number" && Date.now() > who.exp) return null;
+  return who.sub ?? null;
+}
+
+function roleOf(userId: string | null): string | null {
+  if (!userId) return null;
+  try {
+    const row = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as { role?: string } | undefined;
+    return row?.role ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Length-tolerant constant-time string compare (avoids leaking a password's length). */
+function safeEqualStr(a: string, b: string): boolean {
+  const ab = Buffer.from(String(a), "utf8");
+  const bb = Buffer.from(String(b), "utf8");
+  if (ab.length !== bb.length) {
+    timingSafeEqual(ab, ab); // burn a comparison so length is not a timing oracle
+    return false;
+  }
+  return timingSafeEqual(ab, bb);
+}
+
+/** Express guard for every /api/admin/* route. */
+function requireSystemAdmin(req: any, res: any, next: any): void {
+  const userId = getUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: { code: "unauthenticated", message: "Sign in to the admin console" }, simulasi: true });
+  }
+  if (roleOf(userId) !== "system-admin") {
+    return res.status(403).json({ error: { code: "forbidden", message: "system-admin required" }, simulasi: true });
+  }
+  next();
 }
 
 // AUTH ROUTES
-app.post("/api/auth/signup", async (req, res) => {
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const unixNow = (): number => Math.floor(Date.now() / 1000);
+
+/**
+ * Member self-registration. Creates the user, their ledger account, a starting
+ * simulated USDT balance and the matching journal entry — then signs them in, so a
+ * freshly registered member can trade immediately. Mounted at both /api/auth/register
+ * (the explicit member-registration endpoint the UI uses) and /api/auth/signup (kept for
+ * backwards compatibility).
+ */
+function registerMember(req: any, res: any): void {
   try {
-    const { email, password } = req.body ?? {};
-    if (!email || !password) {
-      return res.status(400).json({ error: "bad_credentials", message: "Email and password required" });
+    const { email, password, name } = (req.body ?? {}) as Record<string, unknown>;
+    const emailLower = String(email ?? "").trim().toLowerCase();
+    if (!emailLower || !password) {
+      return res.status(400).json({ error: { code: "bad_credentials", message: "Email and password required" }, simulasi: true });
     }
-    const emailLower = String(email).toLowerCase();
-    const existing = db.prepare("SELECT id FROM users WHERE email = ?").get(emailLower);
-    if (existing) {
-      return res.status(409).json({ error: "email_taken", message: "Email already registered" });
+    if (!EMAIL_RE.test(emailLower)) {
+      return res.status(400).json({ error: { code: "invalid_email", message: "Enter a valid email address" }, simulasi: true });
     }
-    const hash = hashPassword(String(password));
+    const pw = String(password);
+    if (pw.length < MEMBER_MIN_PASSWORD) {
+      return res.status(400).json({
+        error: { code: "weak_password", message: `Password must be at least ${MEMBER_MIN_PASSWORD} characters` },
+        simulasi: true,
+      });
+    }
+    if (db.prepare("SELECT id FROM users WHERE email = ?").get(emailLower)) {
+      return res.status(409).json({ error: { code: "email_taken", message: "Email already registered" }, simulasi: true });
+    }
+
+    const hash = hashPassword(pw);
     const rayId = `ray-${randomBytes(8).toString("hex")}`;
     const userId = `u_${randomBytes(8).toString("hex")}`;
-    const stmt = db.prepare("INSERT INTO users (id, email, password_hash, status, ray_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    stmt.run(userId, emailLower, hash, "active", rayId, NOW, NOW);
-    res.status(201).json({ userId, simulasi: true });
+    const accountId = `acct_${randomBytes(8).toString("hex")}`;
+    const ts = unixNow();
+    const displayName = typeof name === "string" && name.trim() ? name.trim().slice(0, 60) : "Member";
+
+    db.transaction(() => {
+      db.prepare("INSERT INTO users (id, email, password_hash, status, role, ray_id, created_at, updated_at) VALUES (?, ?, ?, 'active', 'customer', ?, ?, ?)")
+        .run(userId, emailLower, hash, rayId, ts, ts);
+      db.prepare("INSERT INTO accounts (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)")
+        .run(accountId, userId, displayName, ts, ts);
+      db.prepare("INSERT INTO balances (account_id, asset, available, locked) VALUES (?, 'USDT', ?, 0)")
+        .run(accountId, MEMBER_START_USDT);
+      const journalId = `signup_${userId}_USDT`;
+      db.prepare("INSERT INTO journal (id, timestamp, description, created_at) VALUES (?, ?, ?, ?)")
+        .run(journalId, ts, `Signup demo funds ${MEMBER_START_USDT} USDT`, ts);
+      db.prepare("INSERT INTO journal_lines (journal_id, account_id, asset, amount, entry_type) VALUES (?, ?, 'USDT', ?, 'debit')")
+        .run(journalId, accountId, MEMBER_START_USDT);
+      db.prepare("INSERT INTO audit_log (ray_id, user_id, event, detail, created_at) VALUES (?, ?, 'member_registered', ?, ?)")
+        .run(rayId, userId, emailLower, ts);
+    })();
+
+    const token = signJWT({ sub: userId, ray: rayId, iat: Date.now(), exp: Date.now() + MEMBER_SESSION_TTL_MS }, JWT_SECRET);
+    res.status(201).json({
+      ok: true,
+      userId,
+      accountId,
+      token,
+      user: { id: userId, email: emailLower, name: displayName, role: "customer", status: "active" },
+      wallet: {
+        accountId,
+        balances: [{ asset: "USDT", available: MEMBER_START_USDT, locked: 0, total: MEMBER_START_USDT }],
+        balance: MEMBER_START_USDT,
+        currency: "USDT",
+      },
+      simulasi: true,
+    });
   } catch (e: any) {
-    res.status(500).json({ error: "internal", message: e.message });
+    res.status(500).json({ error: { code: "internal", message: e.message }, simulasi: true });
   }
-});
+}
+
+app.post("/api/auth/register", registerMember);
+app.post("/api/auth/signup", registerMember);
 
 app.post("/api/auth/login", (req, res) => {
   try {
     const { email, password } = req.body ?? {};
-    const userEmail = String(email ?? "").toLowerCase();
-    const userRow = db.prepare("SELECT id, email, status, password_hash, ray_id FROM users WHERE email = ?").get(userEmail);
-    if (!userRow) {
-      return res.status(401).json({ error: "bad_credentials", message: "Invalid email or password" });
+    const userEmail = String(email ?? "").trim().toLowerCase();
+    const ip = req.ip || req.connection?.remoteAddress || "unknown";
+    const throttleKey = `${ip}|${userEmail}`;
+
+    if (throttleCheck(memberLoginAttempts, throttleKey, MEMBER_LOGIN_MAX_ATTEMPTS, MEMBER_LOGIN_WINDOW_MS)) {
+      res.setHeader("Retry-After", String(Math.ceil(MEMBER_LOGIN_WINDOW_MS / 1000)));
+      return res.status(429).json({ error: { code: "rate_limited", message: "Too many sign-in attempts. Try again later." }, simulasi: true });
     }
-    const user = userRow as any;
-    if (!user.password_hash) {
-      return res.status(401).json({ error: "bad_credentials", message: "Invalid email or password" });
+
+    // One generic message for every credential failure — never reveal which field was wrong.
+    const invalid = (): any => {
+      throttleNote(memberLoginAttempts, throttleKey);
+      return res.status(401).json({ error: { code: "bad_credentials", message: "Invalid email or password" }, simulasi: true });
+    };
+
+    // NOTE: the users table has no `name` column — the display name lives on accounts.name.
+    const userRow = db.prepare(
+      "SELECT u.id, u.email, u.status, u.role, u.password_hash, u.ray_id, a.name AS account_name " +
+      "FROM users u LEFT JOIN accounts a ON a.user_id = u.id WHERE u.email = ?"
+    ).get(userEmail) as any;
+    if (!userRow || !userRow.password_hash) return invalid();
+    if (!verifyPassword(String(password ?? ""), userRow.password_hash)) return invalid();
+
+    if (userRow.status === "suspended") {
+      return res.status(403).json({ error: { code: "account_suspended", message: "This account is suspended" }, simulasi: true });
     }
-    if (!verifyPassword(String(password ?? ""), user.password_hash)) {
-      return res.status(401).json({ error: "bad_credentials", message: "Invalid email or password" });
+    if (userRow.status !== "active") {
+      return res.status(403).json({ error: { code: "pending_verification", message: "Finish phone verification first" }, simulasi: true });
     }
-    if (user.status !== "active") {
-      return res.status(403).json({ error: "pending_verification", message: "Finish phone verification first" });
-    }
-    const payload = { sub: user.id, ray: user.ray_id, iat: Date.now() };
+
+    memberLoginAttempts.delete(throttleKey); // successful sign-in clears the throttle
+    const payload = { sub: userRow.id, ray: userRow.ray_id, iat: Date.now(), exp: Date.now() + MEMBER_SESSION_TTL_MS };
     const jwt = signJWT(payload, JWT_SECRET);
-    res.json({ ok: true, userId: user.id, rayId: user.ray_id, redirect: "/dashboard", simulasi: true, token: jwt });
+    res.json({
+      ok: true,
+      userId: userRow.id,
+      rayId: userRow.ray_id,
+      token: jwt,
+      user: { id: userRow.id, email: userRow.email, name: userRow.account_name ?? null, role: userRow.role ?? "customer", status: userRow.status },
+      redirect: "/dashboard",
+      simulasi: true,
+    });
   } catch (e: any) {
-    res.status(500).json({ error: "internal", message: e.message });
+    res.status(500).json({ error: { code: "internal", message: e.message }, simulasi: true });
   }
 });
 
@@ -414,19 +606,109 @@ app.post("/api/auth/guest", (req, res) => {
 
 app.get("/api/auth/me", (req, res) => {
   const userId = getUserId(req);
-  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  if (!userId) return res.status(401).json({ error: { code: "unauthenticated", message: "Sign in first" }, simulasi: true });
   try {
-    const userRow = db.prepare("SELECT id, email, phone, phone_verified, status, ray_id FROM users WHERE id = ?").get(userId);
-    if (!userRow) return res.status(401).json({ error: "unauthenticated" });
+    const userRow = db.prepare(
+      "SELECT u.id, u.email, u.phone, u.phone_verified, u.status, u.role, u.ray_id, u.created_at, a.name AS account_name " +
+      "FROM users u LEFT JOIN accounts a ON a.user_id = u.id WHERE u.id = ?"
+    ).get(userId);
+    if (!userRow) return res.status(401).json({ error: { code: "unauthenticated", message: "Sign in first" }, simulasi: true });
     const user = userRow as any;
-    res.json({ ...user, simulasi: true });
+    // `isAdmin` lets the SPA show the admin entry point without a second round trip.
+    res.json({ ...user, name: user.account_name ?? null, isAdmin: user.role === "system-admin", simulasi: true });
   } catch (e: any) {
-    res.status(500).json({ error: "internal", message: e.message });
+    res.status(500).json({ error: { code: "internal", message: e.message }, simulasi: true });
   }
 });
 
 // ADMIN ROUTES
-app.get("/api/admin/stats", (req, res) => {
+// ── ADMIN CONSOLE AUTH (password-gated) ──────────────────────────────────────
+// The operator signs in with just ADMIN_PASSWORD. On success we mint a short-lived
+// session token for the seeded system-admin identity, so every existing role-guarded
+// /api/admin/* route works unchanged. The password itself is never stored or logged.
+app.post("/api/admin/login", (req, res) => {
+  try {
+    const ip = req.ip || req.connection?.remoteAddress || "unknown";
+    if (throttleCheck(adminLoginAttempts, ip, ADMIN_LOGIN_MAX_ATTEMPTS, ADMIN_LOGIN_WINDOW_MS)) {
+      res.setHeader("Retry-After", String(Math.ceil(ADMIN_LOGIN_WINDOW_MS / 1000)));
+      return res.status(429).json({ error: { code: "rate_limited", message: "Too many admin sign-in attempts" }, simulasi: true });
+    }
+    const { password } = req.body ?? {};
+    if (!password || !safeEqualStr(String(password), ADMIN_PASSWORD)) {
+      throttleNote(adminLoginAttempts, ip);
+      return res.status(401).json({ error: { code: "bad_credentials", message: "Invalid admin password" }, simulasi: true });
+    }
+
+    // Resolve the system-admin identity the session will act as (seed on first use).
+    let admin = db.prepare("SELECT id, email, role FROM users WHERE role = 'system-admin' ORDER BY created_at LIMIT 1").get() as { id: string; email: string; role: string } | undefined;
+    if (!admin) {
+      seedDevAccount();
+      admin = db.prepare("SELECT id, email, role FROM users WHERE role = 'system-admin' ORDER BY created_at LIMIT 1").get() as { id: string; email: string; role: string } | undefined;
+    }
+    if (!admin) {
+      return res.status(500).json({ error: { code: "admin_identity_missing", message: "No system-admin identity exists" }, simulasi: true });
+    }
+
+    adminLoginAttempts.delete(ip);
+    const exp = Date.now() + ADMIN_SESSION_TTL_MS;
+    const rayId = `adm-${randomBytes(8).toString("hex")}`;
+    const token = signJWT({ sub: admin.id, ray: rayId, adm: true, iat: Date.now(), exp }, JWT_SECRET);
+    const ts = unixNow();
+    db.prepare("INSERT INTO audit_log (ray_id, user_id, event, detail, created_at) VALUES (?, ?, 'admin_login', ?, ?)")
+      .run(rayId, admin.id, `ip=${ip}`, ts);
+    res.json({
+      ok: true,
+      token,
+      admin: { id: admin.id, email: ADMIN_EMAIL || admin.email, role: admin.role },
+      expiresAt: exp,
+      simulasi: true,
+    });
+  } catch (e: any) {
+    res.status(500).json({ error: { code: "internal", message: e.message }, simulasi: true });
+  }
+});
+
+app.get("/api/admin/session", requireSystemAdmin, (req, res) => {
+  const userId = getUserId(req);
+  const row = db.prepare("SELECT id, email, role FROM users WHERE id = ?").get(userId) as any;
+  res.json({ ok: true, admin: { id: row.id, email: ADMIN_EMAIL || row.email, role: row.role }, simulasi: true });
+});
+
+// Stateless tokens: "logout" is the client discarding its token. Kept as an explicit
+// endpoint so the console has an auditable action.
+app.post("/api/admin/logout", (_req, res) => {
+  res.json({ ok: true, simulasi: true });
+});
+
+// Dashboard payload for the console: ledger + member + audit summary in one round trip.
+app.get("/api/admin/overview", requireSystemAdmin, (_req, res) => {
+  try {
+    const one = (sql: string): number => ((db.prepare(sql).get() as { c: number } | undefined)?.c ?? 0);
+    const counts = {
+      users: one("SELECT COUNT(*) c FROM users"),
+      members: one("SELECT COUNT(*) c FROM users WHERE role = 'customer'"),
+      admins: one("SELECT COUNT(*) c FROM users WHERE role = 'system-admin'"),
+      nonActive: one("SELECT COUNT(*) c FROM users WHERE status <> 'active'"),
+      accounts: one("SELECT COUNT(*) c FROM accounts"),
+      orders: one("SELECT COUNT(*) c FROM orders"),
+      openOrders: one("SELECT COUNT(*) c FROM orders WHERE status IN ('open','partially_filled')"),
+      fills: one("SELECT COUNT(*) c FROM fills"),
+      journalLines: one("SELECT COUNT(*) c FROM journal_lines"),
+    };
+    const recentMembers = db.prepare(
+      "SELECT u.id, u.email, u.status, u.role, u.created_at, a.name AS account_name " +
+      "FROM users u LEFT JOIN accounts a ON a.user_id = u.id ORDER BY u.created_at DESC LIMIT 10"
+    ).all();
+    const recentAudit = db.prepare("SELECT ray_id, user_id, event, detail, created_at FROM audit_log ORDER BY id DESC LIMIT 20").all();
+    res.json({ ok: true, counts, brand: readBrand(), recentMembers, recentAudit, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: { code: "internal", message: e.message }, simulasi: true });
+  }
+});
+
+// NOTE: /api/admin/stats and /api/admin/integrity previously had NO authentication at all.
+// They are ledger internals, so both are now behind the same guard as the rest of /api/admin/*.
+app.get("/api/admin/stats", requireSystemAdmin, (_req, res) => {
   try {
     const usersCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number };
     const ordersCount = db.prepare("SELECT COUNT(*) as count FROM orders").get() as { count: number };
@@ -436,7 +718,7 @@ app.get("/api/admin/stats", (req, res) => {
   }
 });
 
-app.get("/api/admin/integrity", (req, res) => {
+app.get("/api/admin/integrity", requireSystemAdmin, (req, res) => {
   try {
     const dbCheck = db.prepare("SELECT COUNT(*) as count FROM users").get();
     if ((dbCheck as any).count < 0) {
@@ -1119,7 +1401,10 @@ app.get("/api/admin/users", (req, res) => {
     return res.status(403).json({ error: "forbidden", message: "Admin access required" });
   }
   try {
-    const users = db.prepare("SELECT id, email, phone, phone_verified, status, role, ray_id, created_at, updated_at FROM users ORDER BY created_at DESC LIMIT 100").all();
+    const users = db.prepare(
+      "SELECT u.id, u.email, u.phone, u.phone_verified, u.status, u.role, u.ray_id, u.created_at, u.updated_at, a.name AS account_name " +
+      "FROM users u LEFT JOIN accounts a ON a.user_id = u.id ORDER BY u.created_at DESC LIMIT 100"
+    ).all();
     res.json({ users, simulasi: true });
   } catch (e: any) {
     res.status(500).json({ error: "internal", message: e.message });
@@ -1318,4 +1603,13 @@ app.listen(PORT, () => {
   // Auto-seed dev credentials on startup (idempotent)
   const result = seedDevAccount();
   console.log(`[${result.seeded ? "SEED" : "INFO"}] ${result.message}`);
+
+  // Admin console surface + a loud warning while the demo password is unchanged.
+  console.log(`[admin] console at /admin — sign in with ADMIN_PASSWORD (email label: ${ADMIN_EMAIL})`);
+  if (ADMIN_PASSWORD === "admin1") {
+    console.warn("[admin] WARNING: ADMIN_PASSWORD is still the default 'admin1'. Set ADMIN_PASSWORD before exposing this service.");
+  }
+  if (JWT_SECRET === "dev-secret-change-in-production") {
+    console.warn("[auth] WARNING: JWT_SECRET is the default value. Set JWT_SECRET before exposing this service.");
+  }
 });

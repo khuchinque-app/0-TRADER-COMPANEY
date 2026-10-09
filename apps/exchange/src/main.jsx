@@ -78,6 +78,9 @@ function Banner() {
         <a className="item" href="/affiliate">{t.nav.affiliate}</a>
         <a className="item" href="/privacy-policy">{t.nav.privacy}</a>
         <a className="item" href="/help/pengguna-baru">{t.nav.help}</a>
+        <a className="item" href="/akun/masuk">{t.nav.login}</a>
+        <a className="item" href="/akun/daftar">{t.nav.register}</a>
+        <a className="item" href="/admin">Admin</a>
         <span className="lang" onClick={toggleTheme} title="Ganti tema / Toggle theme">
           {theme === 'dark' ? '🌙' : '☀️'}
         </span>
@@ -557,9 +560,9 @@ function App() {
   </SimplePage>;
   if (path === '/akun/order') return <MyOrdersPage />;
   if (path === '/akun/masuk') return <LoginPage />;
-  if (path === '/akun/daftar') return <SimplePage title="Daftar"><p>Gunakan <a href="/akun/masuk" style={{ color: 'var(--up)' }}>/akun/masuk</a> → tombol Guest Demo untuk saldo instan (tanpa KYC).</p></SimplePage>;
+  if (path === '/akun/daftar' || path === '/daftar') return <RegisterPage />;
   if (path === '/akun/dompet') return <WalletPage />;
-  if (path === '/akun/admin') return <AdminPanelPage />;
+  if (path === '/admin' || path === '/akun/admin') return <AdminConsole />;
   return <NotFound />;
 }
 
@@ -670,120 +673,340 @@ function MyOrdersPage() {
   );
 }
 
-// ---------------- admin: whitelabel panel (/akun/admin, login-gated) ----------------
+// ---------------- admin console (/admin + /akun/admin, password-gated) ----------------
 const BRAND_FIELDS = ['name', 'tagline', 'logoText', 'logoAccent', 'supportEmail', 'supportUrl', 'colorUp', 'colorDown', 'theme', 'announcement'];
 
-function AdminPanelPage() {
+// Admin sessions live under their own key so an admin sign-in never disturbs a member
+// session (and vice versa).
+const ADMIN_TOKEN_KEY = 'sx_admin_jwt';
+
+function readErr(d, status) {
+  const msg = (d && ((d.error && d.error.message) || d.message || (typeof d.error === 'string' ? d.error : null))) || `HTTP ${status}`;
+  return msg;
+}
+
+async function apiFetch(url, { token, method = 'GET', body } = {}) {
+  const r = await fetch(url, {
+    method,
+    headers: {
+      accept: 'application/json',
+      ...(body !== undefined ? { 'content-type': 'application/json' } : {}),
+      ...(token ? { authorization: 'Bearer ' + token } : {}),
+    },
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(readErr(d, r.status)), { status: r.status, data: d });
+  return d;
+}
+
+const fmtWhen = (secs) => (secs ? new Date(secs * 1000).toLocaleString('id-ID') : '—');
+
+// ---- member registration (/akun/daftar) ----
+function RegisterPage() {
   const t = useLang();
-  const [token, setToken] = useState(() => localStorage.getItem('sx_jwt') || '');
-  const [email, setEmail] = useState('');
-  const [pass, setPass] = useState('');
-  const [brand, setBrand] = useState(null);
+  const [f, setF] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setMsg('');
+    if (!f.email || !f.password) { setMsg('Email dan password wajib diisi.'); return; }
+    if (f.password.length < 8) { setMsg('Password minimal 8 karakter.'); return; }
+    if (f.password !== f.confirm) { setMsg('Konfirmasi password tidak sama.'); return; }
+    setBusy(true);
+    try {
+      const d = await apiFetch('/api/auth/register', { method: 'POST', body: { name: f.name, email: f.email, password: f.password } });
+      localStorage.setItem('sx_jwt', d.token || '');
+      location.href = '/akun/dompet';
+    } catch (err) {
+      setMsg(err.message);
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="wrap" style={{ maxWidth: 440 }}>
+      <h1 className="crumb"><b>Daftar Akun — Simulasi</b></h1>
+      <form className="panel form" onSubmit={submit}>
+        <div className="field"><span>Nama</span><input value={f.name} onChange={set('name')} placeholder="Nama tampilan" /></div>
+        <div className="field"><span>Email</span><input value={f.email} onChange={set('email')} placeholder="nama@email.com" autoComplete="username" /></div>
+        <div className="field"><span>Password</span><input value={f.password} onChange={set('password')} type="password" placeholder="min. 8 karakter" autoComplete="new-password" /></div>
+        <div className="field"><span>Ulangi</span><input value={f.confirm} onChange={set('confirm')} type="password" placeholder="ulangi password" autoComplete="new-password" /></div>
+        <button type="submit" className="btn" disabled={busy}>{busy ? 'Memproses…' : 'Daftar & mulai trading'}</button>
+        {msg && <div className="down" style={{ fontSize: 12 }}>{msg}</div>}
+        <div className="muted" style={{ fontSize: 12 }}>
+          Sudah punya akun? <a href="/akun/masuk" style={{ color: 'var(--up)' }}>Masuk di sini</a> ·
+          dapat saldo virtual 10.000 USDT untuk simulasi · {t.simNote}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ---- admin console ----
+function AdminLoginScreen({ onToken }) {
+  const t = useLang();
+  const [pw, setPw] = useState('');
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (!token) { setBrand(null); return; }
-    let ok = true;
-    fetch('/api/admin/whitelabel', { headers: { authorization: 'Bearer ' + token, accept: 'application/json' } })
-      .then(async (r) => {
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok) throw Object.assign(new Error((d.error && d.error.message) || `HTTP ${r.status}`), { status: r.status });
-        return d;
-      })
-      .then((d) => { if (ok) { setBrand(d.brand || {}); setMsg(''); } })
-      .catch((e) => { if (ok) { setBrand(null); setMsg(e.status === 403 || e.status === 401 ? 'Perlu login sebagai system-admin.' : String(e.message)); } });
-    return () => { ok = false; };
-  }, [token]);
-
-  const login = async () => {
+  const submit = async (e) => {
+    e.preventDefault();
     setBusy(true); setMsg('');
     try {
-      const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) { setMsg(d.message || 'login gagal'); return; }
-      localStorage.setItem('sx_jwt', d.token || '');
-      setToken(d.token || '');
-    } catch (e) { setMsg(String(e.message)); } finally { setBusy(false); }
+      const d = await apiFetch('/api/admin/login', { method: 'POST', body: { password: pw } });
+      localStorage.setItem(ADMIN_TOKEN_KEY, d.token || '');
+      onToken(d.token || '');
+    } catch (err) {
+      setMsg(err.message);
+    } finally { setBusy(false); }
   };
+
+  return (
+    <div className="wrap" style={{ maxWidth: 420 }}>
+      <h1 className="crumb"><b>Admin Console — Simulasi</b></h1>
+      <form className="panel form" onSubmit={submit}>
+        <div className="field"><span>Password admin</span>
+          <input value={pw} onChange={(e) => setPw(e.target.value)} type="password" placeholder="ADMIN_PASSWORD" autoComplete="current-password" /></div>
+        <button type="submit" className="btn" disabled={busy}>{busy ? 'Memeriksa…' : 'Masuk sebagai admin'}</button>
+        {msg && <div className="down" style={{ fontSize: 12 }}>{msg}</div>}
+        <div className="muted" style={{ fontSize: 12 }}>Area operator · {t.simNote}</div>
+      </form>
+    </div>
+  );
+}
+
+function DashboardTab({ token }) {
+  const [ov, setOv] = useState(null);
+  const [feed, setFeed] = useState(null);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    let ok = true;
+    const load = async () => {
+      try { const d = await apiFetch('/api/admin/overview', { token }); if (ok) { setOv(d); setErr(''); } }
+      catch (e) { if (ok) setErr(e.message); }
+      try { const h = await apiFetch('/api/market/health'); if (ok) setFeed(h); } catch { /* feed optional */ }
+    };
+    load(); const iv = setInterval(load, 10000);
+    return () => { ok = false; clearInterval(iv); };
+  }, [token]);
+
+  if (err) return <div className="panel" style={{ padding: 16 }}><span className="down">{err}</span></div>;
+  if (!ov) return <div className="panel" style={{ padding: 16 }}><span className="muted">Memuat…</span></div>;
+  const c = ov.counts || {};
+  const KPIS = [
+    ['Members', c.members], ['Admins', c.admins], ['Non-active', c.nonActive],
+    ['Accounts', c.accounts], ['Orders', c.orders], ['Open orders', c.openOrders],
+    ['Fills', c.fills], ['Journal lines', c.journalLines],
+  ];
+  return (
+    <>
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 12 }}>
+        {KPIS.map(([label, value]) => (
+          <div className="panel" key={label} style={{ padding: '12px 14px' }}>
+            <div className="muted" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: .4 }}>{label}</div>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>{value ?? '—'}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+        <div className="panel"><h3>Feed pasar</h3>
+          <table><tbody>
+            <tr><td className="muted">Upstream</td><td style={{ textAlign: 'right' }}>{feed ? <span className={feed.mexc === 'up' ? 'up' : 'down'}>{feed.mexc}</span> : '—'}</td></tr>
+            <tr><td className="muted">Pairs</td><td style={{ textAlign: 'right' }}>{feed ? feed.pairs : '—'}</td></tr>
+            <tr><td className="muted">LIVE</td><td style={{ textAlign: 'right' }}>{feed ? feed.live : '—'}</td></tr>
+            <tr><td className="muted">Latency</td><td style={{ textAlign: 'right' }}>{feed ? feed.mexcLatencyMs + ' ms' : '—'}</td></tr>
+          </tbody></table>
+        </div>
+        <div className="panel"><h3>Registrasi terbaru</h3>
+          <table><thead><tr><th>email</th><th>role</th><th>status</th></tr></thead><tbody>
+            {(ov.recentMembers || []).map((u) => (
+              <tr key={u.id}><td>{u.email}</td><td className="muted">{u.role}</td>
+                <td className={u.status === 'active' ? 'up' : 'down'}>{u.status}</td></tr>
+            ))}
+          </tbody></table>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function MembersTab({ token }) {
+  const [rows, setRows] = useState(null);
+  const [msg, setMsg] = useState('');
+  const load = () => apiFetch('/api/admin/users', { token }).then((d) => setRows(d.users || [])).catch((e) => setMsg(e.message));
+  useEffect(() => { load(); }, [token]);
+
+  const setStatus = async (id, status) => {
+    setMsg('');
+    try { await apiFetch(`/api/admin/users/${id}/status`, { token, method: 'PUT', body: { status } }); load(); }
+    catch (e) { setMsg(e.message); }
+  };
+
+  if (!rows) return <div className="panel" style={{ padding: 16 }}><span className="muted">{msg || 'Memuat…'}</span></div>;
+  return (
+    <div className="panel">
+      <h3>Members · {rows.length}</h3>
+      {msg && <div className="down" style={{ padding: '0 14px 8px', fontSize: 12 }}>{msg}</div>}
+      <table>
+        <thead><tr><th>email</th><th>nama</th><th>role</th><th>status</th><th>terdaftar</th><th>aksi</th></tr></thead>
+        <tbody>
+          {rows.map((u) => (
+            <tr key={u.id}>
+              <td><b>{u.email}</b></td>
+              <td className="muted">{u.account_name || '—'}</td>
+              <td className={u.role === 'system-admin' ? 'up' : 'muted'}>{u.role}</td>
+              <td className={u.status === 'active' ? 'up' : 'down'}>{u.status}</td>
+              <td className="muted" style={{ fontSize: 12 }}>{fmtWhen(u.created_at)}</td>
+              <td>
+                {u.status !== 'active'
+                  ? <button className="btn ghost" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => setStatus(u.id, 'active')}>aktifkan</button>
+                  : <button className="btn ghost" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => setStatus(u.id, 'suspended')}>suspend</button>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function BrandTab({ token }) {
+  const [brand, setBrand] = useState(null);
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let ok = true;
+    apiFetch('/api/admin/whitelabel', { token })
+      .then((d) => { if (ok) setBrand(d.brand || {}); })
+      .catch((e) => { if (ok) setMsg(e.message); });
+    return () => { ok = false; };
+  }, [token]);
 
   const save = async () => {
     setBusy(true); setMsg('');
     try {
       const patch = {}; for (const k of BRAND_FIELDS) patch[k] = brand[k];
-      const r = await fetch('/api/admin/whitelabel', {
-        method: 'PUT',
-        headers: { authorization: 'Bearer ' + token, accept: 'application/json', 'content-type': 'application/json' },
-        body: JSON.stringify({ brand: patch }),
-      });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) { setMsg((d.error && d.error.message) || d.message || `HTTP ${r.status}`); return; }
-      setBrand(d.brand || brand); setMsg('Tersimpan ✔ — brand live dibaca ulang dari GET /api/brand');
-    } catch (e) { setMsg(String(e.message)); } finally { setBusy(false); }
+      const d = await apiFetch('/api/admin/whitelabel', { token, method: 'PUT', body: { brand: patch } });
+      setBrand(d.brand || brand); setMsg('Tersimpan ✔ — /api/brand sekarang mengembalikan nilai ini.');
+    } catch (e) { setMsg(e.message); } finally { setBusy(false); }
   };
 
-  if (!token || !brand) {
-    return (
-      <div className="wrap" style={{ maxWidth: 420 }}>
-        <h1 className="crumb"><b>Admin — Whitelabel (Simulasi)</b></h1>
-        <div className="panel form">
-          <div className="field"><input placeholder="email admin" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-          <div className="field"><input placeholder="password" type="password" value={pass} onChange={(e) => setPass(e.target.value)} /></div>
-          <button className="btn" disabled={busy} onClick={login}>Masuk sebagai admin</button>
-          {msg && <div className="muted" style={{ fontSize: 12 }}>{msg}</div>}
-          <div className="muted" style={{ fontSize: 12 }}>{t.simNote} · butuh role system-admin</div>
-        </div>
-      </div>
-    );
-  }
-
+  if (!brand) return <div className="panel" style={{ padding: 16 }}><span className="muted">{msg || 'Memuat…'}</span></div>;
   return (
-    <div className="wrap" style={{ maxWidth: 660 }}>
-      <h1 className="crumb"><b>Admin — Whitelabel &amp; Brand (Simulasi)</b></h1>
-      <div className="panel form">
-        {BRAND_FIELDS.map((k) => (
-          <div className="field" key={k}>
-            <span style={{ minWidth: 120, color: 'var(--muted)', fontSize: 12 }}>{k}</span>
-            <input value={brand[k] ?? ''} onChange={(e) => setBrand({ ...brand, [k]: e.target.value })} />
-          </div>
-        ))}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn" disabled={busy} onClick={save}>Simpan brand</button>
-          <button className="btn ghost" onClick={() => { localStorage.removeItem('sx_jwt'); setToken(''); }}>Keluar</button>
+    <div className="panel form">
+      <h3>Whitelabel &amp; brand</h3>
+      {BRAND_FIELDS.map((k) => (
+        <div className="field" key={k}>
+          <span style={{ minWidth: 120, color: 'var(--muted)', fontSize: 12 }}>{k}</span>
+          <input value={brand[k] ?? ''} onChange={(e) => setBrand({ ...brand, [k]: e.target.value })} />
         </div>
-        {msg && <div className="muted" style={{ fontSize: 12 }}>{msg}</div>}
-        <div className="muted" style={{ fontSize: 12 }}>{t.simNote}</div>
+      ))}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="btn" disabled={busy} onClick={save}>Simpan brand</button>
       </div>
+      {msg && <div className="muted" style={{ fontSize: 12 }}>{msg}</div>}
     </div>
   );
 }
 
-// ---------------- wallet + login (mock, investor-clickable) ----------------
+function AuditTab({ token }) {
+  const [ov, setOv] = useState(null);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    apiFetch('/api/admin/overview', { token }).then(setOv).catch((e) => setErr(e.message));
+  }, [token]);
+  if (err) return <div className="panel" style={{ padding: 16 }}><span className="down">{err}</span></div>;
+  if (!ov) return <div className="panel" style={{ padding: 16 }}><span className="muted">Memuat…</span></div>;
+  return (
+    <div className="panel"><h3>Audit log (terbaru)</h3>
+      <table><thead><tr><th>waktu</th><th>event</th><th>detail</th><th>user</th></tr></thead><tbody>
+        {(ov.recentAudit || []).map((a, i) => (
+          <tr key={i}><td className="muted" style={{ fontSize: 12 }}>{fmtWhen(a.created_at)}</td>
+            <td>{a.event}</td><td className="muted">{a.detail}</td>
+            <td className="muted" style={{ fontSize: 12 }}>{(a.user_id || '').slice(0, 14)}</td></tr>
+        ))}
+        {!(ov.recentAudit || []).length && <tr><td colSpan={4} className="muted">belum ada event</td></tr>}
+      </tbody></table>
+    </div>
+  );
+}
+
+function AdminConsole() {
+  const t = useLang();
+  const [token, setToken] = useState(() => localStorage.getItem(ADMIN_TOKEN_KEY) || '');
+  const [admin, setAdmin] = useState(null);
+  const [tab, setTab] = useState('dashboard');
+
+  useEffect(() => {
+    if (!token) { setAdmin(null); return; }
+    let ok = true;
+    apiFetch('/api/admin/session', { token })
+      .then((d) => { if (ok) setAdmin(d.admin); })
+      .catch(() => { if (ok) { localStorage.removeItem(ADMIN_TOKEN_KEY); setToken(''); setAdmin(null); } });
+    return () => { ok = false; };
+  }, [token]);
+
+  const logout = async () => {
+    try { await fetch('/api/admin/logout', { method: 'POST' }); } catch { /* stateless token */ }
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
+    setToken(''); setAdmin(null);
+  };
+
+  if (!token || !admin) return <AdminLoginScreen onToken={setToken} />;
+
+  const TABS = [['dashboard', 'Dashboard'], ['members', 'Members'], ['brand', 'Brand'], ['audit', 'Audit']];
+  return (
+    <div className="wrap" style={{ maxWidth: 1040 }}>
+      <h1 className="crumb">
+        <b>Admin Console</b> <span className="muted">· {admin.email} · {admin.role}</span>
+        <button className="btn ghost" style={{ float: 'right', padding: '4px 12px', fontSize: 12 }} onClick={logout}>Keluar</button>
+      </h1>
+      <div className="row" style={{ gap: 6, marginBottom: 14 }}>
+        {TABS.map(([id, label]) => (
+          <button key={id} className="btn ghost" onClick={() => setTab(id)}
+            style={tab === id ? { borderColor: 'var(--up)', color: 'var(--up)' } : null}>{label}</button>
+        ))}
+      </div>
+      {tab === 'dashboard' && <DashboardTab token={token} />}
+      {tab === 'members' && <MembersTab token={token} />}
+      {tab === 'brand' && <BrandTab token={token} />}
+      {tab === 'audit' && <AuditTab token={token} />}
+      <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>{t.simNote} · area operator</p>
+    </div>
+  );
+}
+
+// ---------------- wallet + login (member session) ----------------
 function LoginPage() {
   const t = useLang();
   const [msg, setMsg] = useState('');
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
+  const [busy, setBusy] = useState(false);
   const go = async (url, body) => {
+    setBusy(true); setMsg('');
     try {
-      const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}) });
-      const d = await r.json();
-      if (r.status === 401 || r.status === 400) { setMsg(d.message || 'gagal'); return; }
+      const d = await apiFetch(url, { method: 'POST', body: body || {} });
       localStorage.setItem('sx_jwt', d.token || '');
       location.href = '/akun/dompet';
-    } catch (e) { setMsg(String(e.message)); }
+    } catch (e) { setMsg(e.message); } finally { setBusy(false); }
   };
   return (
-    <div className="wrap" style={{ maxWidth: 420 }}>
+    <div className="wrap" style={{ maxWidth: 440 }}>
       <h1 className="crumb"><b>Masuk — Simulasi</b></h1>
-      <div className="panel form">
-        <div className="field"><input placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-        <div className="field"><input placeholder="password" type="password" value={pass} onChange={(e) => setPass(e.target.value)} /></div>
-        <button className="btn" onClick={() => go('/api/auth/login', { email, password: pass })}>Masuk (mock)</button>
-        <button className="btn ghost" onClick={() => go('/api/auth/guest')}>Guest Demo — saldo virtual instan 🎁</button>
-        {msg && <div className="muted" style={{ fontSize: 12 }}>{msg}</div>}
-        <div className="muted" style={{ fontSize: 12 }}>{t.simNote}</div>
-      </div>
+      <form className="panel form" onSubmit={(e) => { e.preventDefault(); go('/api/auth/login', { email, password: pass }); }}>
+        <div className="field"><span>Email</span><input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nama@email.com" autoComplete="username" /></div>
+        <div className="field"><span>Password</span><input value={pass} onChange={(e) => setPass(e.target.value)} type="password" autoComplete="current-password" /></div>
+        <button type="submit" className="btn" disabled={busy}>{busy ? 'Memeriksa…' : 'Masuk'}</button>
+        <button type="button" className="btn ghost" disabled={busy} onClick={() => go('/api/auth/guest')}>Guest Demo — saldo virtual instan 🎁</button>
+        {msg && <div className="down" style={{ fontSize: 12 }}>{msg}</div>}
+        <div className="muted" style={{ fontSize: 12 }}>
+          Belum punya akun? <a href="/akun/daftar" style={{ color: 'var(--up)' }}>Daftar di sini</a> · {t.simNote}
+        </div>
+      </form>
     </div>
   );
 }
