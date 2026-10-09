@@ -423,6 +423,7 @@ const LIMIT_CAP_PER_USER_PER_PAIR = parseFloat(process.env.LIMIT_CAP_USDT || "50
 /** Place a limit order: validates, persists to orders table as 'open', adds to in-memory book. */
 export async function placeLimitOrder(expr: {
   userId: string; slug: string; side: "buy" | "sell"; price: number; quantity: number;
+  stopLoss?: number | null; takeProfit?: number | null;
   db: DbLike;
 }): Promise<{ ok: boolean; status: number; body?: Record<string, unknown>; error?: string; message?: string }> {
   const p = await resolveFlexible(expr.slug);
@@ -451,8 +452,8 @@ export async function placeLimitOrder(expr: {
         throw Object.assign(new Error(`Not enough ${needAsset} for limit order`), { code: "insufficient_balance" });
       }
       db.prepare("UPDATE balances SET available = available - ?, locked = locked + ? WHERE id = ?").run(needAmount, needAmount, row.id);
-      db.prepare("INSERT INTO orders (id, user_id, pair, side, type, price, quantity, filled_quantity, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'limit', ?, ?, 0, 'open', ?, ?)")
-        .run(orderId, expr.userId, `${p.base}USDT`, expr.side, expr.price, expr.quantity, now, now);
+      db.prepare("INSERT INTO orders (id, user_id, pair, side, type, price, quantity, filled_quantity, status, stop_loss, take_profit, created_at, updated_at) VALUES (?, ?, ?, ?, 'limit', ?, ?, 0, 'open', ?, ?, ?, ?)")
+        .run(orderId, expr.userId, `${p.base}USDT`, expr.side, expr.price, expr.quantity, expr.stopLoss ?? null, expr.takeProfit ?? null, now, now);
     })();
   } catch (e: any) {
     if (e?.code === "insufficient_balance") return { ok: false, status: 409, error: "insufficient_balance", message: e.message };
@@ -462,7 +463,16 @@ export async function placeLimitOrder(expr: {
   const arr = restingBySymbol.get(p.mexcSymbol) || [];
   arr.push(entry);
   restingBySymbol.set(p.mexcSymbol, arr);
-  return { ok: true, status: 201, body: { ok: true, orderId, status: "open", pair: entry.pair, side: expr.side, price: expr.price, quantity: expr.quantity, simulasi: true } };
+  return {
+    ok: true,
+    status: 201,
+    body: {
+      ok: true, orderId, status: "open", pair: entry.pair, side: expr.side,
+      price: expr.price, quantity: expr.quantity,
+      stop_loss: expr.stopLoss ?? null, take_profit: expr.takeProfit ?? null,
+      simulasi: true,
+    },
+  };
 }
 
 /** One matcher pass: best bid/ask per restless symbol; fill crossing orders. */

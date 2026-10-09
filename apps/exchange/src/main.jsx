@@ -35,6 +35,11 @@ const T = {
 };
 
 // ---------------- api helpers (browser -> :22221 /api -> backend 11110) ----------------
+// The interval buttons show `1h` but /api/market/klines only accepts 60m (2devtool/API
+// contract). Without this map the 1h button silently returned 1m candles.
+const API_INTERVAL = { '1h': '60m' };
+const apiInterval = (label) => API_INTERVAL[label] || label;
+
 async function jget(url) {
   const r = await fetch(url, { headers: { accept: 'application/json' } });
   if (!r.ok) throw Object.assign(new Error(`HTTP ${r.status}`), { status: r.status });
@@ -196,14 +201,30 @@ function fmtNum(n) {
 }
 
 // ---------- candle chart: tiny SVG candlestick, no deps ----------
-function CandleChart({ data, height = 320 }) {
+// Stop Loss / Take Profit are drawn as dashed horizontal price lines with inline labels
+// (devtool pattern: one <g> per indicator holding its <line> + <text> so the label stays
+// attached). The Y scale is computed from the candle range UNION the SL/TP prices, so an
+// indicator outside the visible candles still lands on-canvas instead of being clipped.
+function CandleChart({ data, height = 320, stopLoss, takeProfit }) {
   if (!data || !data.length) return <div className="muted" style={{ padding: 30, textAlign: 'center' }}>—</div>;
   const W = 900, H = height, pad = 30;
   const n = Math.min(data.length, 90);
   const d = data.slice(-n);
-  const hi = Math.max(...d.map((k) => k.high)), lo = Math.min(...d.map((k) => k.low));
+  const px = (v) => { const x = parseFloat(v); return isFinite(x) && x > 0 ? x : null; };
+  const sl = px(stopLoss), tp = px(takeProfit);
+  const hi = Math.max(...d.map((k) => k.high), ...(sl != null ? [sl] : []), ...(tp != null ? [tp] : []));
+  const lo = Math.min(...d.map((k) => k.low), ...(sl != null ? [sl] : []), ...(tp != null ? [tp] : []));
   const y = (v) => pad + (1 - (v - lo) / (hi - lo || 1)) * (H - 2 * pad);
   const bw = (W - 2 * pad) / n;
+  const mkLine = (value, label, color, cls) => {
+    const yy = y(value);
+    return (
+      <g key={cls} className={cls}>
+        <line x1={pad} x2={W - pad} y1={yy} y2={yy} stroke={color} strokeWidth="1" strokeDasharray="4 4" />
+        <text x={pad + 4} y={yy - 5} fill={color} fontSize="12">{label}: {fmtNum(value)}</text>
+      </g>
+    );
+  };
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block' }}>
       {d.map((k, i) => {
@@ -218,6 +239,8 @@ function CandleChart({ data, height = 320 }) {
           </g>
         );
       })}
+      {sl != null && mkLine(sl, 'Stop Loss', 'var(--down)', 'price-line stop-loss')}
+      {tp != null && mkLine(tp, 'Take Profit', 'var(--up)', 'price-line take-profit')}
     </svg>
   );
 }
@@ -231,6 +254,7 @@ function PairPage({ slug, trade = false }) {
   const [tape, setTape] = useState(null);
   const [klines, setKlines] = useState(null);
   const [interval, setIntervalSel] = useState('15m');
+  const [bs, setBs] = useState('buy');
   const [ot, setOt] = useState('limit');
   const [price, setPrice] = useState('');
   const [stopLoss, setStopLoss] = useState('');
@@ -255,7 +279,7 @@ function PairPage({ slug, trade = false }) {
   useEffect(() => {
     if (!tick || tick.state !== 'LIVE') return;
     let ok = true;
-    const load = () => jget(`/api/market/klines/${slug}?interval=${interval}&limit=90`).then((d) => ok && setKlines(d)).catch(() => {});
+    const load = () => jget(`/api/market/klines/${slug}?interval=${apiInterval(interval)}&limit=90`).then((d) => ok && setKlines(d)).catch(() => {});
     load();
     const iv = setInterval(load, interval === '1m' ? 6000 : 20000);
     return () => { ok = false; clearInterval(iv); };
@@ -273,13 +297,19 @@ function PairPage({ slug, trade = false }) {
       const resp = await fetch('/api/market/orders', {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
-        body: JSON.stringify({ slug, side: bs, type: ot, price: ot === 'limit' ? parseFloat(price) : undefined, quantity: parseFloat(amount) }),
+        body: JSON.stringify({
+          slug, side: bs, type: ot,
+          price: ot === 'limit' ? parseFloat(price) : undefined,
+          quantity: parseFloat(amount),
+          stopLoss: ot === 'limit' ? (parseFloat(stopLoss) || undefined) : undefined,
+          takeProfit: ot === 'limit' ? (parseFloat(takeProfit) || undefined) : undefined,
+        }),
       });
       if (resp.status === 401) { setToast(t.pair.needLogin); setTimeout(() => setToast(null), 3000); location.href = '/akun/masuk'; return; }
       const d = await resp.json();
       if (!resp.ok) throw new Error(d.message || 'HTTP ' + resp.status);
       setToast(`${t.pair.orderPlaced} @ ${fmtNum(d.displayedPrice)} × ${fmtNum(d.quantity)}`); setTimeout(() => setToast(null), 3600);
-      setAmount(''); setPrice('');
+      setAmount(''); setPrice(''); setStopLoss(''); setTakeProfit('');
     } catch (e2) {
       setToast('ERR ' + e2.message); setTimeout(() => setToast(null), 3600);
     }
@@ -311,7 +341,7 @@ function PairPage({ slug, trade = false }) {
                       style={interval === i ? { borderColor: 'var(--up)', color: 'var(--up)', padding: '4px 10px' } : { padding: '4px 10px', fontSize: 12 }}>{i}</button>
                   ))}
                 </div>
-                <CandleChart data={klines?.klines} />
+                <CandleChart data={klines?.klines} stopLoss={stopLoss} takeProfit={takeProfit} />
               </div>
               <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <div className="panel"><h3>{t.pair.bids}</h3>
@@ -385,6 +415,7 @@ function PairPage({ slug, trade = false }) {
 }
 
 function OrdersPanel({ slug }) {
+  const t = useLang();
   const [token] = useState(() => localStorage.getItem('sx_jwt') || '');
   const [orders, setOrders] = useState(null);
   const load = () => fetch(`/api/market/myorders/${slug}`, { headers: { authorization: 'Bearer ' + token, accept: 'application/json' } })
@@ -399,12 +430,17 @@ function OrdersPanel({ slug }) {
   };
   return (
     <table style={{ fontSize: 12 }}>
+      <thead><tr>
+        <th></th><th>type</th><th>{t.pair.price}</th><th>{t.pair.amount}</th><th>status</th>
+        <th>Stop Loss</th><th>Take Profit</th><th></th>
+      </tr></thead>
       <tbody>
         {open.map((o) => (
           <tr key={o.id}><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side === 'buy' ? 'B' : 'S'}</td>
             <td>{o.type}</td><td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
             <td className="muted">{o.status}</td>
-            <td>{o.stop_loss != null || o.take_profit != null ? (fmtNum(o.stop_loss ?? '') + (o.take_profit != null ? ' → ' + fmtNum(o.take_profit ?? '') : '')) : ''}</td>
+            <td className="down">{o.stop_loss != null ? fmtNum(o.stop_loss) : '—'}</td>
+            <td className="up">{o.take_profit != null ? fmtNum(o.take_profit) : '—'}</td>
             <td><button className="btn ghost" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => cancel(o.id)}>✕</button></td></tr>
         ))}
       </tbody>
@@ -454,7 +490,7 @@ function ChartOnlyPage({ slug }) {
   const [interval, setIntervalSel] = useState('15m');
   useEffect(() => {
     let ok = true;
-    const load = () => jget(`/api/market/klines/${slug}?interval=${interval}&limit=120`).then((d) => ok && setK(d)).catch(() => {});
+    const load = () => jget(`/api/market/klines/${slug}?interval=${apiInterval(interval)}&limit=120`).then((d) => ok && setK(d)).catch(() => {});
     load(); const iv = setInterval(load, 10000);
     return () => { ok = false; clearInterval(iv); };
   }, [slug, interval]);
@@ -592,21 +628,26 @@ function MyOrdersPage() {
       {data ? (
         <>
           <div className="panel" style={{ marginBottom: 12 }}><h3>{t.pair.open}</h3>
-            <table><thead><tr><th>pair</th><th>side</th><th>type</th><th>price</th><th>qty</th><th>status</th></tr></thead><tbody>
+            <table><thead><tr><th>pair</th><th>side</th><th>type</th><th>price</th><th>qty</th><th>stop_loss</th><th>take_profit</th><th>status</th></tr></thead><tbody>
               {(data.open || []).map((o) => (
                 <tr key={o.id}><td>{o.pair}</td><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side}</td><td>{o.type}</td>
-                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td><td className="muted">{o.status}</td></tr>
+                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
+                  <td className="down">{o.stop_loss != null ? fmtNum(o.stop_loss) : '—'}</td>
+                  <td className="up">{o.take_profit != null ? fmtNum(o.take_profit) : '—'}</td>
+                  <td className="muted">{o.status}</td></tr>
               ))}
-              {!(data.open || []).length && <tr><td colSpan={6} className="muted">0 order terbuka</td></tr>}
+              {!(data.open || []).length && <tr><td colSpan={8} className="muted">0 order terbuka</td></tr>}
             </tbody></table>
           </div>
           <div className="panel" style={{ marginBottom: 12 }}><h3>{t.pair.hist}</h3>
-            <table><thead><tr><th>pair</th><th>side</th><th>status</th><th>price</th><th>qty</th></tr></thead><tbody>
+            <table><thead><tr><th>pair</th><th>side</th><th>status</th><th>price</th><th>qty</th><th>stop_loss</th><th>take_profit</th></tr></thead><tbody>
               {(data.history || []).map((o) => (
                 <tr key={o.id}><td>{o.pair}</td><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side}</td><td className="muted">{o.status}</td>
-                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td></tr>
+                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
+                  <td className="down">{o.stop_loss != null ? fmtNum(o.stop_loss) : '—'}</td>
+                  <td className="up">{o.take_profit != null ? fmtNum(o.take_profit) : '—'}</td></tr>
               ))}
-              {!(data.history || []).length && <tr><td colSpan={5} className="muted">riwayat kosong</td></tr>}
+              {!(data.history || []).length && <tr><td colSpan={7} className="muted">riwayat kosong</td></tr>}
             </tbody></table>
           </div>
           <div className="panel"><h3>Fills (ledger)</h3>

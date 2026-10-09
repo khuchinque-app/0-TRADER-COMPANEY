@@ -1,0 +1,5 @@
+{
+  "error": "too_many_requests",
+  "message": "Rate limit exceeded, retry later",
+  "simulasi": true
+}

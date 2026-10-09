@@ -1,0 +1,14 @@
+{
+  "slug": "ACSIDR",
+  "base": "ACS",
+  "quote": "IDR",
+  "inMarket": true,
+  "inDepth": true,
+  "inChart": true,
+  "mexcSymbol": null,
+  "state": "NO_FEED",
+  "tradable": false,
+  "dataState": "no-feed",
+  "message": "no live feed in simulation",
+  "simulasi": true
+}

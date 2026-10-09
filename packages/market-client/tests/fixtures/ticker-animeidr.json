@@ -1,0 +1,23 @@
+{
+  "slug": "ANIMEIDR",
+  "base": "ANIME",
+  "quote": "IDR",
+  "inMarket": true,
+  "inDepth": true,
+  "inChart": true,
+  "mexcSymbol": "ANIMEUSDT",
+  "state": "LIVE",
+  "tradable": true,
+  "lastPrice": 49.87125,
+  "indicative": true,
+  "priceChangePercent": -0.021,
+  "highPrice": 51.17125,
+  "lowPrice": 47.222500000000004,
+  "quoteVolume": 843641635.2,
+  "openPrice": 50.94375,
+  "bidPrice": 49.855,
+  "askPrice": 49.887499999999996,
+  "stale": false,
+  "staleSince": null,
+  "simulasi": true
+}

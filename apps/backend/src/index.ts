@@ -152,6 +152,15 @@ function initDb() {
       updated_at INTEGER NOT NULL
     );
   `);
+
+  // Idempotent additive migration: stop_loss / take_profit on orders (task.md: order
+  // history must carry these). SQLite has no "ADD COLUMN IF NOT EXISTS", so probe
+  // PRAGMA table_info first — safe to run on every boot, existing rows keep NULL.
+  const orderCols = new Set(
+    (db.prepare("PRAGMA table_info(orders)").all() as Array<{ name: string }>).map((c) => c.name)
+  );
+  if (!orderCols.has("stop_loss")) db.exec("ALTER TABLE orders ADD COLUMN stop_loss REAL");
+  if (!orderCols.has("take_profit")) db.exec("ALTER TABLE orders ADD COLUMN take_profit REAL");
 }
 
 // Run DB initialization on startup
@@ -669,12 +678,20 @@ app.post("/api/market/orders", async (req, res) => {
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: "unauthenticated" });
   try {
-    const { slug, side, quantity, type, price } = req.body ?? {};
+    const { slug, side, quantity, type, price, stopLoss, takeProfit } = req.body ?? {};
     if (!slug || !(side === "buy" || side === "sell")) {
       return res.status(400).json({ error: "invalid_params", message: "slug and side (buy|sell) required" });
     }
+    // Optional SL/TP triggers — absent/invalid/non-positive collapses to null (not 0).
+    const posNum = (v: unknown): number | null => {
+      const n = Number(v);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    };
     if (type === "limit") {
-      const result = await placeLimitOrder({ userId, slug: String(slug), side, price: Number(price), quantity: Number(quantity), db });
+      const result = await placeLimitOrder({
+        userId, slug: String(slug), side, price: Number(price), quantity: Number(quantity),
+        stopLoss: posNum(stopLoss), takeProfit: posNum(takeProfit), db,
+      });
       if (!result.ok) return res.status(result.status).json({ error: result.error, message: result.message, simulasi: true });
       return res.status(result.status).json(result.body);
     }

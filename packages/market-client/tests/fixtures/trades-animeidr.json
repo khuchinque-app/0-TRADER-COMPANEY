@@ -1,0 +1,18 @@
+{
+  "slug": "ANIMEIDR",
+  "base": "ANIME",
+  "quote": "IDR",
+  "state": "LIVE",
+  "count": 7,
+  "trades": [
+    { "id": 7, "time": 1791538400000, "price": 49.9, "qty": 120.5, "side": "buy" },
+    { "id": 6, "time": 1791538395000, "price": 49.88, "qty": 40.0, "side": "sell" },
+    { "id": 5, "time": 1791538390000, "price": 49.87, "qty": 310.25, "side": "buy" },
+    { "id": 4, "time": 1791538385000, "price": 49.86, "qty": 15.0, "side": "buy" },
+    { "id": 3, "time": 1791538380000, "price": 49.85, "qty": 900.0, "side": "sell" },
+    { "id": 2, "time": 1791538375000, "price": 49.84, "qty": 22.75, "side": "buy" },
+    { "id": 1, "time": 1791538370000, "price": 49.83, "qty": 5.0, "side": "sell" }
+  ],
+  "stale": false,
+  "simulasi": true
+}
