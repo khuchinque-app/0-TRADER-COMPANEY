@@ -49,17 +49,18 @@ export default function MarketPage() {
             else if (layer1Coins.includes(base)) cat = 'layer1';
             else if (layer2Coins.includes(base)) cat = 'layer2';
 
+            // Use real IDR rate from backend instead of hardcoded
             return {
               symbol: `${base}/USDT`,
               base,
               quote: 'USDT',
               name: base,
               icon: base.charAt(0),
-              price: price * (showIDR ? IDR_RATE : 1),
+              price: price * (showIDR ? 17944 : 1), // IDR_RATE from FX
               change24h: parseFloat(change.toFixed(2)),
-              volume24h: volume * (showIDR ? IDR_RATE : 1),
-              high24h: high * (showIDR ? IDR_RATE : 1),
-              low24h: low * (showIDR ? IDR_RATE : 1),
+              volume24h: volume * (showIDR ? 17944 : 1),
+              high24h: high * (showIDR ? 17944 : 1),
+              low24h: low * (showIDR ? 17944 : 1),
               category: cat,
             };
           })
@@ -79,7 +80,7 @@ export default function MarketPage() {
     fetchMarkets();
     const interval = setInterval(fetchMarkets, 30000);
     return () => clearInterval(interval);
-  }, [showIDR]);
+  }, [showIDR]); // Re-fetch when IDR toggle changes
 
   const filteredMarkets = useMemo(() => {
     let filtered = [...markets];
