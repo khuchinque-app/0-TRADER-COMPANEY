@@ -1,0 +1,3839 @@
+{
+  "generatedAt": "2026-10-09T03:00:29.919Z",
+  "stale": false,
+  "static": [
+    "",
+    "/market",
+    "/id_ID/saya-pengguna-baru-dan-saya-bingung-harus-memulai-darimana-bagaimana-cara-membeli-menjual-bitcoin",
+    "/id_ID/ketentuan-dan-persyaratan-indodaxcom",
+    "/privacy-policy",
+    "/trade_api",
+    "/affiliate"
+  ],
+  "pairs": [
+    {
+      "slug": "1INCHIDR",
+      "base": "1INCH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AAPLXIDR",
+      "base": "AAPLX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AAVEIDR",
+      "base": "AAVE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ABIDR",
+      "base": "AB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ACEIDR",
+      "base": "ACE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ACHIDR",
+      "base": "ACH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ACNIDR",
+      "base": "ACN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ACSIDR",
+      "base": "ACS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ACTIDR",
+      "base": "ACT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ADAIDR",
+      "base": "ADA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AEROIDR",
+      "base": "AERO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AEVOIDR",
+      "base": "AEVO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AGIIDR",
+      "base": "AGI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AIHIDR",
+      "base": "AIH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AIIDR",
+      "base": "AI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AIOZIDR",
+      "base": "AIOZ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AIXBTIDR",
+      "base": "AIXBT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ALEIDR",
+      "base": "ALE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ALGOIDR",
+      "base": "ALGO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ALICEIDR",
+      "base": "ALICE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ALLOIDR",
+      "base": "ALLO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ALTIDR",
+      "base": "ALT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AMPIDR",
+      "base": "AMP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AMZNXIDR",
+      "base": "AMZNX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ANIMEIDR",
+      "base": "ANIME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ANKRIDR",
+      "base": "ANKR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ANOAIDR",
+      "base": "ANOA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "APEIDR",
+      "base": "APE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "APEXIDR",
+      "base": "APEX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "API3IDR",
+      "base": "API3",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "APUIDR",
+      "base": "APU",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ARBIDR",
+      "base": "ARB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ARCIDR",
+      "base": "ARC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ARKMIDR",
+      "base": "ARKM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ASETQUIDR",
+      "base": "ASETQU",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ASTERIDR",
+      "base": "ASTER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ATHIDR",
+      "base": "ATH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ATOMIDR",
+      "base": "ATOM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AUCTIONIDR",
+      "base": "AUCTION",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AUDIOIDR",
+      "base": "AUDIO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AURAIDR",
+      "base": "AURA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AUSDIDR",
+      "base": "AUSD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AVAIDR",
+      "base": "AVA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AVAXIDR",
+      "base": "AVAX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AVNTIDR",
+      "base": "AVNT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AXLIDR",
+      "base": "AXL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AXSIDR",
+      "base": "AXS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "AZTECIDR",
+      "base": "AZTEC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "B2IDR",
+      "base": "B2",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BALIDR",
+      "base": "BAL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BANANAIDR",
+      "base": "BANANA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BANANAS31IDR",
+      "base": "BANANAS31",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BANDIDR",
+      "base": "BAND",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BANIDR",
+      "base": "BAN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BANKIDR",
+      "base": "BANK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BATIDR",
+      "base": "BAT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BCHIDR",
+      "base": "BCH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BEAMIDR",
+      "base": "BEAM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BEATIDR",
+      "base": "BEAT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BGBIDR",
+      "base": "BGB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BICOIDR",
+      "base": "BICO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BIDR",
+      "base": "B",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BIOIDR",
+      "base": "BIO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BIRBIDR",
+      "base": "BIRB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BLURIDR",
+      "base": "BLUR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BMTIDR",
+      "base": "BMT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BNBIDR",
+      "base": "BNB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BNKRIDR",
+      "base": "BNKR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BOMEIDR",
+      "base": "BOME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BONEIDR",
+      "base": "BONE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BONKIDR",
+      "base": "BONK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BONKUSDT",
+      "base": "BONK",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BPIDR",
+      "base": "BP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BRETTIDR",
+      "base": "BRETT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BRIDR",
+      "base": "BR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BSVIDR",
+      "base": "BSV",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BTCIDR",
+      "base": "BTC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BTCUSDT",
+      "base": "BTC",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "BTTUSDT",
+      "base": "BTT",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "C98IDR",
+      "base": "C98",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CAKEIDR",
+      "base": "CAKE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CASTIDR",
+      "base": "CAST",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CATIDR",
+      "base": "CAT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CATIIDR",
+      "base": "CATI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CELOIDR",
+      "base": "CELO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CELRIDR",
+      "base": "CELR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CGPTIDR",
+      "base": "CGPT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CHEEMSIDR",
+      "base": "CHEEMS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CHILLGUYIDR",
+      "base": "CHILLGUY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CHRIDR",
+      "base": "CHR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CHTIDR",
+      "base": "CHT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CHZIDR",
+      "base": "CHZ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CJLIDR",
+      "base": "CJL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CKBIDR",
+      "base": "CKB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CNGIDR",
+      "base": "CNG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "COINXIDR",
+      "base": "COINX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "COLIDR",
+      "base": "COL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "COLLATIDR",
+      "base": "COLLAT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "COMPIDR",
+      "base": "COMP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CONXIDR",
+      "base": "CONX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "COWIDR",
+      "base": "COW",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CRCLXIDR",
+      "base": "CRCLX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CREAMIDR",
+      "base": "CREAM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CROAKIDR",
+      "base": "CROAK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CROIDR",
+      "base": "CRO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CRVIDR",
+      "base": "CRV",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CSTIDR",
+      "base": "CST",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CTCIDR",
+      "base": "CTC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CTKIDR",
+      "base": "CTK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CTSIIDR",
+      "base": "CTSI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CVCIDR",
+      "base": "CVC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CVXIDR",
+      "base": "CVX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "CYBERIDR",
+      "base": "CYBER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DEGENIDR",
+      "base": "DEGEN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DEPIDR",
+      "base": "DEP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DEXEIDR",
+      "base": "DEXE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DFGIDR",
+      "base": "DFG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DGBIDR",
+      "base": "DGB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DIDR",
+      "base": "D",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DLCIDR",
+      "base": "DLC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DODOIDR",
+      "base": "DODO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DOGE2IDR",
+      "base": "DOGE2",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DOGEIDR",
+      "base": "DOGE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DOGSIDR",
+      "base": "DOGS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DOTIDR",
+      "base": "DOT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DRXIDR",
+      "base": "DRX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DUPEIDR",
+      "base": "DUPE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "DUSKIDR",
+      "base": "DUSK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "EDENAIDR",
+      "base": "EDENA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "EDENIDR",
+      "base": "EDEN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "EGLDIDR",
+      "base": "EGLD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "EIGENIDR",
+      "base": "EIGEN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ENAIDR",
+      "base": "ENA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ENJIDR",
+      "base": "ENJ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ENSIDR",
+      "base": "ENS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "EPICIDR",
+      "base": "EPIC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ESPIDR",
+      "base": "ESP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ETCIDR",
+      "base": "ETC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ETHFIIDR",
+      "base": "ETHFI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ETHIDR",
+      "base": "ETH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ETHUSDT",
+      "base": "ETH",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FANCIDR",
+      "base": "FANC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FARTCOINIDR",
+      "base": "FARTCOIN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FETIDR",
+      "base": "FET",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FFIDR",
+      "base": "FF",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FILIDR",
+      "base": "FIL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FLOKIIDR",
+      "base": "FLOKI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FLOKIUSDT",
+      "base": "FLOKI",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FLRIDR",
+      "base": "FLR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FLUXIDR",
+      "base": "FLUX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FORMIDR",
+      "base": "FORM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FUELIDR",
+      "base": "FUEL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "FUNIDR",
+      "base": "FUN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GALAIDR",
+      "base": "GALA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GAMEIDR",
+      "base": "GAME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GENIUSIDR",
+      "base": "GENIUS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GIDR",
+      "base": "G",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GIGAIDR",
+      "base": "GIGA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GIGGLEIDR",
+      "base": "GIGGLE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GLIDRIDR",
+      "base": "GLIDR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GLMIDR",
+      "base": "GLM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GMTIDR",
+      "base": "GMT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GMXIDR",
+      "base": "GMX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GNOIDR",
+      "base": "GNO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GNSIDR",
+      "base": "GNS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GOATIDR",
+      "base": "GOAT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GOIDRIDR",
+      "base": "GOIDR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GOOGLXIDR",
+      "base": "GOOGLX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GPSIDR",
+      "base": "GPS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GRASSIDR",
+      "base": "GRASS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GRIFFAINIDR",
+      "base": "GRIFFAIN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GRTIDR",
+      "base": "GRT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GTCIDR",
+      "base": "GTC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "GWEIIDR",
+      "base": "GWEI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "H2OIDR",
+      "base": "H2O",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HAEDALIDR",
+      "base": "HAEDAL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HARTIDR",
+      "base": "HART",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HBARIDR",
+      "base": "HBAR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HFTIDR",
+      "base": "HFT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HIDR",
+      "base": "H",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HIGHIDR",
+      "base": "HIGH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HIVEIDR",
+      "base": "HIVE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HMSTRIDR",
+      "base": "HMSTR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HNTIDR",
+      "base": "HNT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HOMEIDR",
+      "base": "HOME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HONEYIDR",
+      "base": "HONEY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HOTIDR",
+      "base": "HOT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HUMAIDR",
+      "base": "HUMA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HYPEIDR",
+      "base": "HYPE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "HYPERIDR",
+      "base": "HYPER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ICNTIDR",
+      "base": "ICNT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ICPIDR",
+      "base": "ICP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IDIDR",
+      "base": "ID",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IDRTIDR",
+      "base": "IDRT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IDRXIDR",
+      "base": "IDRX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IDRXUSDT",
+      "base": "IDRX",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ILVIDR",
+      "base": "ILV",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IMXIDR",
+      "base": "IMX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "INDRIDR",
+      "base": "INDR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "INJIDR",
+      "base": "INJ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IOIDR",
+      "base": "IO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IOSTIDR",
+      "base": "IOST",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IOTAIDR",
+      "base": "IOTA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IOTXIDR",
+      "base": "IOTX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "IQIDR",
+      "base": "IQ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ISLMIDR",
+      "base": "ISLM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "JASMYIDR",
+      "base": "JASMY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "JELLYJELLYIDR",
+      "base": "JELLYJELLY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "JOEIDR",
+      "base": "JOE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "JSTIDR",
+      "base": "JST",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "JTOIDR",
+      "base": "JTO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "JUPIDR",
+      "base": "JUP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KAIAIDR",
+      "base": "KAIA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KAITOIDR",
+      "base": "KAITO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KDAGIDR",
+      "base": "KDAG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KERNELIDR",
+      "base": "KERNEL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KITEIDR",
+      "base": "KITE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KMNOIDR",
+      "base": "KMNO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KNCIDR",
+      "base": "KNC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KOMAIDR",
+      "base": "KOMA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KRDIDR",
+      "base": "KRD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KSMIDR",
+      "base": "KSM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "KTAIDR",
+      "base": "KTA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "L3IDR",
+      "base": "L3",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LADYSIDR",
+      "base": "LADYS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LDOIDR",
+      "base": "LDO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LEOIDR",
+      "base": "LEO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LINEAIDR",
+      "base": "LINEA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LINKIDR",
+      "base": "LINK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LISTAIDR",
+      "base": "LISTA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LITIDR",
+      "base": "LIT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LPTIDR",
+      "base": "LPT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LQTYIDR",
+      "base": "LQTY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LRCIDR",
+      "base": "LRC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LSKIDR",
+      "base": "LSK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LTCIDR",
+      "base": "LTC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LUNAIDR",
+      "base": "LUNA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LUNCIDR",
+      "base": "LUNC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LUNCUSDT",
+      "base": "LUNC",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "LYFEIDR",
+      "base": "LYFE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MAGICIDR",
+      "base": "MAGIC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MANAIDR",
+      "base": "MANA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MANTAIDR",
+      "base": "MANTA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MARSCOINIDR",
+      "base": "MARSCOIN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MASKIDR",
+      "base": "MASK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MAVIAIDR",
+      "base": "MAVIA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MAVIDR",
+      "base": "MAV",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MCTIDR",
+      "base": "MCT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MEIDR",
+      "base": "ME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MELANIAIDR",
+      "base": "MELANIA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MEMEIDR",
+      "base": "MEME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "METAIDR",
+      "base": "META",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "METIDR",
+      "base": "MET",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "METISIDR",
+      "base": "METIS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MEWIDR",
+      "base": "MEW",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MITOIDR",
+      "base": "MITO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MNTIDR",
+      "base": "MNT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MOCAIDR",
+      "base": "MOCA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MOGIDR",
+      "base": "MOG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MOLTIDR",
+      "base": "MOLT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MONIDR",
+      "base": "MON",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MOODENGIDR",
+      "base": "MOODENG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MOONPIGIDR",
+      "base": "MOONPIG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MORPHOIDR",
+      "base": "MORPHO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MOVEIDR",
+      "base": "MOVE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MPROIDR",
+      "base": "MPRO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MRSIDR",
+      "base": "MRS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MSHDIDR",
+      "base": "MSHD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MTCIDR",
+      "base": "MTC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MUBARAKIDR",
+      "base": "MUBARAK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MYROIDR",
+      "base": "MYRO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "MYXIDR",
+      "base": "MYX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NBTIDR",
+      "base": "NBT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NEARIDR",
+      "base": "NEAR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NEIROIDR",
+      "base": "NEIRO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NEOIDR",
+      "base": "NEO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NEOIDRIDR",
+      "base": "NEOIDR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NEONIDR",
+      "base": "NEON",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NEWTIDR",
+      "base": "NEWT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NEXOIDR",
+      "base": "NEXO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NIGHTIDR",
+      "base": "NIGHT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NMDIDR",
+      "base": "NMD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NMRIDR",
+      "base": "NMR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NOMIDR",
+      "base": "NOM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NOVAIDR",
+      "base": "NOVA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NPCIDR",
+      "base": "NPC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NRGIDR",
+      "base": "NRG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NUSAIDR",
+      "base": "NUSA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NVDAXIDR",
+      "base": "NVDAX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "NXAIDR",
+      "base": "NXA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "OGNIDR",
+      "base": "OGN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "OKBIDR",
+      "base": "OKB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "OKUSDIDR",
+      "base": "OKUSD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ONDOIDR",
+      "base": "ONDO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ONLIDR",
+      "base": "ONL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ONTIDR",
+      "base": "ONT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "OPIDR",
+      "base": "OP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ORBSIDR",
+      "base": "ORBS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ORCAIDR",
+      "base": "ORCA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ORDERIDR",
+      "base": "ORDER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PAXGIDR",
+      "base": "PAXG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PAYAIIDR",
+      "base": "PAYAI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PENDLEIDR",
+      "base": "PENDLE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PENGUIDR",
+      "base": "PENGU",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PEOPLEIDR",
+      "base": "PEOPLE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PEPEIDR",
+      "base": "PEPE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PEPEUSDT",
+      "base": "PEPE",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PERPIDR",
+      "base": "PERP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PHAIDR",
+      "base": "PHA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PIEVERSEIDR",
+      "base": "PIEVERSE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PIPPINIDR",
+      "base": "PIPPIN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PIXELIDR",
+      "base": "PIXEL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PLPAIDR",
+      "base": "PLPA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PLUMEIDR",
+      "base": "PLUME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PMIDR",
+      "base": "PM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PNUTIDR",
+      "base": "PNUT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "POLIDR",
+      "base": "POL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "POLSIDR",
+      "base": "POLS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "POLYIDR",
+      "base": "POLY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PONDIDR",
+      "base": "POND",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PONKEIDR",
+      "base": "PONKE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "POPCATIDR",
+      "base": "POPCAT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PORTALIDR",
+      "base": "PORTAL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "POWRIDR",
+      "base": "POWR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PRIMEIDR",
+      "base": "PRIME",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PROMIDR",
+      "base": "PROM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PROVEIDR",
+      "base": "PROVE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PUFFERIDR",
+      "base": "PUFFER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PUMPIDR",
+      "base": "PUMP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PUNDIXUSDT",
+      "base": "PUNDIX",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "PYTHIDR",
+      "base": "PYTH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "QNTIDR",
+      "base": "QNT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RADIDR",
+      "base": "RAD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RAREIDR",
+      "base": "RARE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RAYIDR",
+      "base": "RAY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "REDIDR",
+      "base": "RED",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RENDERIDR",
+      "base": "RENDER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "REPIDR",
+      "base": "REP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "REQIDR",
+      "base": "REQ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "REZIDR",
+      "base": "REZ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RFCIDR",
+      "base": "RFC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RIVERIDR",
+      "base": "RIVER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RLCIDR",
+      "base": "RLC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RPLIDR",
+      "base": "RPL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RSRIDR",
+      "base": "RSR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "RVNIDR",
+      "base": "RVN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SAFEIDR",
+      "base": "SAFE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SAHARAIDR",
+      "base": "SAHARA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SANDIDR",
+      "base": "SAND",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SAPIENIDR",
+      "base": "SAPIEN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SENTIDR",
+      "base": "SENT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SFIIDR",
+      "base": "SFI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SFPIDR",
+      "base": "SFP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SHELLIDR",
+      "base": "SHELL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SHIBIDR",
+      "base": "SHIB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SHIBUSDT",
+      "base": "SHIB",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SHOWIDR",
+      "base": "SHOW",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SHREDIDR",
+      "base": "SHRED",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SIDR",
+      "base": "S",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SIGNIDR",
+      "base": "SIGN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SKLIDR",
+      "base": "SKL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SKRIDR",
+      "base": "SKR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SKYAIDR",
+      "base": "SKYA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SKYAIIDR",
+      "base": "SKYAI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SKYIDR",
+      "base": "SKY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SLPIDR",
+      "base": "SLP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SNIDR",
+      "base": "SN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SNTIDR",
+      "base": "SNT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SNXIDR",
+      "base": "SNX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SOLAYERIDR",
+      "base": "SOLAYER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SOLIDR",
+      "base": "SOL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SOLVIDR",
+      "base": "SOLV",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SOMIIDR",
+      "base": "SOMI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SOONIDR",
+      "base": "SOON",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SPELLIDR",
+      "base": "SPELL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SPKIDR",
+      "base": "SPK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SPXIDR",
+      "base": "SPX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SQDIDR",
+      "base": "SQD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SSVIDR",
+      "base": "SSV",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "STGIDR",
+      "base": "STG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "STIKIDR",
+      "base": "STIK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "STOIDR",
+      "base": "STO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "STREAMIDR",
+      "base": "STREAM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "STRKIDR",
+      "base": "STRK",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "STRMIDR",
+      "base": "STRM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SUIIDR",
+      "base": "SUI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SUNDOGIDR",
+      "base": "SUNDOG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SUNIDR",
+      "base": "SUN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SUPERIDR",
+      "base": "SUPER",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SUSHIIDR",
+      "base": "SUSHI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SXTIDR",
+      "base": "SXT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "SYRUPIDR",
+      "base": "SYRUP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TAGIDR",
+      "base": "TAG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TAIKOIDR",
+      "base": "TAIKO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TELIDR",
+      "base": "TEL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TENIDR",
+      "base": "TEN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TFUELIDR",
+      "base": "TFUEL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "THETAIDR",
+      "base": "THETA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TIAIDR",
+      "base": "TIA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TIDR",
+      "base": "T",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TLMIDR",
+      "base": "TLM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TMGIDR",
+      "base": "TMG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TNSRIDR",
+      "base": "TNSR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TOKENIDR",
+      "base": "TOKEN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TONIDR",
+      "base": "TON",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TOSHIIDR",
+      "base": "TOSHI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TRACIDR",
+      "base": "TRAC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TRBIDR",
+      "base": "TRB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TRIAIDR",
+      "base": "TRIA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TROLLSOLIDR",
+      "base": "TROLLSOL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TRUMPIDR",
+      "base": "TRUMP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TRXIDR",
+      "base": "TRX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TSLAXIDR",
+      "base": "TSLAX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TURBOIDR",
+      "base": "TURBO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TURTLEIDR",
+      "base": "TURTLE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "TUSDIDR",
+      "base": "TUSD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "UAIIDR",
+      "base": "UAI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "UBIDR",
+      "base": "UB",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "UCJLIDR",
+      "base": "UCJL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "UMAIDR",
+      "base": "UMA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "UNIIDR",
+      "base": "UNI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "UNMDIDR",
+      "base": "UNMD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "USATIDR",
+      "base": "USAT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "USDCIDR",
+      "base": "USDC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "USDTIDR",
+      "base": "USDT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "USDTOTCIDR",
+      "base": "USDTOTC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "USDTOTCRCIDR",
+      "base": "USDTOTCRC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "USELESSIDR",
+      "base": "USELESS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VANRYIDR",
+      "base": "VANRY",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VBGIDR",
+      "base": "VBG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VCGIDR",
+      "base": "VCG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VCGUSDT",
+      "base": "VCG",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VELOFINIDR",
+      "base": "VELOFIN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VELOIDR",
+      "base": "VELO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VELVETIDR",
+      "base": "VELVET",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VETIDR",
+      "base": "VET",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VEXIDR",
+      "base": "VEX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VINEIDR",
+      "base": "VINE",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VIRTUALIDR",
+      "base": "VIRTUAL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VOXELIDR",
+      "base": "VOXEL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VRAIDR",
+      "base": "VRA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "VVVIDR",
+      "base": "VVV",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "W3FIDR",
+      "base": "W3F",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "W3SIDR",
+      "base": "W3S",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WAVESIDR",
+      "base": "WAVES",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WBTCIDR",
+      "base": "WBTC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WCTIDR",
+      "base": "WCT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WEALTHIDR",
+      "base": "WEALTH",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WEMIXIDR",
+      "base": "WEMIX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WIDR",
+      "base": "W",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WIFIDR",
+      "base": "WIF",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WLDIDR",
+      "base": "WLD",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WLFIIDR",
+      "base": "WLFI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "WOOIDR",
+      "base": "WOO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XAUTIDR",
+      "base": "XAUT",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XCNIDR",
+      "base": "XCN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XDCIDR",
+      "base": "XDC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XECUSDT",
+      "base": "XEC",
+      "quote": "USDT",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XLMIDR",
+      "base": "XLM",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XPLIDR",
+      "base": "XPL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XRIDR",
+      "base": "XR",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XRPIDR",
+      "base": "XRP",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XTZIDR",
+      "base": "XTZ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "XVSIDR",
+      "base": "XVS",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "YFIIDR",
+      "base": "YFI",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "YFIIIDR",
+      "base": "YFII",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "YGGIDR",
+      "base": "YGG",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZAMAIDR",
+      "base": "ZAMA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZBCNIDR",
+      "base": "ZBCN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZENIDR",
+      "base": "ZEN",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZEREBROIDR",
+      "base": "ZEREBRO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZETAIDR",
+      "base": "ZETA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZILIDR",
+      "base": "ZIL",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZKCIDR",
+      "base": "ZKC",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZKJIDR",
+      "base": "ZKJ",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZORAIDR",
+      "base": "ZORA",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZROIDR",
+      "base": "ZRO",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    },
+    {
+      "slug": "ZRXIDR",
+      "base": "ZRX",
+      "quote": "IDR",
+      "inMarket": true,
+      "inDepth": true,
+      "inChart": true
+    }
+  ]
+}

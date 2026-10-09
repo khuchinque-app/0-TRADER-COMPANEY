@@ -16,7 +16,9 @@
     "baseUrl": "..",
     "paths": {
       "@shared/*": ["packages/shared/src/*"],
-      "@engine/*": ["apps/engine/src/*"]
+      "@engine/*": ["apps/engine/src/*"],
+      "@trading/mexc-client": ["../../packages/mexc-client/src/index.ts"],
+      "@trading/indodax-routes/routes.json": ["../../packages/indodax-routes/routes.json"]
     }
   },
   "include": ["src/**/*"],

@@ -10,6 +10,7 @@ import { agentRouter } from "./routes/agent";
 import { priceFeed } from "./pricefeed/service";
 import { isSymbol, SUPPORTED_SYMBOLS } from "./pricefeed/adapter";
 import { tapeService, TAPE_LEN, TapeTrade } from "./pricefeed/tape";
+import { createMarketRouter, startMarketResolution, setMarketDb, fillMarketOrder } from "./market";
 
 // Resolve .env from repo root (works from both src/ and dist/)
 const repoRoot = path.resolve(__dirname, "../../..");
@@ -562,6 +563,45 @@ app.get("/api/markets", async (_req, res) => {
 // ALIAS: /market -> /api/markets
 app.get("/market", (_req, res) => {
   res.redirect(301, '/api/markets');
+});
+
+// M6-M7: MEXC-backed /api/market/* for the exchange app (public data only)
+setMarketDb(db);
+app.use("/api/market", createMarketRouter());
+
+// Mock fill endpoint for the exchange order form (B8): market orders walk MEXC
+// depth; fills post to ledger.db. Auth via same JWT. NO MEXC private calls.
+app.post("/api/market/orders", async (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  try {
+    const { slug, side, quantity } = req.body ?? {};
+    if (!slug || !(side === "buy" || side === "sell")) {
+      return res.status(400).json({ error: "invalid_params", message: "slug and side (buy|sell) required" });
+    }
+    const result = await fillMarketOrder({ userId, slug: String(slug), side, quantity: Number(quantity) });
+    if (!result.ok) return res.status(result.status).json({ error: result.error, message: result.message, simulasi: true });
+    res.status(result.status).json(result.body);
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message, simulasi: true });
+  }
+});
+
+// Open orders + trade history for one slug (exchange order tabs)
+app.get("/api/market/myorders/:slug", (req, res) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+  try {
+    const slug = String(req.params.slug).toUpperCase();
+    const base = slug.endsWith("USDT") ? slug.slice(0, -4) : slug.replace(/IDR$/, "");
+    const pairCol = `${base}USDT`;
+    const open = db.prepare("SELECT * FROM orders WHERE user_id = ? AND pair = ? AND status IN ('open','partially_filled') ORDER BY created_at DESC LIMIT 50").all(userId, pairCol);
+    const historic = db.prepare("SELECT * FROM orders WHERE user_id = ? AND pair = ? AND status NOT IN ('open','partially_filled') ORDER BY created_at DESC LIMIT 50").all(userId, pairCol);
+    const fills = db.prepare("SELECT * FROM fills WHERE user_id = ? AND pair = ? ORDER BY timestamp DESC LIMIT 50").all(userId, pairCol);
+    res.json({ open, history: historic, fills, simulasi: true });
+  } catch (e: any) {
+    res.status(500).json({ error: "internal", message: e.message, simulasi: true });
+  }
 });
 
 // T04: Reference price feed routes (mounted before the generic /api/ticker/:pair route)
@@ -1125,6 +1165,8 @@ app.post("/api/chat", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
+  // M7: resolve indodax slug -> MEXC symbol states (LIVE/NO_FEED)
+  startMarketResolution();
   // T04: start the reference price feed poller (immediate first poll, then every few seconds)
   priceFeed.start();
   // T07: start the synthetic market-trades tape (appends a tick per symbol every few seconds)

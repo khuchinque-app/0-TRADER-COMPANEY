@@ -14,7 +14,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "better-sqlite3": "^9.4.3",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "@trading/mexc-client": "*",
+    "@trading/indodax-routes": "*"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

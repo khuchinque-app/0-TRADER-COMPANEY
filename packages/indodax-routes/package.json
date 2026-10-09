@@ -1,0 +1,7 @@
+{
+  "name": "@trading/indodax-routes",
+  "version": "1.0.0",
+  "private": true,
+  "main": "routes.json",
+  "files": ["routes.json"]
+}
