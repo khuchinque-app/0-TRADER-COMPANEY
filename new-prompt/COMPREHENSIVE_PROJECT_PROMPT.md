@@ -1,22 +1,3 @@
-I've read the full `COMPREHENSIVE_PROJECT_PROMPT.md` and researched the HollaEx Kit architecture. Here is the corrected version of your project prompt, with **HollaEx Kit** integrated as the backend engine.
-
----
-
-## 🔄 Key Changes at a Glance
-
-| Aspect | Before (Custom Backend) | After (HollaEx Kit) |
-| :--- | :--- | :--- |
-| **Backend** | Custom Express API on :11110 | HollaEx Kit Docker stack (nginx + postgres + redis + kit server) |
-| **Trading Engine** | Custom engine on :3001 | HollaEx Kit's built-in matching engine |
-| **Database** | SQLite `ledger.db` | PostgreSQL (HollaEx Kit's native database) |
-| **API Prefix** | Custom routes (`/api/market/*`, etc.) | `/v2/*` (HollaEx standard: `/v2/public`, `/v2/order`, `/v2/wallet`, etc.) |
-| **WebSocket** | Custom WS on :3001 | `wss://your-exchange.com/stream` |
-| **Market Data** | MEXC public API via custom `packages/mexc-client` | HollaEx Kit's built-in market data + optional MEXC connector plugin |
-| **Wallet & Blockchain** | Custom engine routes | HollaEx Kit's built-in wallet system (handles ETH/ERC-20 via `web3.js`, etc.) |
-| **Auth** | Custom auth routes | HollaEx Kit's user management (`/v2/user`) |
-
----
-
 ## 📄 Corrected `COMPREHENSIVE_PROJECT_PROMPT.md`
 
 Below is the revised document. I've marked **⚡ NEW** for sections that changed and **🔄 MODIFIED** for sections that were adjusted.
