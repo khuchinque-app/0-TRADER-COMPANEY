@@ -72,3 +72,25 @@ untouched.
   (legacy orders endpoint, unauthenticated) — unrelated to market data.
 - Reference (`6b3bbhptcfblg.ok.kimi.link`) is a US market-monitor dashboard, not an
   exchange terminal, so refinements follow its conventions rather than cloning it.
+
+## 2026-10-10 · SECURITY fix: __STATE__ injection
+
+### Found (verification pass)
+- The `a9346c1` fix produced a valid JS string literal but did **not** escape `<`.
+  `path` derives from `req.path` (attacker-controlled), so a request such as
+  `GET /pwn</script><script>window.__PWN=1</script>` closed the `<script>` tag and
+  injected executable markup — confirmed XSS.
+
+### Fixed
+- `server.mjs` now has `serializeState()` which JSON-encodes then escapes
+  `<`→`\u003c`, `>`→`\u003e`, `&`→`\u0026`, U+2028→`\u2028`, U+2029→`\u2029`.
+  Re-tested: payload is inert; `window.__EXCHANGE_STATE__` still parses as a string.
+
+### Verified (fresh ports :18081 / :22233, Playwright over HTTP) — 21/21 PASS
+- `/market/BTCIDR` 200; `/api/hx/market/BTCIDR(|/orderbook|/trades)` 200.
+- unknown pair → API 404 + page 404; NO_FEED pair → 200 `stale:true`, greyed UI, no trade CTA.
+- upstream down → ticker 200 `stale:true` (`source:stale`).
+- state is a string, parses, contains no secret; no page errors; no 5xx from `/api/hx`.
+- screenshot `/tmp/trade-page-http-verify.png` (1440×1900, 7595 colors).
+- Only non-200 resources: legacy `GET /api/market/myorders/BTCIDR` → 401 (unauthenticated)
+  and 404s for unknown-pair page assets — unrelated to `/api/hx`.

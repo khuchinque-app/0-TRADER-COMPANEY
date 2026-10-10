@@ -33,6 +33,19 @@ const staticRoutes = new Set((manifest?.static || []).filter(Boolean));
 // Spec hard rule: persistent banner present in the raw HTML of EVERY page.
 const SERVER_BANNER_HTML = `<div class="banner">SIMULASI &mdash; dana virtual, bukan Indodax, bukan bursa sungguhan &middot; <small>SIMULATION &mdash; virtual funds, not Indodax, not a real exchange &middot; ChinQue Exchange</small></div>`;
 
+// Serialize page state into a JS string literal that is safe to embed inside a
+// <script> element. `path` derives from req.path (attacker-controlled), so raw
+// `<` would otherwise let a crafted path close the script tag and inject markup
+// (confirmed XSS). Escape `<`/`>`/`&` and the JS line separators U+2028/U+2029.
+function serializeState(obj) {
+  return JSON.stringify(JSON.stringify(obj))
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 const app = express();
 app.disable('x-powered-by');
 
@@ -160,7 +173,7 @@ app.get('*', (req, res) => {
   if (code === 404) {
     if (existsSync(indexPath)) {
       const html = readFileSync(indexPath, 'utf8')
-        .replace('"__STATE__"', JSON.stringify(JSON.stringify({ state: 'not-found', path: p })))
+        .replace('"__STATE__"', serializeState({ state: 'not-found', path: p }))
         .replace('<div id="root"></div>', SERVER_BANNER_HTML + '<div id="root"></div>');
       return res.status(404).type('html').send(html);
     }
@@ -168,7 +181,7 @@ app.get('*', (req, res) => {
   }
   if (existsSync(indexPath)) {
     const html = readFileSync(indexPath, 'utf8')
-      .replace('"__STATE__"', JSON.stringify(JSON.stringify({ state, path: p, slug: slug || null })))
+      .replace('"__STATE__"', serializeState({ state, path: p, slug: slug || null }))
       .replace('<div id="root"></div>', SERVER_BANNER_HTML + '<div id="root"></div>');
     return res.status(code).type('html').send(html);
   }
