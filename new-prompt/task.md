@@ -1,187 +1,161 @@
 # SYSTEM OVERRIDE: SWARM MODE & WAYFINDER ACTIVE
 **FOCUS:** Core Engineering, Rapid Execution, Investor Demo Prep
-**OBJECTIVE:** Achieve a "mock finish" state ASAP for investor presentation. Stub complex backend logic if it blocks UI rendering, but ensure the frontend looks fully operational.
+**OBJECTIVE:** Achieve a "mock finish" state ASAP for investor presentation.
+**ENGINE:** HollaEx Kit (Docker) — replaces the deprecated custom backend and engine.
 
 ## 1. CONNECTION DETAILS
-You are running locally but must execute the following tasks on the remote VPS.
-- **Target:** `ssh khuchinque@187.1277.178.20` (Password: admin1)
-- **Target Working Directory:** `~/0-TRADER-COMPANEY`
-- **Context Directory:** `~/0-TRADER-COMPANEY/new-prompt` (Read all prompt, target, and devtool specs here before modifying files).
+- **Target:** ssh <user>@187.127.178.20   # credentials in local .env only, never committed
+- **Target Working Directory:** ~/0-TRADER-COMPANEY
+- **Context Directory:** ~/0-TRADER-COMPANEY/new-prompt (read all specs before editing)
+- **⚠️ DEPRECATED (do NOT edit):**
+  - apps/backend/           → replaced by HollaEx Kit
+  - apps/engine/            → replaced by HollaEx Kit's matching engine
+  - Any reference to initDb, SQLite, ledger.db
 
-## 2. TASK LIST
-Execute the following uncompleted tasks extracted from the project state:
+## 2. HOLLAEX KIT — SINGLE SOURCE OF TRUTH
+The backend is HollaEx Kit running in Docker (vendor/hollaex/).
+Base URL:   http://localhost:<KIT_PORT>/v2
+WebSocket:  ws://localhost:<KIT_PORT>/stream
+Admin:      http://localhost:<KIT_PORT>/admin
 
-**Critical Fixes & Edits:**
-- [ ] Edit `apps/backend/src/index.ts`: Fix duplicate `initDb` (corrupted by merged edit – remove broken stub).
-- [ ] Edit `apps/exchange/src/main.jsx` to support frontend requirements below.
+Key endpoints (replace all old /api/* references):
+  /v2/public/ticker         ← replaces /api/market/ticker
+  /v2/public/orderbook      ← replaces /api/market/orderbook
+  /v2/public/trades         ← replaces /api/market/trades
+  /v2/public/ticker?symbol= ← market data
+  /v2/order                 ← place/cancel order
+  /v2/user                  ← auth, profile, 2FA
+  /v2/wallet                ← balances, deposits, withdrawals
+  /v2/admin                 ← built-in admin (pairs, fees, users)
 
-**UI & Feature Delegation:**
-- [ ] Delegate sub-agent lane: Build the trade page design matching `https://6b3bbhptcfblg.ok.kimi.link/`. Fetch its CSS/JS via agent-reach web channel.
-- [ ] CandleChart: Implement SVG Stop/Take Profit horizontal dashed lines with labels (following the `3devtool.md` pattern).
-- [ ] Order history table: Add and populate `stop_loss` and `take_profit` columns.
+## 3. TASK LIST (CORRECTED)
 
-**API & Backend Implementation (Mock if necessary for demo):**
-- [ ] NO_FEED fix task: Ensure `/api/market/ticker` for `ACSIDR` never returns 5xx errors; verify render is stable.
-- [ ] Backend: Create `/api/admin/whitelabel` (GET/PUT) + public brand endpoint.
-- [ ] Frontend: Implement `/akun/admin` login + admin panel + ensure SPA reads live brand config correctly.
+**Frontend-only work (your domain):**
+- [ ] apps/exchange: rebuild trade page UI matching reference design
+- [ ] CandleChart: implement SVG Stop/Take Profit dashed lines with labels
+- [ ] Order history table: add stop_loss / take_profit columns
+- [ ] NO_FEED state: when HollaEx /v2/public/ticker returns empty, render greyed UI (200, not 5xx)
+- [ ] Admin login page `/akun/admin`: SPA reads brand config from a lightweight frontend config store (NOT from a custom backend route)
 
-**Finalization:**
-- [ ] Build + rebuild + verify (Ensure CPD-render successfully renders SL/TP visible).
-- [ ] Final: Smoke test + CDP-render verification + commit/push changes.
+**Adapter layer (server-side, calls HollaEx):**
+- [ ] apps/exchange/lib/hollaex-adapter.ts — wraps hollaex-node-lib
+- [ ] Brand config: store white-label branding (logo, colors, name) in frontend env/config, editable via HollaEx admin settings OR a simple JSON in the repo — no custom backend route needed
 
-## 3. EXECUTION RULES
-1. **Speed Over Perfection:** If a backend route is complex, mock the JSON response so the frontend UI renders perfectly for the investor demo.
-2. **Parallel Processing:** Invoke wayfinder/swarm ability. Delegate the Trade Page UI cloning and the Backend Whitelabel endpoints to concurrent sub-routines.
-3. **Validation:** Do not disconnect until the `build` succeeds and the `NO_FEED ticker task` stops throwing 500 errors.
+**REMOVED (obsolete):**
+- [x] ~~Edit apps/backend/src/index.ts (initDb)~~ — deprecated
+- [x] ~~Create /api/admin/whitelabel (GET/PUT)~~ — HollaEx admin panel handles this
+- [x] ~~Custom backend mock routes~~ — HollaEx provides real endpoints
+
+## 4. EXECUTION RULES
+1. **Speed Over Perfection:** If a HollaEx endpoint is slow, cache the response server-side; never mock what HollaEx already provides.
+2. **Parallel Processing:** Delegate Trade Page UI + Adapter Layer to concurrent sub-routines.
+3. **Validation:** Do not disconnect until `npm run build` succeeds AND the NO_FEED ticker returns 200 (with `stale: true`), not 5xx.
+
+---
 
 ROLE
-You are a senior integration/backend coding agent working on an authorized crypto market service.
+You are a senior integration/frontend coding agent working on an authorized paper-trading crypto platform backed by HollaEx Kit.
 
-BASE URL
+BASE URL (your frontend)
 http://187.127.178.20:22221
 
-REFERENCE ENDPOINT
-/market/ANIMEIDR
+UPSTREAM (data source)
+HollaEx Kit — http://localhost:<KIT_PORT>/v2  (server-side only, never exposed to browser)
 
 PRIMARY SCOPE
-All routes under /market/*.
-Assume there are approximately 500 market endpoints, likely one per trading pair/symbol or per market sub-resource.
-Your job is to discover, document, and build a clean client/integration layer for those /market endpoints only.
+All frontend routes under /market/* on YOUR domain (mirrors Indodax).
+Behind each route, your Next.js server-side adapter calls HollaEx /v2/public/* endpoints.
+You do NOT call HollaEx from the browser. You do NOT call MEXC at all.
 
 HARD CONSTRAINTS
-- Only access this service if you have explicit written authorization. If authorization is unclear, use mocks/fixtures only.
-- Read-only operations only. Do not attempt auth bypass, fuzzing, brute force, injection, load testing, or destructive requests.
-- Do not touch /admin, /user, /wallet, /withdraw, /deposit, /login, /register, or similar routes unless explicitly authorized.
-- Rate limit yourself: max 1 request per second, no concurrency unless the docs explicitly allow it.
-- Respect 429, 403, 5xx, and Retry-After. Back off exponentially.
-- Never hardcode secrets. Use environment variables.
-- Do not guess or attack undocumented endpoints. Discover them from the app’s own HTML, JS, network calls, docs, sitemap, or OpenAPI.
+- Read-only against HollaEx public endpoints unless the user explicitly authorizes order placement.
+- Never expose HOLLAEX_API_KEY / HOLLAEX_API_SECRET to the client bundle.
+- Rate limit yourself: max 1 request/sec to HollaEx public endpoints.
+- Respect 429/5xx with exponential backoff and serve `stale: true` from cache.
+- No secrets in code. Use .env (server-side only).
+- Do not touch HollaEx /v2/admin, /v2/user, /v2/wallet, /v2/withdrawal, /v2/deposit unless explicitly authorized.
 
 PRIMARY OBJECTIVE
-Build an endpoint inventory and a reusable market client focused on /market/*.
-Start with /market/ANIMEIDR, then generalize to all market endpoints.
+Build a clean, config-driven adapter layer that maps your /market/{PAIR} frontend routes to HollaEx /v2/public/* data.
 
-DISCOVERY PLAN
-1. Fetch /market/ANIMEIDR.
-2. Inspect:
-   - HTML source
-   - linked JavaScript bundles
-   - inline scripts
-   - network/API calls made by the page
-   - WebSocket/EventSource/GraphQL usage
-3. Search for route patterns such as:
-   - /market/
-   - /market/{pair}
-   - /market/{base}{quote}
-   - /market/{pair}/ticker
-   - /market/{pair}/orderbook
-   - /market/{pair}/trades
-   - /market/{pair}/candles
-   - /market/{pair}/history
-   - /market/{pair}/stats
-   - /market/list
-   - /market/symbols
-4. Check non-invasive discovery files:
-   - /robots.txt
-   - /sitemap.xml
-   - /openapi.json
-   - /swagger.json
-   - /api-docs
-   - /.well-known/
-5. Extract the symbol/pair list from the page, JS bundles, or a market-list endpoint.
-6. Do not manually hardcode 500 endpoints. Generate them from the discovered symbol list and route templates.
+DISCOVERY PLAN (against HollaEx Kit)
+1. Fetch HollaEx API docs: vendor/hollaex/API-NOTES.md (generated during vendoring).
+2. Confirm these endpoints exist locally:
+   - GET /v2/public/ticker?symbol=btc-usdt
+   - GET /v2/public/orderbook?symbol=btc-usdt
+   - GET /v2/public/trades?symbol=btc-usdt
+   - GET /v2/public/ticker (bulk, all pairs)
+3. Confirm WebSocket: wss://.../stream with subscription messages.
+4. Extract the supported pair list from HollaEx (usually via /v2/public/ticker bulk or exchangeInfo).
+5. Map frontend slug (e.g. ANIMEIDR) → HollaEx symbol (e.g. anime-usdt) using the resolution rule:
+   - strip IDR/USDT suffix once from the end
+   - append -usdt
+   - verify against HollaEx pair list
+6. Generate routes.json from the pair list (never hardcode pairs).
 
-ENDPOINT INVENTORY REQUIREMENTS
-Create `endpoints.json` with one record per discovered /market endpoint:
+ENDPOINT INVENTORY (upstream = HollaEx)
+Create vendor/hollaex/API-NOTES.md with one record per used endpoint:
 
 {
   "method": "GET",
-  "path": "/market/ANIMEIDR",
-  "category": "ticker|orderbook|trades|candles|history|stats|list|unknown",
-  "params": {},
-  "response_schema": {},
-  "auth": "none|apiKey|unknown",
+  "path": "/v2/public/ticker",
+  "category": "ticker",
+  "params": {"symbol": "btc-usdt"},
+  "auth": "none",
   "rate_limit": "unknown",
   "sample_response": {},
-  "notes": ""
+  "notes": "server-side only, cached 2s"
 }
 
-For every endpoint, document:
-- HTTP method
-- Full path
-- Required/optional query params
-- Path params
-- Response content type
-- Response shape
-- Status codes observed
-- Whether auth is required
-- Whether it is paginated
-- Whether it is WebSocket/SSE/streaming
-- Any rate-limit headers
+CLIENT IMPLEMENTATION (adapter layer)
+Suggested structure inside apps/exchange:
+- lib/hollaex-adapter.ts        ← server-side wrapper using hollaex-node-lib
+- lib/market-client.ts          ← thin typed functions (getTicker, getOrderbook, getTrades)
+- lib/pair-resolver.ts          ← slug <-> HollaEx symbol
+- app/api/market/[pair]/route.ts ← Next.js route handler (frontend calls THIS)
+- app/api/market/[pair]/orderbook/route.ts
+- app/api/market/[pair]/trades/route.ts
+- app/api/market/list/route.ts
 
-CLIENT IMPLEMENTATION REQUIREMENTS
-Build a typed, config-driven client.
-Suggested structure:
-
-- `config.py` or `config.ts`
-- `market_client.py` or `market_client.ts`
-- `endpoints.json`
-- `tests/`
-- `README.md`
-- `discovery-report.md`
-
-The client must:
-- Use a base URL from config.
-- Support generic calls like:
-  - `get_market(pair)`
-  - `get_market_subresource(pair, subresource, params)`
-  - `list_markets()`
-- Include:
-  - timeout handling
-  - retry with exponential backoff
-  - rate limiter
-  - optional caching
-  - typed response models where possible
-  - clear error classes
-- Avoid one-off duplicated functions for all 500 endpoints. Prefer templates and configuration.
+The adapter must:
+- Read HOLLAEX_API_URL, HOLLAEX_WS_URL from server env
+- Include timeout, retry with backoff, in-memory cache, stale fallback
+- Return typed responses
+- Never leak HollaEx credentials to the browser
 
 TESTING REQUIREMENTS
-- Unit tests must use recorded fixtures or mocks, not live requests by default.
-- Integration tests against the live service only if authorization is confirmed.
-- Test:
-  - successful response parsing
-  - 404/429/500 handling
-  - timeout handling
-  - rate limiter behavior
-  - pagination
-  - malformed JSON
+- Unit tests use recorded fixtures from HollaEx (not live calls).
+- Integration tests hit live HollaEx only if HOLLAEX_API_URL is set.
+- Test: success parsing, 404 (unknown pair), 429, 5xx fallback to stale, timeout, malformed JSON.
 
 DELIVERABLES
-1. `endpoints.json` containing every discovered /market endpoint.
-2. A reusable market client in Python or TypeScript.
-3. Tests with fixtures.
-4. `README.md` explaining setup, usage, and authorization assumptions.
-5. `discovery-report.md` explaining:
-   - how endpoints were discovered
-   - which endpoints were confirmed
-   - which are inferred
-   - any blocked or unclear areas
-   - rate-limit and auth observations
+1. vendor/hollaex/API-NOTES.md (HollaEx endpoint inventory).
+2. apps/exchange/lib/hollaex-adapter.ts + market-client.ts + pair-resolver.ts.
+3. Next.js route handlers under app/api/market/*.
+4. Tests with fixtures.
+5. README.md explaining setup, env vars, authorization assumptions.
+6. discovery-report.md covering:
+   - how HollaEx endpoints were discovered
+   - pair resolution logic
+   - rate-limit observations
+   - blocked/unknown areas
 
 ACCEPTANCE CRITERIA
-- All discovered /market/* endpoints are documented.
-- No unauthorized, destructive, or non-market routes are touched.
-- The client can query /market/ANIMEIDR and other discovered market endpoints.
-- The code is configuration-driven, typed where possible, and tested.
-- The agent stops and asks for authorization if it cannot confirm permission.
+- Frontend /market/{PAIR} renders data from HollaEx via your adapter.
+- No HollaEx API keys in browser bundle (verified by grep).
+- Unknown pair → 404; missing feed → NO_FEED UI (200).
+- Adapter is config-driven and tested.
+- Agent stops and asks if authorization or HollaEx config is unclear.
 
 WORKFLOW
-1. Confirm authorization.
-2. Discover market symbols and route patterns.
-3. Build `endpoints.json`.
-4. Implement the client.
-5. Write tests.
-6. Produce the README and discovery report.
-7. Summarize findings and list any unknowns.
+1. Confirm HollaEx Kit is running locally (curl /v2/public/ticker).
+2. Generate API-NOTES.md from vendor/hollaex/.
+3. Build pair list + routes.json.
+4. Implement adapter + route handlers.
+5. Write tests with fixtures.
+6. Produce README + discovery report.
+7. Summarize findings and unknowns.
 
-If you encounter an endpoint that is not under /market/*, do not explore it. Add it to a separate `out-of-scope.md` note and continue focusing on /market/*.
+OUT OF SCOPE
+Do NOT explore HollaEx /v2/admin, /v2/user, /v2/wallet, /v2/withdrawal, /v2/deposit, /v2/login, /v2/register.
+Add them to out-of-scope.md and continue with /v2/public/* only.

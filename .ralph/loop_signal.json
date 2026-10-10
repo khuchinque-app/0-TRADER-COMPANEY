@@ -1,0 +1,7 @@
+{
+  "RALPH_LOOP_SIGNAL": {
+    "completion_score": 1,
+    "EXIT_STATE": true,
+    "summary": "STANDBY - SSH/Wake investigation complete. Ralph ready but not started. Waiting for user resume command."
+  }
+}
