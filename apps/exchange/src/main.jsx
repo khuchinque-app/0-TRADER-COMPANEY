@@ -329,9 +329,9 @@ function PairPage({ slug, trade = false }) {
               <span>{slug}</span>
               <b className={tick?.priceChangePercent >= 0 ? 'up' : 'down'} style={{ fontSize: 30, fontWeight: 800 }}>{fmtNum(last)}</b>
             </div>
-            <div className={tick?.priceChangePercent >= 0 ? 'up chg' : 'down chg'} style={{ alignSelf: 'flex-end', paddingBottom: 6 }}>
+            <span className={'chg-pill ' + (tick?.priceChangePercent >= 0 ? 'up' : 'down')} style={{ alignSelf: 'flex-end', marginBottom: 6 }}>
               {tick ? `${tick.priceChangePercent?.toFixed(2)}%` : '—'}
-            </div>
+            </span>
             <div className="stat"><span>24h High</span><b>{fmtNum(tick?.highPrice)}</b></div>
             <div className="stat"><span>24h Low</span><b>{fmtNum(tick?.lowPrice)}</b></div>
             <div className="stat"><span>24h Vol</span><b>{fmtNum(tick?.quoteVolume)}</b></div>
@@ -357,6 +357,7 @@ function PairPage({ slug, trade = false }) {
                   <span className="muted" style={{ fontSize: 11 }}>Simulasi</span>
                 </div>
                 <div className="book">
+                  <div className="bhead"><span>Harga</span><span>Jumlah</span></div>
                   {[...(depth?.asks || [])].slice(0, 10).reverse().map((a, i) => (
                     <div className="brow" key={'a' + i}>
                       <span className="down">{fmtNum(a[0])}</span>

@@ -160,7 +160,7 @@ app.get('*', (req, res) => {
   if (code === 404) {
     if (existsSync(indexPath)) {
       const html = readFileSync(indexPath, 'utf8')
-        .replace('__STATE__', JSON.stringify({ state: 'not-found', path: p }))
+        .replace('"__STATE__"', JSON.stringify(JSON.stringify({ state: 'not-found', path: p })))
         .replace('<div id="root"></div>', SERVER_BANNER_HTML + '<div id="root"></div>');
       return res.status(404).type('html').send(html);
     }
@@ -168,7 +168,7 @@ app.get('*', (req, res) => {
   }
   if (existsSync(indexPath)) {
     const html = readFileSync(indexPath, 'utf8')
-      .replace('__STATE__', JSON.stringify({ state, path: p, slug: slug || null }))
+      .replace('"__STATE__"', JSON.stringify(JSON.stringify({ state, path: p, slug: slug || null })))
       .replace('<div id="root"></div>', SERVER_BANNER_HTML + '<div id="root"></div>');
     return res.status(code).type('html').send(html);
   }

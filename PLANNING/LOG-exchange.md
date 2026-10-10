@@ -39,3 +39,36 @@ untouched.
 - Reference design at `https://6b3bbhptcfblg.ok.kimi.link/` is a client-rendered
   SPA with no server-extractable CSS; redesign follows the project's own design
   tokens for a clean, operational look.
+
+## 2026-10-10 · UI refinement + real HTTP render
+
+### Fixed
+- **Server state injection bug (`server.mjs`).** The `__STATE__` replacement left
+  the surrounding quotes, producing invalid JS (`window.__EXCHANGE_STATE__ =
+  "{"state":...}"`). Now replaces `"__STATE__"` with a doubly-stringified JSON
+  literal, so the injected state parses. (Page still worked because the router
+  falls back to `location.pathname`, but the injected state was dead.)
+
+### Changed
+- **Trade page refinements** aligned to the reference's conventions (market-monitor
+  dashboard: ticker tape, uppercase micro-labels, chips, compact tables):
+  change-% pill, uppercase panel headers + section labels, order-book
+  `HARGA / JUMLAH` header row, tighter row rhythm, larger mid-price.
+
+### Verified
+- **Real HTTP render (Playwright, not raw Chrome headless).**
+  `apps/exchange/server.mjs` on `:22232` with `HOLLAEX_API_URL` → a live mock
+  HollaEx upstream on `:18080`. Playwright Chromium navigated to
+  `http://127.0.0.1:22232/market/BTCIDR` and rendered it: **10/10 checks PASS**,
+  observed `GET /api/hx/market/BTCIDR` (+`/orderbook`, `/trades`) all HTTP 200,
+  no page errors. Screenshot → `/tmp/trade-page-http.png` (1440×1900, 7,889 colors).
+- **jsdom regression harness** (HTML served over HTTP, fetches to the live server):
+  **14/14 PASS**.
+- `npm test -w apps/exchange` 28/28 · `node --check server.mjs` OK · root
+  `npm run build` exit 0 · secret scan clean.
+
+### Note
+- The only non-200 in the browser was `GET /api/market/myorders/BTCIDR` → 401
+  (legacy orders endpoint, unauthenticated) — unrelated to market data.
+- Reference (`6b3bbhptcfblg.ok.kimi.link`) is a US market-monitor dashboard, not an
+  exchange terminal, so refinements follow its conventions rather than cloning it.
