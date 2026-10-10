@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "start": "node server.mjs",
-    "dev": "vite"
+    "dev": "vite",
+    "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
     "express": "^4.18.2"

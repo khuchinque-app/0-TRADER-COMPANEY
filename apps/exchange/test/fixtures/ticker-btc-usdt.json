@@ -1,0 +1,14 @@
+[
+  {
+    "symbol": "btc-usdt",
+    "open": 100.0,
+    "close": 110.0,
+    "high": 115.0,
+    "low": 99.0,
+    "last": 110.0,
+    "volume": 12.5,
+    "quote_volume": 1300.0,
+    "change": 10.0,
+    "timestamp": 1700000000
+  }
+]

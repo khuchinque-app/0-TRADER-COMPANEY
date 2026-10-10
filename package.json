@@ -6,7 +6,7 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspaces --if-present",
     "pretypecheck": "npm run build -w packages/shared",
     "dev:engine": "npm run dev -w apps/engine",
     "dev:terminal": "npm run dev -w apps/terminal",

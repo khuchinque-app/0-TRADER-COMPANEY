@@ -8,6 +8,9 @@ import express from 'express';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHollaexAdapter } from './lib/hollaex-adapter.mjs';
+import { createMarketClient } from './lib/market-client.mjs';
+import { buildPairIndex } from './lib/pair-resolver.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));   // .../apps/exchange
 const ROOT = HERE;                                          // app dir
@@ -36,6 +39,57 @@ app.disable('x-powered-by');
 // robots: simulation site must never be crawled
 app.get('/robots.txt', (_req, res) => {
   res.type('text/plain').send('User-agent: *\nDisallow: /\n');
+});
+
+// ---------------------------------------------------------------------------
+// HollaEx Kit adapter routes (server-side only).
+// The browser calls THESE; these call HollaEx /v2/public/*. HollaEx credentials
+// never leave this process (see lib/hollaex-adapter.mjs).
+//   GET /api/hx/market/list                     -> pair list
+//   GET /api/hx/market/:pair                    -> ticker   (404 unknown | 200 NO_FEED)
+//   GET /api/hx/market/:pair/orderbook          -> orderbook
+//   GET /api/hx/market/:pair/trades             -> trades
+//   GET /api/hx/health                          -> adapter reachability
+// ---------------------------------------------------------------------------
+const hxAdapter = createHollaexAdapter();
+const hxClient = createMarketClient({
+  adapter: hxAdapter,
+  index: buildPairIndex({ slugs: [...pairSlugs] }),
+});
+
+app.get('/api/hx/market/list', (_req, res) => {
+  const { status, body } = hxClient.list();
+  res.status(status).json(body);
+});
+
+app.get('/api/hx/market/:pair/orderbook', async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+  const { status, body } = await hxClient.orderbook(req.params.pair, limit);
+  res.status(status).json(body);
+});
+
+app.get('/api/hx/market/:pair/trades', async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit, 10) || 30, 100);
+  const { status, body } = await hxClient.trades(req.params.pair, limit);
+  res.status(status).json(body);
+});
+
+app.get('/api/hx/market/:pair', async (req, res) => {
+  const { status, body } = await hxClient.ticker(req.params.pair);
+  res.status(status).json(body);
+});
+
+// Adapter health: reports whether the HollaEx bulk ticker endpoint is reachable.
+app.get('/api/hx/health', async (_req, res) => {
+  const r = await hxAdapter.get('ticker');
+  res.status(200).json({
+    ok: !r.noFeed,
+    stale: r.stale,
+    source: r.source,
+    pairs: [...pairSlugs].length,
+    upstream: hxAdapter.config.apiURL,
+    simulasi: true,
+  });
 });
 
 // small proxy for frontend-only needs (keeps browser -> exchange -> backend 11110)

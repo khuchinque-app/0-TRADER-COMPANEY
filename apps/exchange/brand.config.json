@@ -1,0 +1,19 @@
+{
+  "name": "ChinQue Exchange",
+  "shortName": "ChinQue",
+  "logoText": "ChinQue",
+  "logoAccent": "Exchange",
+  "tagline": "Trading kripto, cara Indonesia. (Simulasi.)",
+  "colors": {
+    "primary": "#00FF88",
+    "accent": "#8A93C7",
+    "up": "#00FF88",
+    "down": "#FF3366"
+  },
+  "admin": {
+    "enabled": true,
+    "title": "Admin Exchange",
+    "manageUrl": "http://localhost:10010/admin",
+    "manageLabel": "Buka HollaEx Admin"
+  }
+}

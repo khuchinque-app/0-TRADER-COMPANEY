@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+// Brand config store: a lightweight frontend JSON (repo-local), NOT a custom
+// backend route. Swap values here or via HollaEx admin settings to white-label.
+import brand from '../brand.config.json';
 
 const STATE = (() => {
   try { return JSON.parse(window.__EXCHANGE_STATE__ || '{}'); } catch { return {}; }
@@ -191,7 +194,9 @@ function fmtNum(n) {
 }
 
 // ---------- candle chart: tiny SVG candlestick, no deps ----------
-function CandleChart({ data, height = 320 }) {
+// `levels`: [{ price, label, kind: 'sl' | 'tp' }] -> horizontal dashed lines
+// with right-aligned labels (Stop Loss / Take Profit), following 3devtool.md.
+function CandleChart({ data, height = 320, levels = [] }) {
   if (!data || !data.length) return <div className="muted" style={{ padding: 30, textAlign: 'center' }}>—</div>;
   const W = 900, H = height, pad = 30;
   const n = Math.min(data.length, 90);
@@ -199,6 +204,7 @@ function CandleChart({ data, height = 320 }) {
   const hi = Math.max(...d.map((k) => k.high)), lo = Math.min(...d.map((k) => k.low));
   const y = (v) => pad + (1 - (v - lo) / (hi - lo || 1)) * (H - 2 * pad);
   const bw = (W - 2 * pad) / n;
+  const active = (levels || []).filter((l) => l && l.price != null && !isNaN(l.price) && l.price >= lo && l.price <= hi);
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block' }}>
       {d.map((k, i) => {
@@ -210,6 +216,18 @@ function CandleChart({ data, height = 320 }) {
           <g key={i}>
             <line x1={x + bw / 2} x2={x + bw / 2} y1={y(k.high)} y2={y(k.low)} stroke={col} strokeWidth="1" />
             <rect x={x + 1} y={top} width={Math.max(bw - 2, 1)} height={Math.max(bot - top, 1)} fill={col} />
+          </g>
+        );
+      })}
+      {active.map((l, i) => {
+        const yy = y(l.price);
+        const col = l.kind === 'tp' ? 'var(--up)' : 'var(--down)';
+        return (
+          <g key={'lvl' + i}>
+            <line x1={pad} x2={W - pad} y1={yy} y2={yy} stroke={col} strokeWidth="1" strokeDasharray="6 4" />
+            <text x={W - pad - 4} y={yy - 4} fill={col} fontSize="11" textAnchor="end">
+              {l.label} {fmtNum(l.price)}
+            </text>
           </g>
         );
       })}
@@ -230,14 +248,17 @@ function PairPage({ slug, trade = false }) {
   const [price, setPrice] = useState('');
   const [amount, setAmount] = useState('');
   const [toast, setToast] = useState(null);
+  const [sl, setSl] = useState('');  // stop loss (display-only dashed line)
+  const [tp, setTp] = useState('');  // take profit (display-only dashed line)
   useEffect(() => {
     let ok = true;
     const load = async () => {
       try {
-        const tk = await jget(`/api/market/ticker/${slug}`); if (ok) setTick(tk);
+        // Market data now comes from the server-side HollaEx adapter (/api/hx/*).
+        const tk = await jget(`/api/hx/market/${slug}`); if (ok) setTick(tk);
         if (tk.state === 'LIVE') {
-          jget(`/api/market/depth/${slug}?limit=15`).then((d) => ok && setDepth(d)).catch(() => {});
-          jget(`/api/market/trades/${slug}?limit=30`).then((d) => ok && setTape(d)).catch(() => {});
+          jget(`/api/hx/market/${slug}/orderbook?limit=15`).then((d) => ok && setDepth(d)).catch(() => {});
+          jget(`/api/hx/market/${slug}/trades?limit=30`).then((d) => ok && setTape(d)).catch(() => {});
         }
       } catch (e) { if (ok) setErr(e); }
     };
@@ -259,6 +280,15 @@ function PairPage({ slug, trade = false }) {
   }
   const noFeed = tick && tick.state === 'NO_FEED';
   const last = tick?.lastPrice;
+  // Stop/Take levels drawn as dashed lines on the chart.
+  const levels = [];
+  if (parseFloat(sl) > 0) levels.push({ price: parseFloat(sl), label: 'SL', kind: 'sl' });
+  if (parseFloat(tp) > 0) levels.push({ price: parseFloat(tp), label: 'TP', kind: 'tp' });
+  // Order-book mid price + spread (shown between the ask and bid ladders).
+  const bestBid = depth?.bids?.[0]?.[0];
+  const bestAsk = depth?.asks?.[0]?.[0];
+  const mid = bestBid != null && bestAsk != null ? (bestBid + bestAsk) / 2 : (bestBid ?? bestAsk ?? last);
+  const spread = bestBid != null && bestAsk != null ? bestAsk - bestBid : null;
   const submit = async (e) => {
     e.preventDefault();
     try {
@@ -266,7 +296,13 @@ function PairPage({ slug, trade = false }) {
       const resp = await fetch('/api/market/orders', {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
-        body: JSON.stringify({ slug, side: bs, type: ot, price: ot === 'limit' ? parseFloat(price) : undefined, quantity: parseFloat(amount) }),
+        body: JSON.stringify({
+          slug, side: bs, type: ot,
+          price: ot === 'limit' ? parseFloat(price) : undefined,
+          quantity: parseFloat(amount),
+          stop_loss: parseFloat(sl) > 0 ? parseFloat(sl) : undefined,
+          take_profit: parseFloat(tp) > 0 ? parseFloat(tp) : undefined,
+        }),
       });
       if (resp.status === 401) { setToast(t.pair.needLogin); setTimeout(() => setToast(null), 3000); location.href = '/akun/masuk'; return; }
       const d = await resp.json();
@@ -279,7 +315,7 @@ function PairPage({ slug, trade = false }) {
   };
   return (
     <div className="wrap">
-      <h1 className="crumb"><b>{slug}</b> · {tick?.mexcSymbol || '—'} <span className="muted">Simulasi</span>{trade && <span className="up" style={{ marginLeft: 8 }}>MEXC universe</span>}</h1>
+      <h1 className="crumb"><b>{slug}</b> · {tick?.symbol || '—'} <span className="muted">Simulasi</span>{tick?.stale && <span className="muted" style={{ marginLeft: 8 }}>· stale</span>}</h1>
       {noFeed ? (
         <div className="panel" style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 26, marginBottom: 8 }}>⛔ {t.noFeedShort}</div>
@@ -288,12 +324,21 @@ function PairPage({ slug, trade = false }) {
         </div>
       ) : (
         <>
-          <div className="row" style={{ gap: 18, marginBottom: 12, flexWrap: 'wrap', alignItems: 'baseline' }}>
-            <div style={{ fontSize: 26, fontWeight: 700 }} className={tick?.priceChangePercent >= 0 ? 'up' : 'down'}>{fmtNum(last)}</div>
-            <div className={tick?.priceChangePercent >= 0 ? 'up' : 'down'}>{tick ? `${tick.priceChangePercent?.toFixed(2)}%` : ''} (24h)</div>
-            <div className="muted">H {fmtNum(tick?.highPrice)} · L {fmtNum(tick?.lowPrice)} · Vol {fmtNum(tick?.quoteVolume)} {tick?.indicative ? '· indikatif' : ''}</div>
-            <a className="btn ghost" href={`/market/depth_chart/${slug}`} style={{ marginLeft: 'auto' }}>Depth</a>
-            <a className="btn ghost" href={`/chart/${slug}`}>Chart ⛶</a>
+          <div className="ticker-bar">
+            <div className="stat">
+              <span>{slug}</span>
+              <b className={tick?.priceChangePercent >= 0 ? 'up' : 'down'} style={{ fontSize: 30, fontWeight: 800 }}>{fmtNum(last)}</b>
+            </div>
+            <div className={tick?.priceChangePercent >= 0 ? 'up chg' : 'down chg'} style={{ alignSelf: 'flex-end', paddingBottom: 6 }}>
+              {tick ? `${tick.priceChangePercent?.toFixed(2)}%` : '—'}
+            </div>
+            <div className="stat"><span>24h High</span><b>{fmtNum(tick?.highPrice)}</b></div>
+            <div className="stat"><span>24h Low</span><b>{fmtNum(tick?.lowPrice)}</b></div>
+            <div className="stat"><span>24h Vol</span><b>{fmtNum(tick?.quoteVolume)}</b></div>
+            <div className="ticker-actions">
+              <a className="btn ghost" href={`/market/depth_chart/${slug}`}>Depth</a>
+              <a className="btn ghost" href={`/chart/${slug}`}>Chart ⛶</a>
+            </div>
           </div>
           <div className="grid">
             <div>
@@ -304,24 +349,35 @@ function PairPage({ slug, trade = false }) {
                       style={interval === i ? { borderColor: 'var(--up)', color: 'var(--up)', padding: '4px 10px' } : { padding: '4px 10px', fontSize: 12 }}>{i}</button>
                   ))}
                 </div>
-                <CandleChart data={klines?.klines} />
+                <CandleChart data={klines?.klines} levels={levels} />
               </div>
-              <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <div className="panel"><h3>{t.pair.bids}</h3>
-                  <div className="depthbar">
-                    {(depth?.bids || []).slice(0, 12).map((b, i) => (
-                      <div className="drow" key={i}><span className="up">{fmtNum(b[0])}</span><span style={{ textAlign: 'right' }}>{fmtNum(b[1])}</span>
-                        <span className="bar up" style={{ width: Math.min(100, (b[1] / (depth.bids[0]?.[1] || 1)) * 100) + '%' }} /></div>
-                    ))}
-                  </div>
+              <div className="panel">
+                <div className="panel-head">
+                  <h3>{t.pair.bids} / {t.pair.asks}</h3>
+                  <span className="muted" style={{ fontSize: 11 }}>Simulasi</span>
                 </div>
-                <div className="panel"><h3>{t.pair.asks}</h3>
-                  <div className="depthbar">
-                    {(depth?.asks || []).slice(0, 12).map((a, i) => (
-                      <div className="drow" key={i}><span className="down">{fmtNum(a[0])}</span><span style={{ textAlign: 'right' }}>{fmtNum(a[1])}</span>
-                        <span className="bar down" style={{ width: Math.min(100, (a[1] / (depth.asks[0]?.[1] || 1)) * 100) + '%' }} /></div>
-                    ))}
+                <div className="book">
+                  {[...(depth?.asks || [])].slice(0, 10).reverse().map((a, i) => (
+                    <div className="brow" key={'a' + i}>
+                      <span className="down">{fmtNum(a[0])}</span>
+                      <span style={{ textAlign: 'right' }}>{fmtNum(a[1])}</span>
+                      <span className="bar down" style={{ width: Math.min(100, (a[1] / (depth.asks[0]?.[1] || 1)) * 100) + '%' }} />
+                    </div>
+                  ))}
+                  <div className="mid">
+                    <b className={tick?.priceChangePercent >= 0 ? 'up' : 'down'}>{fmtNum(mid)}</b>
+                    <span className="muted" style={{ fontSize: 11 }}>spread {spread == null ? '—' : fmtNum(spread)}</span>
                   </div>
+                  {(depth?.bids || []).slice(0, 10).map((b, i) => (
+                    <div className="brow" key={'b' + i}>
+                      <span className="up">{fmtNum(b[0])}</span>
+                      <span style={{ textAlign: 'right' }}>{fmtNum(b[1])}</span>
+                      <span className="bar up" style={{ width: Math.min(100, (b[1] / (depth.bids[0]?.[1] || 1)) * 100) + '%' }} />
+                    </div>
+                  ))}
+                  {!(depth?.bids || []).length && !(depth?.asks || []).length && (
+                    <div className="muted" style={{ padding: 18, textAlign: 'center' }}>—</div>
+                  )}
                 </div>
               </div>
               <div className="panel" style={{ marginTop: 12 }}>
@@ -351,6 +407,12 @@ function PairPage({ slug, trade = false }) {
                     onChange={(e) => setPrice(e.target.value)} readOnly={ot === 'market'} inputMode="decimal" /></div>
                 <div className="field"><span>{t.pair.amount}</span>
                   <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" /></div>
+                <div className="row" style={{ gap: 8 }}>
+                  <div className="field" style={{ flex: 1 }}><span>SL</span>
+                    <input value={sl} onChange={(e) => setSl(e.target.value)} inputMode="decimal" placeholder="stop loss" /></div>
+                  <div className="field" style={{ flex: 1 }}><span>TP</span>
+                    <input value={tp} onChange={(e) => setTp(e.target.value)} inputMode="decimal" placeholder="take profit" /></div>
+                </div>
                 <div className="muted" style={{ fontSize: 12 }}>
                   {t.pair.balance}: <a href="/akun/dompet" style={{ color: 'var(--up)' }}>USB → dompet simulasi</a>
                 </div>
@@ -388,6 +450,8 @@ function OrdersPanel({ slug }) {
         {open.map((o) => (
           <tr key={o.id}><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side === 'buy' ? 'B' : 'S'}</td>
             <td>{o.type}</td><td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
+            <td className="muted">{o.stop_loss ? fmtNum(o.stop_loss) : '—'}</td>
+            <td className="muted">{o.take_profit ? fmtNum(o.take_profit) : '—'}</td>
             <td className="muted">{o.status}</td>
             <td><button className="btn ghost" style={{ padding: '2px 8px', fontSize: 11 }} onClick={() => cancel(o.id)}>✕</button></td></tr>
         ))}
@@ -401,7 +465,7 @@ function DepthChartPage({ slug }) {
   const [d, setD] = useState(null);
   useEffect(() => {
     let ok = true;
-    const load = () => jget(`/api/market/depth/${slug}?limit=500`).then((x) => ok && setD(x)).catch(() => {});
+    const load = () => jget(`/api/hx/market/${slug}/orderbook?limit=200`).then((x) => ok && setD(x)).catch(() => {});
     load(); const iv = setInterval(load, 1500);
     return () => { ok = false; clearInterval(iv); };
   }, [slug]);
@@ -487,7 +551,7 @@ function App() {
   if ((m = path.match(/^\/market\/([A-Z0-9]+)$/))) return <PairPage slug={m[1]} />;
   if (STATE.state === 'not-found') return <NotFound />;
   if (path === '/trade_api') return <SimplePage title="trade_api — Read-only API (Simulasi)">
-    <p>Endpoint publik <code>/api/market/*</code> (GET): <code>health, pairs, tickers, ticker/:slug, depth/:slug, trades/:slug, klines/:slug</code>.</p>
+    <p>Endpoint publik adapter HollaEx (GET): <code>/api/hx/market/list</code>, <code>/api/hx/market/:pair</code>, <code>/api/hx/market/:pair/orderbook</code>, <code>/api/hx/market/:pair/trades</code>, <code>/api/hx/health</code>.</p>
     <p className="muted">Data pasar bersumber dari MEXC public market data. Semua trading adalah simulasi dengan dana virtual.</p>
   </SimplePage>;
   if (path === '/affiliate') return <SimplePage title="Afiliasi"><p>Program afiliasi simulasi — komisi dari temuan trader virtual. Segera hadir.</p></SimplePage>;
@@ -504,6 +568,7 @@ function App() {
     <p>ChinQue Exchange = SIMULASI. Semua dana virtual. Bukan bursa sungguhan, bukan nasihat investasi.</p>
   </SimplePage>;
   if (path === '/akun/order') return <MyOrdersPage />;
+  if (path === '/akun/admin') return <AdminPage />;
   if (path === '/akun/masuk') return <LoginPage />;
   if (path === '/akun/daftar') return <SimplePage title="Daftar"><p>Gunakan <a href="/akun/masuk" style={{ color: 'var(--up)' }}>/akun/masuk</a> → tombol Guest Demo untuk saldo instan (tanpa KYC).</p></SimplePage>;
   if (path === '/akun/dompet') return <WalletPage />;
@@ -575,21 +640,26 @@ function MyOrdersPage() {
       {data ? (
         <>
           <div className="panel" style={{ marginBottom: 12 }}><h3>{t.pair.open}</h3>
-            <table><thead><tr><th>pair</th><th>side</th><th>type</th><th>price</th><th>qty</th><th>status</th></tr></thead><tbody>
+            <table><thead><tr><th>pair</th><th>side</th><th>type</th><th>price</th><th>qty</th><th>SL</th><th>TP</th><th>status</th></tr></thead><tbody>
               {(data.open || []).map((o) => (
                 <tr key={o.id}><td>{o.pair}</td><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side}</td><td>{o.type}</td>
-                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td><td className="muted">{o.status}</td></tr>
+                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
+                  <td className="muted">{o.stop_loss ? fmtNum(o.stop_loss) : '—'}</td>
+                  <td className="muted">{o.take_profit ? fmtNum(o.take_profit) : '—'}</td>
+                  <td className="muted">{o.status}</td></tr>
               ))}
-              {!(data.open || []).length && <tr><td colSpan={6} className="muted">0 order terbuka</td></tr>}
+              {!(data.open || []).length && <tr><td colSpan={8} className="muted">0 order terbuka</td></tr>}
             </tbody></table>
           </div>
           <div className="panel" style={{ marginBottom: 12 }}><h3>{t.pair.hist}</h3>
-            <table><thead><tr><th>pair</th><th>side</th><th>status</th><th>price</th><th>qty</th></tr></thead><tbody>
+            <table><thead><tr><th>pair</th><th>side</th><th>status</th><th>price</th><th>qty</th><th>SL</th><th>TP</th></tr></thead><tbody>
               {(data.history || []).map((o) => (
                 <tr key={o.id}><td>{o.pair}</td><td className={o.side === 'buy' ? 'up' : 'down'}>{o.side}</td><td className="muted">{o.status}</td>
-                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td></tr>
+                  <td>{fmtNum(o.price)}</td><td>{fmtNum(o.quantity)}</td>
+                  <td className="muted">{o.stop_loss ? fmtNum(o.stop_loss) : '—'}</td>
+                  <td className="muted">{o.take_profit ? fmtNum(o.take_profit) : '—'}</td></tr>
               ))}
-              {!(data.history || []).length && <tr><td colSpan={5} className="muted">riwayat kosong</td></tr>}
+              {!(data.history || []).length && <tr><td colSpan={7} className="muted">riwayat kosong</td></tr>}
             </tbody></table>
           </div>
           <div className="panel"><h3>Fills (ledger)</h3>
@@ -606,6 +676,62 @@ function MyOrdersPage() {
       ) : (
         <div className="panel" style={{ padding: 20 }}>
           <p className="muted">Ketik slug pair (mis. BTCIDR), atau <a href="/akun/dompet" style={{ color: 'var(--up)' }}>lihat dompet</a> · {t.simNote}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------- admin login (SPA, brand config from frontend store) ----------------
+// /akun/admin reads white-label branding from ../brand.config.json (a repo-local
+// frontend config store). It does NOT call a custom backend route — exchange
+// administration itself lives in HollaEx Kit's built-in admin panel.
+function AdminPage() {
+  const t = useLang();
+  const [user, setUser] = useState('');
+  const [pass, setPass] = useState('');
+  const [signedIn, setSignedIn] = useState(false);
+  const [msg, setMsg] = useState('');
+  const c = brand.colors || {};
+  const signIn = (e) => {
+    e.preventDefault();
+    // Simulation admin gate: no real credentials, no custom backend route.
+    if (!user || !pass) { setMsg('Isi pengguna & kata sandi.'); return; }
+    setSignedIn(true);
+    setMsg('');
+  };
+  return (
+    <div className="wrap" style={{ maxWidth: 480 }}>
+      <h1 className="crumb"><b>{brand.admin?.title || 'Admin Exchange'}</b> <span className="muted">· Simulasi</span></h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <span style={{ fontWeight: 800, fontSize: 18, color: c.primary }}>{brand.logoText}</span>
+        <span style={{ fontWeight: 800, fontSize: 18 }}>{brand.logoAccent}</span>
+        <span className="muted" style={{ fontSize: 12 }}>{brand.tagline}</span>
+      </div>
+      {!signedIn ? (
+        <div className="panel form">
+          <div className="field"><span>user</span>
+            <input value={user} onChange={(e) => setUser(e.target.value)} placeholder="admin" /></div>
+          <div className="field"><span>pass</span>
+            <input value={pass} onChange={(e) => setPass(e.target.value)} type="password" placeholder="••••••" /></div>
+          <button className="btn" onClick={signIn}>Masuk Admin (mock)</button>
+          {msg && <div className="muted" style={{ fontSize: 12 }}>{msg}</div>}
+        </div>
+      ) : (
+        <div className="panel" style={{ padding: 16 }}>
+          <h3>Brand (frontend config store)</h3>
+          <table><tbody>
+            <tr><td className="muted">Name</td><td>{brand.name}</td></tr>
+            <tr><td className="muted">Primary</td><td><span style={{ color: c.primary }}>■</span> {c.primary}</td></tr>
+            <tr><td className="muted">Accent</td><td><span style={{ color: c.accent }}>■</span> {c.accent}</td></tr>
+            <tr><td className="muted">Up / Down</td><td><span style={{ color: c.up }}>■</span> <span style={{ color: c.down }}>■</span></td></tr>
+          </tbody></table>
+          {brand.admin?.manageUrl && (
+            <p style={{ marginTop: 12 }}>
+              <a className="btn ghost" href={brand.admin.manageUrl}>{brand.admin.manageLabel || 'Open admin'}</a>
+            </p>
+          )}
+          <p className="muted" style={{ fontSize: 12 }}>Penyimpanan pengaturan exchange dikelola oleh panel HollaEx Kit. {t.simNote}</p>
         </div>
       )}
     </div>

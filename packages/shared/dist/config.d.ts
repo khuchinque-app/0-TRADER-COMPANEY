@@ -30,4 +30,8 @@ export declare const DISCLAIMER_TEXT = "Reference data \u00B7 Demo only \u00B7 N
 export declare const ENGINE_PORT: number;
 export declare const TERMINAL_PORT: number;
 export declare const FX_CACHE_TTL_SECONDS: number;
+export declare const INDODAX_BASE_URL: string;
+export declare const FX_SOURCE: string;
+export declare const FX_TTL_MS: number;
+export declare const FX_STALE_MAX_MS: number;
 //# sourceMappingURL=config.d.ts.map
